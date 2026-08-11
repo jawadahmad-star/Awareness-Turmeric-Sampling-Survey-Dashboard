@@ -553,7 +553,14 @@ function donutChart(id, arr, colors) {
     options: baseOpts({
       cutout: '58%',
       plugins: {
-        legend: { position: 'right', labels: { font: { family: 'Inter', size: 11 }, color: TXT(), boxWidth: 12, padding: 9 } },
+        // Right-hand legend leaves almost no ring on a phone-width card.
+        legend: {
+          position: isNarrow() ? 'bottom' : 'right',
+          labels: {
+            font: { family: 'Inter', size: isNarrow() ? 10 : 11 }, color: TXT(),
+            boxWidth: 11, padding: isNarrow() ? 7 : 9,
+          },
+        },
         tooltip: { callbacks: { label: c => { const t = c.dataset.data.reduce((a, b) => a + b, 0) || 1; return ' ' + c.label + ': ' + fmt(c.raw) + ' (' + Math.round(100 * c.raw / t) + '%)'; } } },
         datalabels: {
           display: true, color: '#fff', font: { family: 'Inter', size: 12, weight: '700' },
@@ -672,7 +679,7 @@ function groupedBar(id, labels, series, suffix, maxY) {
         datalabels: { display: ctx => ctx.dataset.data.length <= 12, anchor: 'end', align: 'top', clamp: true, clip: false, color: TXT(), font: { family: 'Inter', size: 10, weight: '700' }, formatter: v => v == null ? '' : v + sfx },
       },
       scales: {
-        x: { ticks: { font: { family: 'Inter', size: 11 }, color: TXT(), autoSkip: false, maxRotation: 0, minRotation: 0, callback: function (v) { return wrapTick(this.getLabelForValue(v), 14); } }, grid: { display: false }, border: { display: false } },
+        x: { ticks: { font: { family: 'Inter', size: isNarrow() ? 9.5 : 11 }, color: TXT(), autoSkip: false, maxRotation: isNarrow() ? 45 : 0, minRotation: 0, callback: function (v) { return wrapTick(this.getLabelForValue(v), isNarrow() ? 9 : 14); } }, grid: { display: false }, border: { display: false } },
         y: { beginAtZero: true, max: maxY === undefined ? (sfx === '%' ? 100 : undefined) : maxY, grace: sfx === '%' ? undefined : '14%', ticks: { font: { family: 'Inter', size: 11 }, color: TXT(), callback: v => v + sfx }, grid: { color: GRID() }, border: { display: false } },
       },
     }),
@@ -743,7 +750,7 @@ function boxPlot(id, groups, unit) {
         },
       },
       scales: {
-        x: { ticks: { font: { family: 'Inter', size: 11.5, weight: '600' }, color: TXT(), autoSkip: false, maxRotation: 0, callback: function (v) { return wrapTick(this.getLabelForValue(v), 16); } }, grid: { display: false }, border: { display: false } },
+        x: { ticks: { font: { family: 'Inter', size: isNarrow() ? 9.5 : 11.5, weight: '600' }, color: TXT(), autoSkip: false, maxRotation: 0, callback: function (v) { return wrapTick(this.getLabelForValue(v), isNarrow() ? 9 : 16); } }, grid: { display: false }, border: { display: false } },
         y: { beginAtZero: false, grace: '10%', ticks: { font: { family: 'Inter', size: 11 }, color: TXT(), callback: v => fmt(v) }, grid: { color: GRID() }, border: { display: false }, title: { display: !!u, text: 'Rupees per kilogram', font: { family: 'Inter', size: 11, weight: '600' }, color: TXT() } },
       },
     }),
@@ -799,7 +806,7 @@ function scatterChart(id, groups, xLabel, yLabel) {
     },
     options: baseOpts({
       plugins: {
-        legend: { position: 'top', labels: { font: { family: 'Inter', size: 10.5 }, color: TXT(), boxWidth: 11, padding: 8, usePointStyle: true } },
+        legend: { position: 'top', labels: { font: { family: 'Inter', size: isNarrow() ? 9.5 : 10.5 }, color: TXT(), boxWidth: 11, padding: isNarrow() ? 6 : 8, usePointStyle: true } },
         tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + fmt(c.parsed.x) + ' g · Rs ' + fmt(c.parsed.y) } },
       },
       scales: {
@@ -1331,7 +1338,7 @@ function drawPrice() {
 
   const types = ord('ts', 'collected_sample_type');
   boxPlot('prBox', types.map(t => ({
-    label: short(lab('ts', 'collected_sample_type', t), 22),
+    label: short(lab('ts', 'collected_sample_type', t), 30),
     s: stats(nums(sp.filter(r => r[SP.f.type] === t), SP.f.price_per_kg)),
   })), '');
 
