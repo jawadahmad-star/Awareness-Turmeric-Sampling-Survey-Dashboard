@@ -410,6 +410,9 @@ function wrapTick(label, max) {
   return lines.length ? lines : [String(label)];
 }
 
+/* Phone-width breakpoint, kept in step with the 720px one in theme.css. */
+const isNarrow = () => window.innerWidth <= 720;
+
 const CHARTS = {};
 function mk(id, cfg) {
   const el = document.getElementById(id);
@@ -480,29 +483,51 @@ function clearEmpty(id) {
 const has = arr => arr && arr.length && SUM(arr) > 0;
 
 /* ============================ CHART TYPES =========================== */
-function barChart(id, arr, color, horizontal, suffix) {
+/* `showPct` puts the share of the chart total next to the count — "161 (33%)".
+   Only meaningful when the bars partition one base, so it stays off for price
+   and quantity charts, where a share of the total is nonsense. */
+function barChart(id, arr, color, horizontal, suffix, showPct) {
   if (!has(arr)) return noData(id);
   clearEmpty(id);
   const sfx = suffix || '';
-  const catWrap = horizontal ? 26 : 11;
+  const total = SUM(arr);
+  const withPct = showPct && !sfx && total > 0;
+  const pctTxt = v => total ? Math.round(1000 * v / total) / 10 : 0;
+  // A phone canvas is ~a third the width, so category labels have to break
+  // earlier and each horizontal bar needs more vertical room for the extra
+  // wrapped lines.
+  const narrow = isNarrow();
+  const catWrap = horizontal ? (narrow ? 16 : 26) : (narrow ? 8 : 11);
   const catTicks = {
     font: { family: 'Inter', size: 11 }, color: TXT(), autoSkip: false, maxRotation: 0, minRotation: 0,
     callback: function (v) { return wrapTick(this.getLabelForValue(v), catWrap); },
   };
   const valTicks = { font: { family: 'Inter', size: 11 }, color: TXT(), callback: sfx ? (v => v + sfx) : undefined };
-  if (horizontal) fitHeight(id, arr.length, 32, 46);
+  if (horizontal) fitHeight(id, arr.length, narrow ? 44 : 32, 46);
   mk(id, {
     type: 'bar',
     data: { labels: LBLS(arr), datasets: [{ data: V(arr), backgroundColor: color || S(1), borderRadius: 6, maxBarThickness: 44 }] },
     options: baseOpts({
       indexAxis: horizontal ? 'y' : 'x',
-      layout: { padding: { top: horizontal ? 6 : 20, right: horizontal ? 46 : 8 } },
+      layout: {
+        padding: {
+          top: horizontal ? 6 : 22,
+          right: horizontal ? (withPct ? (narrow ? 58 : 74) : 46) : 8,
+        },
+      },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: c => ' ' + c.raw + sfx } },
+        tooltip: {
+          callbacks: {
+            label: c => withPct
+              ? ' ' + fmt(c.raw) + '  (' + pctTxt(c.raw) + '% of ' + fmt(total) + ')'
+              : ' ' + fmt(c.raw) + sfx,
+          },
+        },
         datalabels: {
           display: true, anchor: 'end', align: horizontal ? 'right' : 'top', clamp: true, clip: false,
-          color: TXT(), font: { family: 'Inter', size: 11, weight: '700' }, formatter: v => v + sfx,
+          color: TXT(), font: { family: 'Inter', size: 11, weight: '700' },
+          formatter: v => withPct ? v + '  (' + pctTxt(v) + '%)' : v + sfx,
         },
       },
       scales: {
@@ -960,13 +985,33 @@ const esc = s => String(s === null || s === undefined ? '' : s)
 let currentPanel = 'overview';
 function showPanel(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b.dataset.panel === id));
   const panel = document.getElementById('panel-' + id);
   if (panel) panel.classList.add('active');
-  if (btn) btn.classList.add('active');
   currentPanel = id;
+
+  // Keep the mobile picker and the desktop tab strip showing the same thing —
+  // the breakpoint can change under you when a phone is rotated.
+  const sel = document.getElementById('navSelect');
+  if (sel && sel.value !== id) sel.value = id;
+  // Bring the active tab into view when the strip is scrolled horizontally.
+  const active = document.querySelector('.nav-tab.active');
+  if (active && active.scrollIntoView) {
+    active.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
   drawPanel(id);
+}
+
+/* Build the phone picker from the tab strip so there is one list, not two. */
+function buildNavSelect() {
+  const sel = document.getElementById('navSelect');
+  if (!sel) return;
+  sel.innerHTML = [...document.querySelectorAll('.nav-tab')].map((b, i) =>
+    `<option value="${esc(b.dataset.panel)}">${i + 1}. ${esc(b.textContent.trim())}</option>`).join('');
+  sel.value = currentPanel;
+  sel.onchange = () => showPanel(sel.value);
 }
 
 /* ============================== PANELS ============================== */
@@ -1031,8 +1076,8 @@ function drawOverview() {
     { label: 'Consumer survey', value: Q.cs.length },
   ], [S(1), S(8)]);
 
-  barChart('ovAwCity', cityDist(con, 'aw', AW, AW.f.city), S(3), true);
-  barChart('ovTsCity', cityDist(sp, 'ts', SP, SP.f.city), S(8), true);
+  barChart('ovAwCity', cityDist(con, 'aw', AW, AW.f.city), S(3), true, '', true);
+  barChart('ovTsCity', cityDist(sp, 'ts', SP, SP.f.city), S(8), true, '', true);
   cumulativeChart('ovCumAw', dailyAw, awTarget, 'Cumulative interviews', S(6));
   cumulativeChart('ovCumTs', byDay(sp, SP.f.date), null, 'Cumulative samples', S(4));
 
@@ -1068,8 +1113,8 @@ function drawOps() {
      <div><div class="flag-area">${esc(f.area)}</div>${esc(f.msg)}</div></div>`).join('')
     || '<div class="flag ok"><span class="flag-ico">✅</span><div>No exceptions raised.</div></div>');
 
-  barChart('opEnumAw', enumDist(con, 'aw', AW.f.Data_Collector), S(1), true);
-  barChart('opEnumTs', enumDist(ts, 'ts', TS.f.enum_name), S(8), true);
+  barChart('opEnumAw', enumDist(con, 'aw', AW.f.Data_Collector), S(1), true, '', true);
+  barChart('opEnumTs', enumDist(ts, 'ts', TS.f.enum_name), S(8), true, '', true);
 
   histChart('opDur', histogram(awDur.filter(x => x < 90), 5), S(3), 'Minutes', ' min');
   const statusArr = distOf(aw, 'aw', AW, 'survey_status', { sort: true, maxLabel: 34 });
@@ -1231,7 +1276,7 @@ function drawSampling() {
   barChart('smAvail', avail.rows, S(3), true, '%');
   barChart('smColl', coll.rows, S(8), true, '%');
 
-  barChart('smType', typeDist(sp), S(4));
+  barChart('smType', typeDist(sp), S(4), false, '', true);
   donutChart('smBasis', distOf(sp, 'ts', SP, 'basis', {}).map(x => ({ ...x, label: short(sampleTypeLabel('sample_type_2', x.code), 30) })));
   donutChart('smSize', distOf(ts, 'ts', TS, 'size_of_shop'), [S(3), S(1), S(4)]);
 
@@ -1254,7 +1299,7 @@ function drawSampling() {
   const cnt = new Map();
   perVendor.forEach(n => cnt.set(n, (cnt.get(n) || 0) + 1));
   const pv = [...cnt.entries()].sort((a, b) => a[0] - b[0]).map(([k, v]) => ({ label: String(k), value: v }));
-  barChart('smPerVendor', pv, S(5));
+  barChart('smPerVendor', pv, S(5), false, '', true);
 
   setTxt('sm-foot', `Sampling protocol: one to three samples per turmeric product type stocked, with the label written as vendor ID _ product type _ selection basis. ${fmt(sp.length)} samples from ${fmt(ts.length)} vendor visits currently banked, totalling ${(grams / 1000).toFixed(1)} kg. Selection basis matters analytically — samples chosen because they looked bright or shiny are the ones the laboratory results should be read against first.`);
 }
@@ -1369,7 +1414,7 @@ function drawRetail() {
   donutChart('rtVendor', distOf(rs, 'aw', AW, 'type_of_vendor'), [S(1), S(8)]);
   donutChart('rtCust', distOf(rs, 'aw', AW, 'Q10'));
   donutChart('rtSes', distOf(rs, 'aw', AW, 'Q12'), [S(5), S(3), S(4)]);
-  barChart('rtSource', distOf(rs, 'aw', AW, 'Q16', { sort: true, maxLabel: 30 }), S(3), true);
+  barChart('rtSource', distOf(rs, 'aw', AW, 'Q16', { sort: true, maxLabel: 30 }), S(3), true, '', true);
   barChart('rtChoose', multiOf(rs, 'aw', AW, 'Q18', { pct: true, maxLabel: 34 }).rows, S(4), true, '%');
   donutChart('rtStable', distOf(rs, 'aw', AW, 'Q17'), [S(6), S(2)]);
   donutChart('rtComfort', distOf(rs, 'aw', AW, 'Q36', { maxLabel: 30 }));
@@ -1402,11 +1447,11 @@ function drawConsumer() {
   ].join(''));
 
   donutChart('csGender', distOf(cs, 'aw', AW, 'Q_6'), [S(1), S(7), S(4)]);
-  barChart('csAge', distOf(cs, 'aw', AW, 'Q_7', { maxLabel: 14 }), S(3));
+  barChart('csAge', distOf(cs, 'aw', AW, 'Q_7', { maxLabel: 14 }), S(3), false, '', true);
   donutChart('csSes', distOf(cs, 'aw', AW, 'Q_2', { maxLabel: 22 }), [S(4), S(3), S(6)]);
-  barChart('csOcc', distOf(cs, 'aw', AW, 'Q_3', { sort: true, maxLabel: 36 }), S(5), true);
+  barChart('csOcc', distOf(cs, 'aw', AW, 'Q_3', { sort: true, maxLabel: 36 }), S(5), true, '', true);
   barChart('csSource', multiOf(cs, 'aw', AW, 'Q_10', { pct: true, maxLabel: 40 }).rows, S(8), true, '%');
-  barChart('csFreq', distOf(cs, 'aw', AW, 'Q_9', { maxLabel: 30 }), S(6), true);
+  barChart('csFreq', distOf(cs, 'aw', AW, 'Q_9', { maxLabel: 30 }), S(6), true, '', true);
   donutChart('csPurpose', distOf(cs, 'aw', AW, 'Q_1', { maxLabel: 26 }));
 
   // normalise reported monthly quantity to grams where a unit was captured
@@ -1473,9 +1518,9 @@ function drawAdult() {
   barChart('adRs', AD_ROWS.map(r => ({ label: short(r.label, 26), value: shareIn(rs, AW, r.rs, COMMON_CODES).pct })), S(1), true, '%');
   barChart('adCs', AD_ROWS.map(r => ({ label: short(r.label, 26), value: shareIn(cs, AW, r.cs, COMMON_CODES).pct })), S(8), true, '%');
 
-  barChart('adFood', mergeMulti([[rs, 'Q25'], [rs, 'Q28'], [cs, 'Q_35'], [cs, 'Q_37']], 34), S(4), true);
-  barChart('adNonFood', mergeMulti([[rs, 'Q26'], [rs, 'Q29'], [cs, 'Q_36'], [cs, 'Q_38']], 34), S(2), true);
-  barChart('adSource', mergeMulti([[rs, 'Q24'], [cs, 'Q_29']], 38), S(3), true);
+  barChart('adFood', mergeMulti([[rs, 'Q25'], [rs, 'Q28'], [cs, 'Q_35'], [cs, 'Q_37']], 34), S(4), true, '', true);
+  barChart('adNonFood', mergeMulti([[rs, 'Q26'], [rs, 'Q29'], [cs, 'Q_36'], [cs, 'Q_38']], 34), S(2), true, '', true);
+  barChart('adSource', mergeMulti([[rs, 'Q24'], [cs, 'Q_29']], 38), S(3), true, '', true);
 
   const cities = [...new Set(con.map(r => cityOf('aw', r[AW.f.city])).filter(Boolean))].sort();
   barChart('adCity', cities.map(c => {
@@ -1616,7 +1661,7 @@ function drawLead() {
   const concernCs = distOf(cs, 'aw', AW, 'Q_57b', { maxLabel: 26 });
   const merged = new Map();
   [...concernRs, ...concernCs].forEach(x => merged.set(x.label, (merged.get(x.label) || 0) + x.value));
-  barChart('ldConcern', [...merged.entries()].map(([label, value]) => ({ label, value })), S(4), true);
+  barChart('ldConcern', [...merged.entries()].map(([label, value]) => ({ label, value })), S(4), true, '', true);
 
   const cities = [...new Set(con.map(r => cityOf('aw', r[AW.f.city])).filter(Boolean))].sort();
   groupedBar('ldCity', cities, [
@@ -1630,8 +1675,8 @@ function drawLead() {
     { name: 'Consumers', color: S(8), data: [1, 2, 3, 4, 5].map(i => cc.steps[i].pct) },
   ]);
 
-  barChart('ldAvoid', mergeMulti([[rs, 'Q35'], [cs, 'Q_57c_i']], 46), S(6), true);
-  barChart('ldRisk', distOf(cs, 'aw', AW, 'Q_57_iii', { sort: true, maxLabel: 30 }), S(2), true);
+  barChart('ldAvoid', mergeMulti([[rs, 'Q35'], [cs, 'Q_57c_i']], 46), S(6), true, '', true);
+  barChart('ldRisk', distOf(cs, 'aw', AW, 'Q_57_iii', { sort: true, maxLabel: 30 }), S(2), true, '', true);
   donutChart('ldAction', distOf(rs, 'aw', AW, 'Q35_i'), [S(6), S(2)]);
   const sfa = distOf(rs, 'aw', AW, 'Q35_iii');
   donutChart('ldSfa', sfa, [S(6), S(2)]);
@@ -1663,9 +1708,9 @@ function drawMedia() {
     kpi('❓', shareInScale(rs, cs, 'Q42', 'Q_57h', ['1']) + '%', 'Something unclear', 'Comprehension gap', 'down', 'navy'),
   ].join(''));
 
-  barChart('mdChannels', channels, S(1), true);
-  barChart('mdRemember', mergeMulti([[rs, 'Q38'], [cs, 'Q_57d']], 52), S(6), true);
-  barChart('mdFrom', mergeMulti([[rs, 'Q39'], [cs, 'Q_57e']], 34), S(5), true);
+  barChart('mdChannels', channels, S(1), true, '', true);
+  barChart('mdRemember', mergeMulti([[rs, 'Q38'], [cs, 'Q_57d']], 52), S(6), true, '', true);
+  barChart('mdFrom', mergeMulti([[rs, 'Q39'], [cs, 'Q_57e']], 34), S(5), true, '', true);
 
   donutChart('mdTimes', mergeDist(rs, 'Q40', cs, 'Q_57f'));
   donutChart('mdUseful', mergeDist(rs, 'Q41', cs, 'Q_57g'));
@@ -1738,7 +1783,7 @@ function drawCoverage() {
   const mkt = new Map();
   con.forEach(r => { const v = r[AW.f.market_name]; if (v) mkt.set(v, (mkt.get(v) || 0) + 1); });
   barChart('cvAwMkt', [...mkt.entries()].sort((a, b) => b[1] - a[1])
-    .map(([v, n]) => ({ label: short(lab('aw', 'market_name', v), 34), value: n })), S(3), true);
+    .map(([v, n]) => ({ label: short(lab('aw', 'market_name', v), 34), value: n })), S(3), true, '', true);
 
   const loc = new Map();
   ts.forEach(r => {
@@ -1749,7 +1794,7 @@ function drawCoverage() {
     loc.set(l, (loc.get(l) || 0) + 1);
   });
   barChart('cvTsLoc', [...loc.entries()].sort((a, b) => b[1] - a[1]).slice(0, 16)
-    .map(([label, value]) => ({ label, value })), S(8), true);
+    .map(([label, value]) => ({ label, value })), S(8), true, '', true);
 
   setTxt('cv-foot', `Type coverage is the share of the four turmeric product types in the sampling protocol that have been collected at least once in that city — a city at 50% has half the product range still to sample. Median price is across all sampled types in that city and is not adjusted for product mix, so cities skewed towards branded packs will read high.`);
 }
@@ -2013,6 +2058,7 @@ function boot(payload) {
   document.querySelectorAll('.nav-tab').forEach(b => {
     b.onclick = () => showPanel(b.dataset.panel, b);
   });
+  buildNavSelect();
   document.getElementById('cov-search').oninput = renderCovTable;
   document.getElementById('cov-filter').onchange = renderCovTable;
   document.getElementById('enum-search').oninput = renderEnumTable;
@@ -2020,10 +2066,17 @@ function boot(payload) {
   document.getElementById('exp-dataset').onchange = () => { expSort = { i: 0, dir: -1 }; renderExplorer(); };
 
   syncStickyOffset();
-  let rz;
+  let rz, wasNarrow = isNarrow();
   window.addEventListener('resize', () => {
     clearTimeout(rz);
-    rz = setTimeout(() => { syncStickyOffset(); if (MAP) MAP.invalidateSize(); }, 180);
+    rz = setTimeout(() => {
+      syncStickyOffset();
+      if (MAP) MAP.invalidateSize();
+      // Label wrapping and bar heights are chosen per breakpoint, so crossing
+      // it (rotating a phone, mostly) means the panel has to be rebuilt.
+      const now = isNarrow();
+      if (now !== wasNarrow) { wasNarrow = now; drawPanel(currentPanel); }
+    }, 200);
   });
 
   renderAll();

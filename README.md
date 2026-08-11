@@ -5,7 +5,7 @@ Fieldwork and analysis dashboard for the Turmeric Quality Programme — the
 **Market Sampling** exercise collecting physical turmeric samples for
 laboratory lead testing.
 
-**Live:** https://turmericquality.rs.org.pk
+**Live:** https://turmericstudy.rs.org.pk
 
 Built by Research Solutions (M&A Research Solutions LLC) · www.rs.org.pk
 

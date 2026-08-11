@@ -1,4 +1,4 @@
-# Custom domain — turmericquality.rs.org.pk
+# Custom domain — turmericstudy.rs.org.pk
 
 The site is currently served from the GitHub Pages default URL:
 
@@ -20,16 +20,16 @@ Add **one** record on the `rs.org.pk` zone:
 | Field | Value |
 |---|---|
 | Type | `CNAME` |
-| Host / Name | `turmericquality` |
+| Host / Name | `turmericstudy` |
 | Points to / Value | `jawadahmad-star.github.io.` |
 | TTL | `3600` (1 hour) |
 | Proxy / CDN | **DNS only** — must not be proxied |
 
 Notes for the administrator:
 
-- The host is just `turmericquality`, not the full name — most DNS panels append
+- The host is just `turmericstudy`, not the full name — most DNS panels append
   `.rs.org.pk` automatically. If the panel wants the whole name, use
-  `turmericquality.rs.org.pk`.
+  `turmericstudy.rs.org.pk`.
 - The target ends with a dot: `jawadahmad-star.github.io.` — that trailing dot
   matters in BIND-style zone files. Panels that use a plain text box usually do
   not need it.
@@ -43,8 +43,8 @@ Notes for the administrator:
 ### Verifying the record
 
 ```bash
-nslookup turmericquality.rs.org.pk 8.8.8.8
-# expect: turmericquality.rs.org.pk canonical name = jawadahmad-star.github.io
+nslookup turmericstudy.rs.org.pk 8.8.8.8
+# expect: turmericstudy.rs.org.pk canonical name = jawadahmad-star.github.io
 ```
 
 Propagation is usually minutes; allow up to 24 hours in the worst case.
@@ -55,12 +55,12 @@ Propagation is usually minutes; allow up to 24 hours in the worst case.
 
 ```bash
 git mv CNAME.pending CNAME
-git commit -m "Attach custom domain turmericquality.rs.org.pk"
+git commit -m "Attach custom domain turmericstudy.rs.org.pk"
 git push
 ```
 
 Then in the repository: **Settings → Pages**, confirm *Custom domain* reads
-`turmericquality.rs.org.pk` and the DNS check passes.
+`turmericstudy.rs.org.pk` and the DNS check passes.
 
 ## Step 3 — enforce HTTPS
 

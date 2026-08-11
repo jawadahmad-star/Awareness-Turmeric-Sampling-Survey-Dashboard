@@ -9,7 +9,7 @@ It does four things, and stops at the first one that fails:
   1. rebuilds codebook.json if either instrument has been edited
   2. rebuilds data/dashboard_data.js (encrypted) from the CSVs in data_in/
   3. commits the rebuilt payload
-  4. pushes to GitHub, which redeploys turmericquality.rs.org.pk
+  4. pushes to GitHub, which redeploys turmericstudy.rs.org.pk
 
 Raw CSVs are never committed — they hold vendor names, GPS fixes and
 respondent-level answers, and .gitignore keeps them out of the repository.
@@ -153,8 +153,10 @@ def main():
         write_log(started)
         return 0
 
+    # index.html carries the cache-busting stamp for the payload, so it has to
+    # travel with it or returning viewers keep loading the previous build.
     git("add", "--", str(PAYLOAD.relative_to(ROOT)).replace("\\", "/"),
-        "codebook/codebook.json", check=False)
+        "index.html", "codebook/codebook.json", check=False)
     code, _ = git("diff", "--cached", "--quiet", check=False)
     if code == 0:
         say("      no change in the rebuilt payload — nothing to commit")
@@ -190,7 +192,7 @@ def main():
 
     say("      pushed — GitHub Pages will redeploy in about a minute")
     say()
-    say("  [OK] Done. https://turmericquality.rs.org.pk")
+    say("  [OK] Done. https://turmericstudy.rs.org.pk")
     write_log(started)
     return 0
 

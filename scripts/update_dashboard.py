@@ -62,7 +62,7 @@ MISSING = {"", ".", "na", "n/a", "null", "none", "-", "nan"}
 # compressed and encrypted here and only ever decrypted in the browser, after
 # the password is entered. Parameters must match the WebCrypto call in app.js.
 PBKDF2_ITERATIONS = 250_000
-DEFAULT_PASSWORD = "TAS2026_RS"
+DEFAULT_PASSWORD = "TS2026@RS"
 # SurveyCTO writes these for don't-know / refused; they must never be counted
 # as substantive answers but should still be visible in distributions.
 SPECIAL = {"-999": "Don't know", "-888": "Refused", "999": "Don't know", "888": "Refused"}
@@ -88,6 +88,30 @@ def encrypt_payload(obj, password):
     ).derive(password.encode("utf-8"))
     ct = AESGCM(key).encrypt(iv, packed, None)
     return base64.b64encode(salt + iv + ct).decode("ascii"), len(raw), len(packed)
+
+
+def stamp_index(version):
+    """
+    Pin a build stamp onto the payload's <script src> in index.html.
+
+    GitHub Pages serves assets with a ten-minute cache, and browsers hold the
+    file longer still on revalidation. Without a changing URL a returning
+    viewer keeps yesterday's figures after a daily rebuild, which defeats the
+    point of rebuilding daily.
+    """
+    idx = ROOT / "index.html"
+    if not idx.exists():
+        return False
+    html = idx.read_text(encoding="utf-8")
+    new, n = re.subn(
+        r'(<script src="data/dashboard_data\.js)(\?v=[^"]*)?(")',
+        lambda m: f"{m.group(1)}?v={version}{m.group(3)}",
+        html,
+    )
+    if n and new != html:
+        idx.write_text(new, encoding="utf-8")
+        return True
+    return False
 
 
 def norm(s):
@@ -661,6 +685,10 @@ def main():
         f"  ·  {n_raw/1024:.0f} KB json -> {n_packed/1024:.0f} KB deflated)"
     )
     print(f"  encryption: AES-256-GCM, PBKDF2-SHA256 x{PBKDF2_ITERATIONS:,}")
+
+    version = datetime.now().strftime("%Y%m%d%H%M%S")
+    if stamp_index(version):
+        print(f"  cache stamp: index.html -> dashboard_data.js?v={version}")
 
 
 if __name__ == "__main__":

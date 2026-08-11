@@ -41,7 +41,7 @@
   </div>
   <div class="auth-footer">
     <strong>Research Solutions</strong> &nbsp;·&nbsp; M&amp;A Research Solutions LLC &nbsp;·&nbsp; www.rs.org.pk<br>
-    turmericquality.rs.org.pk
+    turmericstudy.rs.org.pk
   </div>
 </div>
 
@@ -90,6 +90,13 @@
       <button class="nav-tab" data-panel="coverage">📋 Coverage Tracker</button>
       <button class="nav-tab" data-panel="explorer">🔎 Data Explorer</button>
     </nav>
+    <!-- Twelve tabs cannot fit a phone without being clipped, so below the
+         tablet breakpoint the nav becomes a native picker instead. Populated
+         from the buttons above by app.js, so the two never drift apart. -->
+    <div class="nav-select-wrap">
+      <label class="nav-select-label" for="navSelect">Section</label>
+      <select class="nav-select" id="navSelect" aria-label="Jump to section"></select>
+    </div>
   </div>
 </div>
 
@@ -790,7 +797,7 @@
 
 <div class="page-footer">
   <strong>Turmeric Quality Programme</strong> — Awareness Follow-up &amp; Market Sampling<br>
-  Dashboard by <strong>Research Solutions</strong> (M&amp;A Research Solutions LLC) · www.rs.org.pk · turmericquality.rs.org.pk<br>
+  Dashboard by <strong>Research Solutions</strong> (M&amp;A Research Solutions LLC) · www.rs.org.pk · turmericstudy.rs.org.pk<br>
   <span id="foot-build">—</span>
 </div>
 
@@ -798,7 +805,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="data/dashboard_data.js"></script>
+<script src="data/dashboard_data.js?v=20260811105157"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>
