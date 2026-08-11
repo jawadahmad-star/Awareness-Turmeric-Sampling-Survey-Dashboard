@@ -1,0 +1,5667 @@
+{
+ "forms": {
+  "awareness": {
+   "questions": {
+    "ta_meta": {
+     "name": "ta_meta",
+     "type": "text audit",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "From_ID": {
+     "name": "From_ID",
+     "type": "integer",
+     "label": "Form ID",
+     "raw_label": "Form ID",
+     "group": [],
+     "required": true
+    },
+    "Consent_Form": {
+     "name": "Consent_Form",
+     "type": "note",
+     "label": "Aim and target of research Hello. My name is ________ and I work with Research Solutions. We are currently doing a study to assess turmeric quality concerns and to develop solutions that will help the industry ensure the availability of high quality spices. Why are we inviting you to participate in the study? This study is primarily based on interviews with consumers and retailers of turmeric. We are inviting you to participate in this research because you are a consumer/retailer of turmeric and are knowledgeable about issues related to spices and spice quality. Methods and procedures If you agree to participate, we will talk to you for around 15 minutes. We would ask you some questions related to your turmeric purchase or consumption. We ask that we speak with you in a comfortable private location so you can openly share your opinions and knowledge. Risk and benefits There is no more than minimal risk related to your participation in this study. There is a potential inconvenience since you would need to spare time from your daily life to participate in the interviews. There is no direct monetary compensation benefit for participating in this study. But the information you are giving has certain benefits since it may contribute to improving the wellbeing of your community and country. Privacy, anonymity and confidentiality We will not collect any identifiable data about you like your name, address, or phone number. We will combine data from all interviews into aggregate findings and the information you share will NOT be linked back to you. Right not to participate and withdraw Your participation in the study is voluntary, and you have the right to refuse in any part, including answering specific questions. You can drop out of this study at any time, even in the middle of an interview with no consequences. We will withdraw your permission and if you wish, we will destroy all the data from the database. You have the right to refuse participation in this study. Principle of compensation You need not pay us to take part in this study, and similarly we will not pay you money for participating in the study. Persons to contact If you have any questions, you can ask me any time, we will happily provide you with further information now or later. You may communicate with the designated person below. [Name: Majid Khan (Field Head Manager) and contact number: +92321-3744666 of Research Solutions designated person]. Do you consent to be interviewed?",
+     "raw_label": "Aim and target of research Hello. My name is ________ and I work with Research Solutions. We are currently doing a study to assess turmeric quality concerns and to develop solutions that will help the industry ensure the availability of high quality spices. Why are we inviting you to participate in the study? This study is primarily based on interviews with consumers and retailers of turmeric. We are inviting you to participate in this research because you are a consumer/retailer of turmeric and are knowledgeable about issues related to spices and spice quality. Methods and procedures If you agree to participate, we will talk to you for around 15 minutes. We would ask you some questions related to your turmeric purchase or consumption. We ask that we speak with you in a comfortable private location so you can openly share your opinions and knowledge. Risk and benefits There is no more than minimal risk related to your participation in this study. There is a potential inconvenience since you would need to spare time from your daily life to participate in the interviews. There is no direct monetary compensation benefit for participating in this study. But the information you are giving has certain benefits since it may contribute to improving the wellbeing of your community and country. Privacy, anonymity and confidentiality We will not collect any identifiable data about you like your name, address, or phone number. We will combine data from all interviews into aggregate findings and the information you share will NOT be linked back to you. Right not to participate and withdraw Your participation in the study is voluntary, and you have the right to refuse in any part, including answering specific questions. You can drop out of this study at any time, even in the middle of an interview with no consequences. We will withdraw your permission and if you wish, we will destroy all the data from the database. You have the right to refuse participation in this study. Principle of compensation You need not pay us to take part in this study, and similarly we will not pay you money for participating in the study. Persons to contact If you have any questions, you can ask me any time, we will happily provide you with further information now or later. You may communicate with the designated person below. [Name: Majid Khan (Field Head Manager) and contact number: +92321-3744666 of Research Solutions designated person]. Do you consent to be interviewed?",
+     "group": [],
+     "required": true
+    },
+    "Consent": {
+     "name": "Consent",
+     "type": "select_one",
+     "label": "Do you consent to be interviewed",
+     "raw_label": "Do you consent to be interviewed",
+     "group": [],
+     "list_name": "yesno",
+     "required": true
+    },
+    "no_consent": {
+     "name": "no_consent",
+     "type": "text",
+     "label": "Reason not provide consent",
+     "raw_label": "Reason not provide consent",
+     "group": [],
+     "relevance": "selected(${Consent}, '0')",
+     "required": true
+    },
+    "starttime": {
+     "name": "starttime",
+     "type": "start",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "endtime": {
+     "name": "endtime",
+     "type": "end",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "deviceid": {
+     "name": "deviceid",
+     "type": "deviceid",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "devicephonenum": {
+     "name": "devicephonenum",
+     "type": "phonenumber",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "username": {
+     "name": "username",
+     "type": "username",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "device_info": {
+     "name": "device_info",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "duration": {
+     "name": "duration",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "caseid": {
+     "name": "caseid",
+     "type": "caseid",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "Signature": {
+     "name": "Signature",
+     "type": "image",
+     "label": "Consent",
+     "raw_label": "Consent",
+     "group": [],
+     "relevance": "selected(${Consent}, '1')",
+     "required": true,
+     "appearance": "signature"
+    },
+    "Data_Collector": {
+     "name": "Data_Collector",
+     "type": "select_one",
+     "label": "Name of Data Collector",
+     "raw_label": "Name of Data Collector",
+     "group": [],
+     "list_name": "Data_Collector",
+     "required": true
+    },
+    "city": {
+     "name": "city",
+     "type": "select_one",
+     "label": "City",
+     "raw_label": "City",
+     "group": [],
+     "list_name": "city",
+     "required": true
+    },
+    "market_name": {
+     "name": "market_name",
+     "type": "select_one",
+     "label": "Market Name",
+     "raw_label": "Market Name",
+     "group": [],
+     "list_name": "market_name",
+     "required": true
+    },
+    "Q1": {
+     "name": "Q1",
+     "type": "select_one",
+     "label": "_Have you been approached by anyone for a survey in the last few days?",
+     "raw_label": "Q1_Have you been approached by anyone for a survey in the last few days?",
+     "group": [],
+     "list_name": "yesno",
+     "relevance": "selected(${Consent}, '1')",
+     "required": true
+    },
+    "Type_of_survey": {
+     "name": "Type_of_survey",
+     "type": "select_one",
+     "label": "Type of Survey",
+     "raw_label": "Type of Survey",
+     "group": [],
+     "list_name": "Type_of_survey",
+     "relevance": "selected(${Q1}, '0')",
+     "required": true
+    },
+    "type_of_vendor": {
+     "name": "type_of_vendor",
+     "type": "select_one",
+     "label": "What kind of vendor?",
+     "raw_label": "What kind of vendor?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "type_of_vendor",
+     "relevance": "selected(${Consent}, '1')",
+     "required": true
+    },
+    "Q2": {
+     "name": "Q2",
+     "type": "select_multiple",
+     "label": "Over the past year, which types of turmeric have you sold?",
+     "raw_label": "Q2. Over the past year, which types of turmeric have you sold?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "Types_of_Turmeric",
+     "required": true
+    },
+    "Q3": {
+     "name": "Q3",
+     "type": "select_one",
+     "label": "During this time of the year, what type of turmeric do you sell the most of, among the following?",
+     "raw_label": "Q3. During this time of the year, what type of turmeric do you sell the most of, among the following?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "Type_of_turmeric",
+     "relevance": "count-selected(${Q2}) > 1",
+     "required": true
+    },
+    "Q3_b": {
+     "name": "Q3_b",
+     "type": "select_one",
+     "label": "During this time of the year, what type of turmeric do you sell the least of, among the following?",
+     "raw_label": "Q3b. During this time of the year, what type of turmeric do you sell the least of, among the following?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "Type_of_turmeric",
+     "relevance": "count-selected(${Q2}) > 1",
+     "required": true
+    },
+    "Fresh_Turmeric_Roots": {
+     "name": "Fresh_Turmeric_Roots",
+     "type": "integer",
+     "label": "Fresh Turmeric Roots",
+     "raw_label": "1.Fresh Turmeric Roots",
+     "group": [
+      "Retailer_survey",
+      "turmeric_sales"
+     ],
+     "required": true
+    },
+    "Dried_Turmeric_Roots": {
+     "name": "Dried_Turmeric_Roots",
+     "type": "integer",
+     "label": "Dried Turmeric Roots",
+     "raw_label": "2.Dried Turmeric Roots",
+     "group": [
+      "Retailer_survey",
+      "turmeric_sales"
+     ],
+     "required": true
+    },
+    "Loose_Turmeric_Powder": {
+     "name": "Loose_Turmeric_Powder",
+     "type": "integer",
+     "label": "Loose Turmeric Powder",
+     "raw_label": "3.Loose Turmeric Powder",
+     "group": [
+      "Retailer_survey",
+      "turmeric_sales"
+     ],
+     "required": true
+    },
+    "Packaged_Branded_Turmeric_Powder": {
+     "name": "Packaged_Branded_Turmeric_Powder",
+     "type": "integer",
+     "label": "Packaged Branded Turmeric Powder",
+     "raw_label": "4.Packaged Branded Turmeric Powder",
+     "group": [
+      "Retailer_survey",
+      "turmeric_sales"
+     ],
+     "required": true
+    },
+    "Packaged_Unbranded_Turmeric_Powder": {
+     "name": "Packaged_Unbranded_Turmeric_Powder",
+     "type": "integer",
+     "label": "Packaged Unbranded Turmeric Powder",
+     "raw_label": "5.Packaged Unbranded Turmeric Powder",
+     "group": [
+      "Retailer_survey",
+      "turmeric_sales"
+     ],
+     "required": true,
+     "constraint": "(if(${Fresh_Turmeric_Roots}='',0,${Fresh_Turmeric_Roots}) + if(${Dried_Turmeric_Roots}='',0,${Dried_Turmeric_Roots}) + if(${Loose_Turmeric_Powder}='',0,${Loose_Turmeric_Powder}) + if(${Packaged_Branded_Turmeric_Powder}='',0,${Packaged_Branded_Turmeric_Powder}) + if(${Packaged_Unbranded_Turmeric_Powder}='',0,${Packaged_Unbranded_Turmeric_Powder})) = 100"
+    },
+    "Q9": {
+     "name": "Q9",
+     "type": "select_one",
+     "label": "Which is the more popular roots product, between these two types?",
+     "raw_label": "Q9.Which is the more popular roots product, between these two types?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "Product_Type",
+     "relevance": "selected(${Q2}, '2') or selected(${Q3}, '2')",
+     "required": true
+    },
+    "Q10": {
+     "name": "Q10",
+     "type": "select_one",
+     "label": "What kind of customers buy this product?",
+     "raw_label": "Q10.What kind of customers buy this product?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "kind_of_customers",
+     "relevance": "selected(${Q2}, '3') or selected(${Q9}, '1') or selected(${Q9}, '2')",
+     "required": true
+    },
+    "note": {
+     "name": "note",
+     "type": "note",
+     "label": "Now we would like to understand the customer profile for some of your turmeric products.",
+     "raw_label": "Now we would like to understand the customer profile for some of your turmeric products.",
+     "group": [
+      "Retailer_survey"
+     ],
+     "required": true
+    },
+    "Q11": {
+     "name": "Q11",
+     "type": "select_one",
+     "label": "What type of areas do customers of this product live?",
+     "raw_label": "Q11.What type of areas do customers of this product live?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "type_of_areas",
+     "relevance": "selected(${Q2}, '3') or selected(${Q9}, '1') or selected(${Q9}, '2')",
+     "required": true
+    },
+    "Q12": {
+     "name": "Q12",
+     "type": "select_one",
+     "label": "What socioeconomic status are customers?",
+     "raw_label": "Q12. What socioeconomic status are customers?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "socioeconomic_status",
+     "relevance": "selected(${Q2}, '3') or selected(${Q9}, '1') or selected(${Q9}, '2')",
+     "required": true
+    },
+    "Q15": {
+     "name": "Q15",
+     "type": "select_multiple",
+     "label": "What kind of business do they buy this for?",
+     "raw_label": "Q15.What kind of business do they buy this for?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "kind_of_business",
+     "relevance": "selected(${Q10}, '2')",
+     "required": true
+    },
+    "Q15_other_specify": {
+     "name": "Q15_other_specify",
+     "type": "text",
+     "label": "Other Specify",
+     "raw_label": "Q15 Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q15}, '5')",
+     "required": true
+    },
+    "note1": {
+     "name": "note1",
+     "type": "note",
+     "label": "Turmeric sourcing/procurement",
+     "raw_label": "Turmeric sourcing/procurement",
+     "group": [
+      "Retailer_survey"
+     ],
+     "required": true
+    },
+    "Q16": {
+     "name": "Q16",
+     "type": "select_one",
+     "label": "Who do you buy your turmeric roots from?",
+     "raw_label": "Q16.Who do you buy your turmeric roots from?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "Who_buy",
+     "relevance": "selected(${Q2}, '2') or selected(${Q3}, '2')",
+     "required": true
+    },
+    "Q16_other": {
+     "name": "Q16_other",
+     "type": "text",
+     "label": "ther (please specify)",
+     "raw_label": "Q16Other (please specify)",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q16}, '7')",
+     "required": true
+    },
+    "Q17": {
+     "name": "Q17",
+     "type": "select_one",
+     "label": "Is it always the same provider?",
+     "raw_label": "Q17.Is it always the same provider?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "same_providers",
+     "required": true
+    },
+    "Q18": {
+     "name": "Q18",
+     "type": "select_multiple",
+     "label": "How do you choose which provider you buy from?",
+     "raw_label": "Q18. How do you choose which provider you buy from?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "choose_provider",
+     "required": true
+    },
+    "Q18_Other_Specify": {
+     "name": "Q18_Other_Specify",
+     "type": "text",
+     "label": "_Other Specify",
+     "raw_label": "Q18_Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q18}, '6')",
+     "required": true
+    },
+    "note2": {
+     "name": "note2",
+     "type": "note",
+     "label": "Adulteration awareness",
+     "raw_label": "Adulteration awareness",
+     "group": [
+      "Retailer_survey"
+     ],
+     "required": true
+    },
+    "Q19": {
+     "name": "Q19",
+     "type": "select_one",
+     "label": "In your opinion, how common is impure turmeric sold in the market?",
+     "raw_label": "Q19.In your opinion, how common is impure turmeric sold in the market?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "common_impure_turmeric_sold",
+     "required": true
+    },
+    "Q20": {
+     "name": "Q20",
+     "type": "select_one",
+     "label": "In your opinion, how common is impure packaged ground turmeric sold in the market?",
+     "raw_label": "Q20.In your opinion, how common is impure packaged ground turmeric sold in the market?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "common_impure_turmeric_sold",
+     "relevance": "selected(${Q19}, '3') or selected(${Q19}, '4') or selected(${Q19}, '5')",
+     "required": true
+    },
+    "Q21": {
+     "name": "Q21",
+     "type": "select_one",
+     "label": "In your opinion, how common is impure loose ground turmeric sold in the market?",
+     "raw_label": "Q21.In your opinion, how common is impure loose ground turmeric sold in the market?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "common_impure_turmeric_sold",
+     "relevance": "selected(${Q19}, '3') or selected(${Q19}, '4') or selected(${Q19}, '5')",
+     "required": true
+    },
+    "Q22": {
+     "name": "Q22",
+     "type": "select_one",
+     "label": "In your opinion, how common are impure dried turmeric roots sold in the market?",
+     "raw_label": "Q22.In your opinion, how common are impure dried turmeric roots sold in the market?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "common_impure_turmeric_sold",
+     "relevance": "selected(${Q19}, '3') or selected(${Q19}, '4') or selected(${Q19}, '5')",
+     "required": true
+    },
+    "Q23": {
+     "name": "Q23",
+     "type": "select_one",
+     "label": "In your opinion, how common is impure fresh roots sold in the market?",
+     "raw_label": "Q23.In your opinion, how common is impure fresh roots sold in the market?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "common_impure_turmeric_sold",
+     "relevance": "selected(${Q19}, '3') or selected(${Q19}, '4') or selected(${Q19}, '5')",
+     "required": true
+    },
+    "Q24": {
+     "name": "Q24",
+     "type": "select_multiple",
+     "label": "Where did you get this information?",
+     "raw_label": "Q24 Where did you get this information?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "get_information",
+     "relevance": "selected(${Q19}, '3') or selected(${Q19}, '4') or selected(${Q19}, '5')",
+     "required": true
+    },
+    "Q24_Other_specify": {
+     "name": "Q24_Other_specify",
+     "type": "text",
+     "label": "_Other Specify",
+     "raw_label": "Q24_Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q24}, '11')",
+     "required": true
+    },
+    "Q25": {
+     "name": "Q25",
+     "type": "select_multiple",
+     "label": "You mentioned that ground turmeric is impure. What food items do you think are mixed into ground turmeric to make it impure?",
+     "raw_label": "Q25.You mentioned that ground turmeric is impure. What food items do you think are mixed into ground turmeric to make it impure?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "mixed_items",
+     "relevance": "selected(${Q20}, '3') or selected(${Q20}, '4') or selected(${Q20}, '5')",
+     "required": true
+    },
+    "Q25_Other": {
+     "name": "Q25_Other",
+     "type": "text",
+     "label": "_Other Specify",
+     "raw_label": "Q25_Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q25}, '4')",
+     "required": true
+    },
+    "Q26": {
+     "name": "Q26",
+     "type": "select_multiple",
+     "label": "What non-food items/additives do you think are mixed into ground turmeric to make it impure?",
+     "raw_label": "Q26.What non-food items/additives do you think are mixed into ground turmeric to make it impure?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "non_food_items_mixed",
+     "required": true
+    },
+    "Q26_Other": {
+     "name": "Q26_Other",
+     "type": "text",
+     "label": "_Other Specify",
+     "raw_label": "Q26_Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q26}, '5')",
+     "required": true
+    },
+    "Q28": {
+     "name": "Q28",
+     "type": "select_multiple",
+     "label": "You mentioned that dried turmeric roots is impure. What food items do you think are mixed into dried turmeric roots to make it impure?",
+     "raw_label": "Q28.You mentioned that dried turmeric roots is impure. What food items do you think are mixed into dried turmeric roots to make it impure?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "dried_turmeric_roots_is_impure",
+     "relevance": "selected(${Q22}, '3') or selected(${Q22}, '4') or selected(${Q22}, '5')",
+     "required": true
+    },
+    "Q28_Other": {
+     "name": "Q28_Other",
+     "type": "text",
+     "label": "_Other Specify",
+     "raw_label": "Q28_Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q28}, '4')",
+     "required": true
+    },
+    "Q29": {
+     "name": "Q29",
+     "type": "select_multiple",
+     "label": "What non-food items/additives do you think are mixed into dried turmeric roots to make it impure?",
+     "raw_label": "Q29.What non-food items/additives do you think are mixed into dried turmeric roots to make it impure?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "non_food_items_not_mixed",
+     "required": true
+    },
+    "Q29_Other_Specify": {
+     "name": "Q29_Other_Specify",
+     "type": "text",
+     "label": "_Other Specify",
+     "raw_label": "Q29_Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q29}, '5')",
+     "required": true
+    },
+    "Q30": {
+     "name": "Q30",
+     "type": "select_multiple",
+     "label": "_How do you think impure whole roots visually compare with pure, dried whole roots?",
+     "raw_label": "Q30_How do you think impure whole roots visually compare with pure, dried whole roots?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "roots_visually_compare",
+     "required": true
+    },
+    "Q30_Other_Specify": {
+     "name": "Q30_Other_Specify",
+     "type": "text",
+     "label": "_Other Specify",
+     "raw_label": "Q30_Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q30}, '8')",
+     "required": true
+    },
+    "Q31": {
+     "name": "Q31",
+     "type": "select_multiple",
+     "label": "Do you think either of these roots is adulterated?",
+     "raw_label": "Q31.Do you think either of these roots is adulterated?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "roots_is_adulterated",
+     "required": true
+    },
+    "Q32": {
+     "name": "Q32",
+     "type": "select_multiple",
+     "label": "_What makes the options impure?",
+     "raw_label": "Q32_What makes the options impure?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "options_impure",
+     "relevance": "not(selected(${Q31}, '7'))",
+     "required": true
+    },
+    "Q32_Other_Sepcify": {
+     "name": "Q32_Other_Sepcify",
+     "type": "text",
+     "label": "Other Specify",
+     "raw_label": "Q32 Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q32}, '2')",
+     "required": true
+    },
+    "Q33": {
+     "name": "Q33",
+     "type": "select_one",
+     "label": "_Do you know what lead is?",
+     "raw_label": "Q33_Do you know what lead is?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "yesno",
+     "required": true
+    },
+    "Q34": {
+     "name": "Q34",
+     "type": "select_one",
+     "label": "_How concerned are you about lead exposure for children?",
+     "raw_label": "Q34_How concerned are you about lead exposure for children?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "concerned",
+     "relevance": "selected(${Q33}, '1')",
+     "required": true
+    },
+    "Q35": {
+     "name": "Q35",
+     "type": "select_multiple",
+     "label": "_Do you know how to avoid lead exposure?",
+     "raw_label": "Q35_Do you know how to avoid lead exposure?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "avoid_lead_exposure",
+     "relevance": "selected(${Q33}, '1')",
+     "required": true
+    },
+    "Q35_other_response": {
+     "name": "Q35_other_response",
+     "type": "text",
+     "label": "Any Other Response",
+     "raw_label": "Q35 Any Other Response",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q35}, '3')",
+     "required": true
+    },
+    "Q33_i": {
+     "name": "Q33_i",
+     "type": "select_multiple",
+     "label": "How did you hear about lead?",
+     "raw_label": "How did you hear about lead?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "get_information",
+     "relevance": "selected(${Q33}, '1')",
+     "required": true
+    },
+    "Q33_i_Other_Sepcify": {
+     "name": "Q33_i_Other_Sepcify",
+     "type": "text",
+     "label": "_i Other Specify",
+     "raw_label": "Q33_i Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q33_i}, '11')",
+     "required": true
+    },
+    "Q33_ii": {
+     "name": "Q33_ii",
+     "type": "select_multiple",
+     "label": "How did you hear about lead adulteration of turmeric?",
+     "raw_label": "How did you hear about lead adulteration of turmeric?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "get_information",
+     "relevance": "selected(${Q26}, '2') or selected(${Q29}, '2')",
+     "required": true
+    },
+    "Q33_ii_Other_Sepcify": {
+     "name": "Q33_ii_Other_Sepcify",
+     "type": "text",
+     "label": "_ii Other Specify",
+     "raw_label": "Q33_ii Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q33_ii}, '11')",
+     "required": true
+    },
+    "selected_media_eng": {
+     "name": "selected_media_eng",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": [
+      "Retailer_survey"
+     ]
+    },
+    "selected_media_ur": {
+     "name": "selected_media_ur",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": [
+      "Retailer_survey"
+     ]
+    },
+    "Q38": {
+     "name": "Q38",
+     "type": "select_multiple",
+     "label": "What do you remember watching/ reading/ hearing about in ${selected_media_eng}?",
+     "raw_label": "What do you remember watching/ reading/ hearing about in ${selected_media_eng}?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "remember",
+     "relevance": "selected(${Q33_ii}, '3') or selected(${Q33_ii}, '4') or selected(${Q33_ii}, '5') or selected(${Q33_ii}, '6')",
+     "required": true
+    },
+    "Q38_Other_Specify": {
+     "name": "Q38_Other_Specify",
+     "type": "text",
+     "label": "Other Specify",
+     "raw_label": "Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q38}, '4')",
+     "required": true
+    },
+    "Q39": {
+     "name": "Q39",
+     "type": "select_multiple",
+     "label": "Do you remember who the message was from? (ask only if social media or TV is selected)",
+     "raw_label": "Do you remember who the message was from? (ask only if social media or TV is selected)",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "message_from",
+     "relevance": "selected(${Q33_ii}, '4') or selected(${Q33_ii}, '6')",
+     "required": true,
+     "constraint": "not(selected(., '5')) or count-selected(.) = 1"
+    },
+    "Q40": {
+     "name": "Q40",
+     "type": "select_one",
+     "label": "How many times did you see/ read this message in the media?",
+     "raw_label": "How many times did you see/ read this message in the media?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "times_see",
+     "relevance": "selected(${Q33_ii}, '3') or selected(${Q33_ii}, '4') or selected(${Q33_ii}, '5') or selected(${Q33_ii}, '6')",
+     "required": true
+    },
+    "Q41": {
+     "name": "Q41",
+     "type": "select_one",
+     "label": "What did you think of the message?",
+     "raw_label": "What did you think of the message?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "message",
+     "relevance": "selected(${Q33_ii}, '3') or selected(${Q33_ii}, '4') or selected(${Q33_ii}, '5') or selected(${Q33_ii}, '6')",
+     "required": true
+    },
+    "Q42": {
+     "name": "Q42",
+     "type": "select_one",
+     "label": "Was there anything that you didn’t understand in the message?",
+     "raw_label": "Was there anything that you didn’t understand in the message?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "yesno",
+     "relevance": "selected(${Q33_ii}, '3') or selected(${Q33_ii}, '4') or selected(${Q33_ii}, '5') or selected(${Q33_ii}, '6')",
+     "required": true
+    },
+    "Q42_Other_Specify": {
+     "name": "Q42_Other_Specify",
+     "type": "text",
+     "label": "What did you not understand?",
+     "raw_label": "What did you not understand?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q42}, '1')",
+     "required": true
+    },
+    "Q35_i": {
+     "name": "Q35_i",
+     "type": "select_one",
+     "label": "Have you taken any actions in the last 2 months to ensure that the turmeric you sell does not contain lead?",
+     "raw_label": "Have you taken any actions in the last 2 months to ensure that the turmeric you sell does not contain lead?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "yesno",
+     "relevance": "selected(${Q26}, '2') or selected(${Q29}, '2')",
+     "required": true
+    },
+    "Q35_ii": {
+     "name": "Q35_ii",
+     "type": "text",
+     "label": "What actions do you take?",
+     "raw_label": "What actions do you take?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q35_i}, '1')",
+     "required": true
+    },
+    "Q35_iii": {
+     "name": "Q35_iii",
+     "type": "select_one",
+     "label": "Has the Sindh Food Authority visited your store in the last 90 days?",
+     "raw_label": "Has the Sindh Food Authority visited your store in the last 90 days?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "yesno",
+     "relevance": "selected(${Q26}, '2') or selected(${Q29}, '2')",
+     "required": true
+    },
+    "Q35_iv": {
+     "name": "Q35_iv",
+     "type": "select_multiple",
+     "label": "Why did they visit your store?",
+     "raw_label": "Why did they visit your store?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "store_visit",
+     "relevance": "selected(${Q35_iii}, '1')",
+     "required": true
+    },
+    "Q35_iv_Other_Specify": {
+     "name": "Q35_iv_Other_Specify",
+     "type": "text",
+     "label": "_iv Other Specify",
+     "raw_label": "Q35_iv Other Specify",
+     "group": [
+      "Retailer_survey"
+     ],
+     "relevance": "selected(${Q35_iv}, '3')",
+     "required": true
+    },
+    "The_interview_ends_here": {
+     "name": "The_interview_ends_here",
+     "type": "note",
+     "label": "The interview ends here",
+     "raw_label": "The interview ends here",
+     "group": [
+      "Retailer_survey"
+     ],
+     "required": true
+    },
+    "Q36": {
+     "name": "Q36",
+     "type": "select_one",
+     "label": "_Survey assessment: How comfortable was this respondent sharing information about their business?",
+     "raw_label": "Q36_Survey assessment: How comfortable was this respondent sharing information about their business?",
+     "group": [
+      "Retailer_survey"
+     ],
+     "list_name": "Survey_assessment",
+     "required": true
+    },
+    "Q37": {
+     "name": "Q37",
+     "type": "text",
+     "label": "_Add any comments on how the interview went:",
+     "raw_label": "Q37_Add any comments on how the interview went:",
+     "group": [
+      "Retailer_survey"
+     ],
+     "required": true
+    },
+    "Q_1": {
+     "name": "Q_1",
+     "type": "select_one",
+     "label": "Do you regularly buy turmeric for HH or business use?",
+     "raw_label": "Q1.Do you regularly buy turmeric for HH or business use?",
+     "group": [
+      "Consumer_survey"
+     ],
+     "list_name": "regularly_buy",
+     "required": true
+    },
+    "Q_2": {
+     "name": "Q_2",
+     "type": "select_one",
+     "label": "(Assumed SES) Based on your observation of the respondent's physical appearance, please rate their socio-economic status on the following scale.",
+     "raw_label": "Q2.(Assumed SES) Based on your observation of the respondent's physical appearance, please rate their socio-economic status on the following scale.",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "list_name": "socio-economic",
+     "required": true
+    },
+    "Q_3": {
+     "name": "Q_3",
+     "type": "select_one",
+     "label": "Q_3.What is your primary occupation?",
+     "raw_label": "Q_3.What is your primary occupation?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "list_name": "primary_occupation",
+     "required": true
+    },
+    "Q_3_OtherSpecify": {
+     "name": "Q_3_OtherSpecify",
+     "type": "text",
+     "label": "Q_3Other (Specify)",
+     "raw_label": "Q_3Other (Specify)",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "relevance": "selected(${Q_3}, '11')",
+     "required": true
+    },
+    "Q_4": {
+     "name": "Q_4",
+     "type": "select_one",
+     "label": "Do you have a secondary occupation?",
+     "raw_label": "Q4.Do you have a secondary occupation?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "list_name": "yesno",
+     "required": true
+    },
+    "Q_5": {
+     "name": "Q_5",
+     "type": "select_one",
+     "label": "Q_5.If yes, what is it?",
+     "raw_label": "Q_5.If yes, what is it?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "list_name": "primary_occupation",
+     "relevance": "selected(${Q_4}, '1')",
+     "required": true
+    },
+    "Q_5_Other_Sepcify": {
+     "name": "Q_5_Other_Sepcify",
+     "type": "text",
+     "label": "Q_5 Other specify",
+     "raw_label": "Q_5 Other specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "relevance": "selected(${Q_5}, '11')",
+     "required": true
+    },
+    "Q_6": {
+     "name": "Q_6",
+     "type": "select_one",
+     "label": "(Assumed gender)",
+     "raw_label": "Q6.(Assumed gender)",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "list_name": "Assumed_gender",
+     "required": true
+    },
+    "Q_7": {
+     "name": "Q_7",
+     "type": "select_one",
+     "label": "What is your age in years?",
+     "raw_label": "Q7.What is your age in years?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "list_name": "years",
+     "required": true
+    },
+    "Q_8": {
+     "name": "Q_8",
+     "type": "select_one",
+     "label": "Do you primarily make turmeric purchasing decisions for your HH/business?",
+     "raw_label": "Q8.Do you primarily make turmeric purchasing decisions for your HH/business?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "list_name": "yesno",
+     "required": true
+    },
+    "Q_9": {
+     "name": "Q_9",
+     "type": "select_one",
+     "label": "How often do you eat food cooked with turmeric?",
+     "raw_label": "Q9.How often do you eat food cooked with turmeric?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview"
+     ],
+     "list_name": "food_cooked",
+     "relevance": "selected(${Q_8}, '1')",
+     "required": true
+    },
+    "Q_10": {
+     "name": "Q_10",
+     "type": "select_multiple",
+     "label": "How do you obtain turmeric for cooking?",
+     "raw_label": "Q10.How do you obtain turmeric for cooking?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_for_cooking",
+     "relevance": "not(selected(${Q_9}, '1')) or not(selected(${Q_1}, '3'))",
+     "required": true
+    },
+    "Q_10_Other_Specify": {
+     "name": "Q_10_Other_Specify",
+     "type": "text",
+     "label": "Q_10 Other Specify",
+     "raw_label": "Q_10 Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_10}, '7')",
+     "required": true
+    },
+    "Q_11": {
+     "name": "Q_11",
+     "type": "select_multiple",
+     "label": "Q_11.Which type of root do you purchase for cooking?",
+     "raw_label": "Q_11.Which type of root do you purchase for cooking?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "type_purchase_cooking",
+     "relevance": "selected(${Q_10}, '4') or selected(${Q_10}, '5')",
+     "required": true
+    },
+    "q11_count_no_7": {
+     "name": "q11_count_no_7",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ]
+    },
+    "Q_12": {
+     "name": "Q_12",
+     "type": "select_one",
+     "label": "Q_12.Which type of root do you purchase most?",
+     "raw_label": "Q_12.Which type of root do you purchase most?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "purchase_most",
+     "relevance": "${q11_count_no_7} > 1",
+     "required": true
+    },
+    "Q_13": {
+     "name": "Q_13",
+     "type": "select_one",
+     "label": "Over the past year, how frequently did you buy whole, dried, polished turmeric root?",
+     "raw_label": "Q13.Over the past year, how frequently did you buy whole, dried, polished turmeric root?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "polished_turmeric_root",
+     "relevance": "selected(${Q_10}, '4')",
+     "required": true
+    },
+    "Q_14": {
+     "name": "Q_14",
+     "type": "select_one",
+     "label": "Over the past year, how frequently do you buy whole, dried, unpolished turmeric root?",
+     "raw_label": "Q14.Over the past year, how frequently do you buy whole, dried, unpolished turmeric root?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "unpolished_turmeric",
+     "relevance": "selected(${Q_10}, '5')",
+     "required": true
+    },
+    "Q_15": {
+     "name": "Q_15",
+     "type": "select_one",
+     "label": "Over the past year, how frequently do you buy whole, fresh, turmeric root?",
+     "raw_label": "Q15.Over the past year, how frequently do you buy whole, fresh, turmeric root?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "fresh_turmeric",
+     "relevance": "selected(${Q_10}, '6')",
+     "required": true
+    },
+    "Q_16": {
+     "name": "Q_16",
+     "type": "integer",
+     "label": "What turmeric powder quantity do you obtain per month in kg/g? (ask number of packets of ground turmeric in case they cannot answer in kg or grams)",
+     "raw_label": "Q16.What turmeric powder quantity do you obtain per month in kg/g? (ask number of packets of ground turmeric in case they cannot answer in kg or grams)",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "required": true
+    },
+    "Q_16_unit": {
+     "name": "Q_16_unit",
+     "type": "select_one",
+     "label": "Please describe the unit.",
+     "raw_label": "Q16.Please describe the unit.",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "unit",
+     "required": true
+    },
+    "Q_16b": {
+     "name": "Q_16b",
+     "type": "integer",
+     "label": "What turmeric root quantity do you obtain per month in kg/g? (ask number of whole roots in case they cannot answer in kg or grams)",
+     "raw_label": "Q16b.What turmeric root quantity do you obtain per month in kg/g? (ask number of whole roots in case they cannot answer in kg or grams)",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_10}, '4') or selected(${Q_10}, '5')",
+     "required": true
+    },
+    "Q_16_b": {
+     "name": "Q_16_b",
+     "type": "select_one",
+     "label": "Please describe the unit.",
+     "raw_label": "Q16b.Please describe the unit.",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "unit",
+     "relevance": "selected(${Q_10}, '4') or selected(${Q_10}, '5')",
+     "required": true
+    },
+    "Q_17": {
+     "name": "Q_17",
+     "type": "select_one",
+     "label": "_What do you obtain each type for?",
+     "raw_label": "Q17_What do you obtain each type for?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "obtain_type",
+     "relevance": "not(selected(${Q_1}, '2'))",
+     "required": true
+    },
+    "Q_17_Other_Specify": {
+     "name": "Q_17_Other_Specify",
+     "type": "text",
+     "label": "Q_17 Other Specify",
+     "raw_label": "Q_17 Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_17}, '3')",
+     "required": true
+    },
+    "Q_18": {
+     "name": "Q_18",
+     "type": "integer",
+     "label": "How many people do you feed regularly? (~household size, aka “how many people eat out of the same pot?”)",
+     "raw_label": "Q18. How many people do you feed regularly? (~household size, aka “how many people eat out of the same pot?”)",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_17}, '1')",
+     "required": true
+    },
+    "Q_19": {
+     "name": "Q_19",
+     "type": "select_one",
+     "label": "_Describe your business",
+     "raw_label": "Q19_Describe your business",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "Describe_your_business",
+     "relevance": "not(selected(${Q_17}, '1'))",
+     "required": true
+    },
+    "Q_19_Other": {
+     "name": "Q_19_Other",
+     "type": "text",
+     "label": "Q_19_Other",
+     "raw_label": "Q_19_Other",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_19}, '5')",
+     "required": true
+    },
+    "Q19_1": {
+     "name": "Q19_1",
+     "type": "select_one",
+     "label": "_1 Do you sell to",
+     "raw_label": "Q19_1 Do you sell to",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "sell_to",
+     "relevance": "selected(${Q_19}, '1')",
+     "required": true
+    },
+    "Q19_2": {
+     "name": "Q19_2",
+     "type": "select_one",
+     "label": "_2.Do you run",
+     "raw_label": "Q19_2.Do you run",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "Do_you_run",
+     "relevance": "selected(${Q_19}, '2')",
+     "required": true
+    },
+    "Q19_3": {
+     "name": "Q19_3",
+     "type": "select_one",
+     "label": "_3 2.Do you run",
+     "raw_label": "Q19_3 2.Do you run",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "Do_you_run",
+     "relevance": "selected(${Q_19}, '3')",
+     "required": true
+    },
+    "Q_20": {
+     "name": "Q_20",
+     "type": "select_multiple",
+     "label": "What type of consumers purchase these types of roots?",
+     "raw_label": "Q20.What type of consumers purchase these types of roots?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "consumers_purchase_types",
+     "relevance": "selected(${Q_19}, '1') or selected(${Q_19}, '2') or selected(${Q_19}, '3')",
+     "required": true
+    },
+    "Q_20_Other_Specify": {
+     "name": "Q_20_Other_Specify",
+     "type": "text",
+     "label": "Q_20_Other Specify",
+     "raw_label": "Q_20_Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_20}, '11')",
+     "required": true
+    },
+    "Q_22": {
+     "name": "Q_22",
+     "type": "select_one",
+     "label": "Which socio-economic status do most of your consumers belong to",
+     "raw_label": "Q22.Which socio-economic status do most of your consumers belong to",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "socio_economic",
+     "relevance": "selected(${Q_17}, '2')",
+     "required": true
+    },
+    "Q_23": {
+     "name": "Q_23",
+     "type": "select_one",
+     "label": "Are consumers from",
+     "raw_label": "Q23.Are consumers from",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "consumers_from",
+     "relevance": "selected(${Q_17}, '2')",
+     "required": true
+    },
+    "Q_24": {
+     "name": "Q_24",
+     "type": "select_multiple",
+     "label": "Which market do you buy your turmeric from?",
+     "raw_label": "Q24.Which market do you buy your turmeric from?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "Which_market",
+     "relevance": "not(selected(${Q_20}, '1')) and not(selected(${Q_20}, '2')) and not(selected(${Q_20}, '3'))",
+     "required": true
+    },
+    "Q_25": {
+     "name": "Q_25",
+     "type": "select_multiple",
+     "label": "Q_25. What is the market called?",
+     "raw_label": "Q_25. What is the market called?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "market_called",
+     "required": true
+    },
+    "Q_25_Other_Specify": {
+     "name": "Q_25_Other_Specify",
+     "type": "text",
+     "label": "Q_25 Other Specify",
+     "raw_label": "Q_25 Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_25}, '10')",
+     "required": true
+    },
+    "Q_26": {
+     "name": "Q_26",
+     "type": "select_multiple",
+     "label": "How do you determine what turmeric product you will buy?",
+     "raw_label": "Q26.How do you determine what turmeric product you will buy?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_product",
+     "required": true,
+     "constraint": "count-selected(.) <= 3"
+    },
+    "Quality": {
+     "name": "Quality",
+     "type": "select_multiple",
+     "label": "Quality_Appearance",
+     "raw_label": "Quality_Appearance",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "Quality_Appearance",
+     "relevance": "selected(${Q_26}, '5')",
+     "required": true
+    },
+    "note3": {
+     "name": "note3",
+     "type": "note",
+     "label": "Adulteration awareness",
+     "raw_label": "Adulteration awareness",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "required": true
+    },
+    "Q_28": {
+     "name": "Q_28",
+     "type": "select_one",
+     "label": "Do you think that some turmeric products may be impure?",
+     "raw_label": "Q28.Do you think that some turmeric products may be impure?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "products_may_impure",
+     "required": true
+    },
+    "Q_29": {
+     "name": "Q_29",
+     "type": "select_multiple",
+     "label": "Q_29. Where did you get this information?",
+     "raw_label": "Q_29. Where did you get this information?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "Get_information",
+     "relevance": "not(selected(${Q_28}, '2')) and not(selected(${Q_28}, '3'))",
+     "required": true
+    },
+    "Q29Other": {
+     "name": "Q29Other",
+     "type": "text",
+     "label": "Other Specify",
+     "raw_label": "Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_29}, '11')",
+     "required": true
+    },
+    "Q_30": {
+     "name": "Q_30",
+     "type": "select_one",
+     "label": "In your opinion, how common is impure turmeric sold in the market?",
+     "raw_label": "Q30.In your opinion, how common is impure turmeric sold in the market?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_sold",
+     "relevance": "selected(${Q_28}, '1')",
+     "required": true
+    },
+    "Q_31": {
+     "name": "Q_31",
+     "type": "select_one",
+     "label": "In your opinion, how common is impure packaged ground turmeric sold in the market?",
+     "raw_label": "Q31. In your opinion, how common is impure packaged ground turmeric sold in the market?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_sold",
+     "relevance": "selected(${Q_28}, '1')",
+     "required": true
+    },
+    "Q_32": {
+     "name": "Q_32",
+     "type": "select_one",
+     "label": "In your opinion, how common is impure loose ground turmeric sold in the market?",
+     "raw_label": "Q32 .In your opinion, how common is impure loose ground turmeric sold in the market?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_sold",
+     "relevance": "selected(${Q_28}, '1')",
+     "required": true
+    },
+    "Q_33": {
+     "name": "Q_33",
+     "type": "select_one",
+     "label": "In your opinion, how common are impure dried turmeric roots sold in the market?",
+     "raw_label": "Q33. In your opinion, how common are impure dried turmeric roots sold in the market?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_sold",
+     "relevance": "selected(${Q_28}, '1')",
+     "required": true
+    },
+    "Q_34": {
+     "name": "Q_34",
+     "type": "select_one",
+     "label": "In your opinion, how common is impure fresh roots sold in the market?",
+     "raw_label": "Q34. In your opinion, how common is impure fresh roots sold in the market?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_sold",
+     "relevance": "selected(${Q_28}, '1')",
+     "required": true
+    },
+    "Q_35": {
+     "name": "Q_35",
+     "type": "select_multiple",
+     "label": "You mentioned that ground turmeric is impure. What food items do you think are mixed into ground turmeric to make it impure?",
+     "raw_label": "Q35.You mentioned that ground turmeric is impure. What food items do you think are mixed into ground turmeric to make it impure?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "food_items_mixed",
+     "relevance": "selected(${Q_31}, '3') or selected(${Q_31}, '4') or selected(${Q_31}, '5') or selected(${Q_32}, '3') or selected(${Q_32}, '4') or selected(${Q_32}, '5')",
+     "required": true
+    },
+    "Q_35_Other": {
+     "name": "Q_35_Other",
+     "type": "text",
+     "label": "Q_35_Other Specify",
+     "raw_label": "Q_35_Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_35}, '4')",
+     "required": true
+    },
+    "Q_36": {
+     "name": "Q_36",
+     "type": "select_multiple",
+     "label": "What non-food items/additives do you think are mixed into ground turmeric to make it impure? Do not read the options.",
+     "raw_label": "Q36.What non-food items/additives do you think are mixed into ground turmeric to make it impure? Do not read the options.",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "non-food_items",
+     "relevance": "selected(${Q_31}, '3') or selected(${Q_31}, '4') or selected(${Q_31}, '5') or selected(${Q_32}, '3') or selected(${Q_32}, '4') or selected(${Q_32}, '5')",
+     "required": true
+    },
+    "Q_36_Other": {
+     "name": "Q_36_Other",
+     "type": "text",
+     "label": "Q_36_Other Specify",
+     "raw_label": "Q_36_Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_36}, '4')",
+     "required": true
+    },
+    "Q_37": {
+     "name": "Q_37",
+     "type": "select_multiple",
+     "label": "You mentioned that dried turmeric roots are impure. What food items do you think are mixed into dried turmeric roots to make it impure?",
+     "raw_label": "Q37.You mentioned that dried turmeric roots are impure. What food items do you think are mixed into dried turmeric roots to make it impure?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "dried_turmeric_impure",
+     "relevance": "selected(${Q_33}, '3') or selected(${Q_33}, '4') or selected(${Q_33}, '5')",
+     "required": true
+    },
+    "Q_37_Other": {
+     "name": "Q_37_Other",
+     "type": "text",
+     "label": "Q_37_Other Specify",
+     "raw_label": "Q_37_Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_37}, '4')",
+     "required": true
+    },
+    "Q_38": {
+     "name": "Q_38",
+     "type": "select_multiple",
+     "label": "What non-food items/additives do you think are mixed into dried turmeric roots to make it impure?",
+     "raw_label": "Q38.What non-food items/additives do you think are mixed into dried turmeric roots to make it impure?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "mixed_dried_turmeric",
+     "relevance": "selected(${Q_33}, '3') or selected(${Q_33}, '4') or selected(${Q_33}, '5')",
+     "required": true
+    },
+    "Q_38_Other": {
+     "name": "Q_38_Other",
+     "type": "text",
+     "label": "Q_38_Other Specify",
+     "raw_label": "Q_38_Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_38}, '4')",
+     "required": true
+    },
+    "Q_40": {
+     "name": "Q_40",
+     "type": "select_multiple",
+     "label": "_How do you think impure, dried whole roots visually compare with pure, dried whole roots?",
+     "raw_label": "Q40_How do you think impure, dried whole roots visually compare with pure, dried whole roots?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_visually_compares",
+     "required": true
+    },
+    "Q_40_Other_Specify": {
+     "name": "Q_40_Other_Specify",
+     "type": "text",
+     "label": "Q_40 Other Specify",
+     "raw_label": "Q_40 Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_40}, '6')",
+     "required": true
+    },
+    "Q_41": {
+     "name": "Q_41",
+     "type": "select_multiple",
+     "label": "Do you think any of these roots are adulterated?",
+     "raw_label": "Q41. Do you think any of these roots are adulterated?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "roots_adulterated",
+     "required": true
+    },
+    "Q_42": {
+     "name": "Q_42",
+     "type": "select_one",
+     "label": "How concerned are you about turmeric being impure?",
+     "raw_label": "Q42.How concerned are you about turmeric being impure?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_impure",
+     "required": true
+    },
+    "note_SOME_LEAD_EXPOSURE": {
+     "name": "note_SOME_LEAD_EXPOSURE",
+     "type": "note",
+     "label": "SOME LEAD EXPOSURE AWARENESS QUESTION OPTIONS:",
+     "raw_label": "SOME LEAD EXPOSURE AWARENESS QUESTION OPTIONS:",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "required": true
+    },
+    "Q_57a": {
+     "name": "Q_57a",
+     "type": "select_one",
+     "label": "Do you know what lead is?",
+     "raw_label": "57a. Do you know what lead is?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "yesno",
+     "required": true
+    },
+    "Q_57c": {
+     "name": "Q_57c",
+     "type": "select_one",
+     "label": "Do you know how to avoid lead exposure from turmeric?",
+     "raw_label": "57c. Do you know how to avoid lead exposure from turmeric?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "yesno",
+     "relevance": "selected(${Q_57a}, '1')",
+     "required": true
+    },
+    "Q_57c_i": {
+     "name": "Q_57c_i",
+     "type": "select_multiple",
+     "label": "What actions do you take?",
+     "raw_label": "What actions do you take?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "avoid_exposure",
+     "relevance": "selected(${Q_57c}, '1')",
+     "required": true
+    },
+    "Q57C_any_other": {
+     "name": "Q57C_any_other",
+     "type": "text",
+     "label": "Any other response",
+     "raw_label": "Q57C Any other response",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_57c_i}, '3')",
+     "required": true
+    },
+    "Q_57_i": {
+     "name": "Q_57_i",
+     "type": "select_one",
+     "label": "Have you heard about lead adulteration in turmeric?",
+     "raw_label": "Have you heard about lead adulteration in turmeric?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "yesno",
+     "required": true
+    },
+    "Q_57_ii": {
+     "name": "Q_57_ii",
+     "type": "select_multiple",
+     "label": "where did you hear about lead adulteration in turmeric?",
+     "raw_label": "where did you hear about lead adulteration in turmeric?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "get_information",
+     "relevance": "selected(${Q_57_i}, '1')",
+     "required": true
+    },
+    "Q_57_iii": {
+     "name": "Q_57_iii",
+     "type": "select_one",
+     "label": "Which types of turmeric are most susceptible to adulteration from lead?",
+     "raw_label": "Which types of turmeric are most susceptible to adulteration from lead?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "turmeric_types",
+     "relevance": "selected(${Q_57_i}, '1')",
+     "required": true
+    },
+    "Q_57b": {
+     "name": "Q_57b",
+     "type": "select_one",
+     "label": "How concerned are you about lead exposure for children?",
+     "raw_label": "57b. How concerned are you about lead exposure for children?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "concerned_exposure_children",
+     "relevance": "selected(${Q_57a}, '1')",
+     "required": true
+    },
+    "selected_media_eng_57": {
+     "name": "selected_media_eng_57",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ]
+    },
+    "selected_media_ur_57": {
+     "name": "selected_media_ur_57",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ]
+    },
+    "Q_57d": {
+     "name": "Q_57d",
+     "type": "select_multiple",
+     "label": "What do you remember watching/ reading/ hearing about in ${selected_media_eng_57}?",
+     "raw_label": "What do you remember watching/ reading/ hearing about in ${selected_media_eng_57}?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "remember",
+     "relevance": "selected(${Q_57_ii}, '3') or selected(${Q_57_ii}, '4') or selected(${Q_57_ii}, '5') or selected(${Q_57_ii}, '6')",
+     "required": true
+    },
+    "Q_57d_Other": {
+     "name": "Q_57d_Other",
+     "type": "text",
+     "label": "Other Specify",
+     "raw_label": "Other Specify",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_57d}, '4')",
+     "required": true
+    },
+    "Q_57e": {
+     "name": "Q_57e",
+     "type": "select_multiple",
+     "label": "Do you remember who the message was from?",
+     "raw_label": "Do you remember who the message was from?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "message_from",
+     "relevance": "selected(${Q_57_ii}, '4') or selected(${Q_57_ii}, '6')",
+     "required": true,
+     "constraint": "not(selected(., '5')) or count-selected(.) = 1"
+    },
+    "Q_57f": {
+     "name": "Q_57f",
+     "type": "select_one",
+     "label": "How many times did you see/ read this message in the media?",
+     "raw_label": "How many times did you see/ read this message in the media?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "times_see",
+     "relevance": "selected(${Q_57_ii}, '3') or selected(${Q_57_ii}, '4') or selected(${Q_57_ii}, '5') or selected(${Q_57_ii}, '6')",
+     "required": true
+    },
+    "Q_57g": {
+     "name": "Q_57g",
+     "type": "select_one",
+     "label": "What did you think of the message?",
+     "raw_label": "What did you think of the message?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "message",
+     "relevance": "selected(${Q_57_ii}, '3') or selected(${Q_57_ii}, '4') or selected(${Q_57_ii}, '5') or selected(${Q_57_ii}, '6')",
+     "required": true
+    },
+    "Q_57h": {
+     "name": "Q_57h",
+     "type": "select_one",
+     "label": "Was there anything that you didn’t understand in the message?",
+     "raw_label": "Was there anything that you didn’t understand in the message?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "list_name": "yesno",
+     "relevance": "selected(${Q_57_ii}, '3') or selected(${Q_57_ii}, '4') or selected(${Q_57_ii}, '5') or selected(${Q_57_ii}, '6')",
+     "required": true
+    },
+    "Q_57h_Other": {
+     "name": "Q_57h_Other",
+     "type": "text",
+     "label": "What did you not understand?",
+     "raw_label": "What did you not understand?",
+     "group": [
+      "Consumer_survey",
+      "terminate_interview",
+      "terminate_interview2"
+     ],
+     "relevance": "selected(${Q_57h}, '1')",
+     "required": true
+    },
+    "survey_status": {
+     "name": "survey_status",
+     "type": "select_one",
+     "label": "Status of survey",
+     "raw_label": "Status of survey",
+     "group": [],
+     "list_name": "status_survey",
+     "required": true
+    }
+   },
+   "order": [
+    "ta_meta",
+    "From_ID",
+    "Consent_Form",
+    "Consent",
+    "no_consent",
+    "starttime",
+    "endtime",
+    "deviceid",
+    "devicephonenum",
+    "username",
+    "device_info",
+    "duration",
+    "caseid",
+    "Signature",
+    "Data_Collector",
+    "city",
+    "market_name",
+    "Q1",
+    "Type_of_survey",
+    "type_of_vendor",
+    "Q2",
+    "Q3",
+    "Q3_b",
+    "Fresh_Turmeric_Roots",
+    "Dried_Turmeric_Roots",
+    "Loose_Turmeric_Powder",
+    "Packaged_Branded_Turmeric_Powder",
+    "Packaged_Unbranded_Turmeric_Powder",
+    "Q9",
+    "Q10",
+    "note",
+    "Q11",
+    "Q12",
+    "Q15",
+    "Q15_other_specify",
+    "note1",
+    "Q16",
+    "Q16_other",
+    "Q17",
+    "Q18",
+    "Q18_Other_Specify",
+    "note2",
+    "Q19",
+    "Q20",
+    "Q21",
+    "Q22",
+    "Q23",
+    "Q24",
+    "Q24_Other_specify",
+    "Q25",
+    "Q25_Other",
+    "Q26",
+    "Q26_Other",
+    "Q28",
+    "Q28_Other",
+    "Q29",
+    "Q29_Other_Specify",
+    "Q30",
+    "Q30_Other_Specify",
+    "Q31",
+    "Q32",
+    "Q32_Other_Sepcify",
+    "Q33",
+    "Q34",
+    "Q35",
+    "Q35_other_response",
+    "Q33_i",
+    "Q33_i_Other_Sepcify",
+    "Q33_ii",
+    "Q33_ii_Other_Sepcify",
+    "selected_media_eng",
+    "selected_media_ur",
+    "Q38",
+    "Q38_Other_Specify",
+    "Q39",
+    "Q40",
+    "Q41",
+    "Q42",
+    "Q42_Other_Specify",
+    "Q35_i",
+    "Q35_ii",
+    "Q35_iii",
+    "Q35_iv",
+    "Q35_iv_Other_Specify",
+    "The_interview_ends_here",
+    "Q36",
+    "Q37",
+    "Q_1",
+    "Q_2",
+    "Q_3",
+    "Q_3_OtherSpecify",
+    "Q_4",
+    "Q_5",
+    "Q_5_Other_Sepcify",
+    "Q_6",
+    "Q_7",
+    "Q_8",
+    "Q_9",
+    "Q_10",
+    "Q_10_Other_Specify",
+    "Q_11",
+    "q11_count_no_7",
+    "Q_12",
+    "Q_13",
+    "Q_14",
+    "Q_15",
+    "Q_16",
+    "Q_16_unit",
+    "Q_16b",
+    "Q_16_b",
+    "Q_17",
+    "Q_17_Other_Specify",
+    "Q_18",
+    "Q_19",
+    "Q_19_Other",
+    "Q19_1",
+    "Q19_2",
+    "Q19_3",
+    "Q_20",
+    "Q_20_Other_Specify",
+    "Q_22",
+    "Q_23",
+    "Q_24",
+    "Q_25",
+    "Q_25_Other_Specify",
+    "Q_26",
+    "Quality",
+    "note3",
+    "Q_28",
+    "Q_29",
+    "Q29Other",
+    "Q_30",
+    "Q_31",
+    "Q_32",
+    "Q_33",
+    "Q_34",
+    "Q_35",
+    "Q_35_Other",
+    "Q_36",
+    "Q_36_Other",
+    "Q_37",
+    "Q_37_Other",
+    "Q_38",
+    "Q_38_Other",
+    "Q_40",
+    "Q_40_Other_Specify",
+    "Q_41",
+    "Q_42",
+    "note_SOME_LEAD_EXPOSURE",
+    "Q_57a",
+    "Q_57c",
+    "Q_57c_i",
+    "Q57C_any_other",
+    "Q_57_i",
+    "Q_57_ii",
+    "Q_57_iii",
+    "Q_57b",
+    "selected_media_eng_57",
+    "selected_media_ur_57",
+    "Q_57d",
+    "Q_57d_Other",
+    "Q_57e",
+    "Q_57f",
+    "Q_57g",
+    "Q_57h",
+    "Q_57h_Other",
+    "survey_status"
+   ],
+   "choices": {
+    "yesno": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "0",
+      "label": "No"
+     }
+    ],
+    "Types_of_Turmeric": [
+     {
+      "value": "1",
+      "label": "Fresh Turmeric Roots"
+     },
+     {
+      "value": "2",
+      "label": "Dried Turmeric Roots"
+     },
+     {
+      "value": "3",
+      "label": "Loose Turmeric Powder"
+     },
+     {
+      "value": "4",
+      "label": "Packaged Unbranded Turmeric Powder"
+     },
+     {
+      "value": "5",
+      "label": "Packaged Branded Turmeric Powder"
+     }
+    ],
+    "Type_of_turmeric": [
+     {
+      "value": "1",
+      "label": "Fresh Turmeric Roots"
+     },
+     {
+      "value": "2",
+      "label": "Dried Turmeric Roots"
+     },
+     {
+      "value": "3",
+      "label": "Loose Turmeric Powder"
+     },
+     {
+      "value": "4",
+      "label": "Packaged Branded Turmeric Powder"
+     },
+     {
+      "value": "5",
+      "label": "Packaged Unbranded Turmeric Powder"
+     }
+    ],
+    "Product_Type": [
+     {
+      "value": "1",
+      "label": "Type A"
+     },
+     {
+      "value": "2",
+      "label": "Type B"
+     }
+    ],
+    "kind_of_customers": [
+     {
+      "value": "1",
+      "label": "Household"
+     },
+     {
+      "value": "2",
+      "label": "Businesses"
+     },
+     {
+      "value": "3",
+      "label": "Both"
+     }
+    ],
+    "type_of_areas": [
+     {
+      "value": "1",
+      "label": "Urban"
+     },
+     {
+      "value": "2",
+      "label": "Rural"
+     },
+     {
+      "value": "3",
+      "label": "Both"
+     },
+     {
+      "value": "4",
+      "label": "N/A"
+     }
+    ],
+    "kind_of_business": [
+     {
+      "value": "1",
+      "label": "Retail"
+     },
+     {
+      "value": "2",
+      "label": "Hotel"
+     },
+     {
+      "value": "3",
+      "label": "Herbalist shop"
+     },
+     {
+      "value": "4",
+      "label": "Restaurant"
+     },
+     {
+      "value": "5",
+      "label": "Other (specify)"
+     }
+    ],
+    "gender": [
+     {
+      "value": "1",
+      "label": "Male"
+     },
+     {
+      "value": "2",
+      "label": "Female"
+     },
+     {
+      "value": "3",
+      "label": "Both"
+     }
+    ],
+    "consumers_age": [
+     {
+      "value": "1",
+      "label": "<20"
+     },
+     {
+      "value": "2",
+      "label": "20-40"
+     },
+     {
+      "value": "3",
+      "label": "40-60"
+     },
+     {
+      "value": "4",
+      "label": "60+"
+     }
+    ],
+    "same_providers": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     }
+    ],
+    "common_impure_turmeric_sold": [
+     {
+      "value": "1",
+      "label": "Haven’t heard of it"
+     },
+     {
+      "value": "2",
+      "label": "Nonexistent/rare"
+     },
+     {
+      "value": "3",
+      "label": "Uncommon"
+     },
+     {
+      "value": "4",
+      "label": "Common"
+     },
+     {
+      "value": "5",
+      "label": "Very common/Ubiquitous"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "types_of_most_impure": [
+     {
+      "value": "1",
+      "label": "Packaged ground turmeric"
+     },
+     {
+      "value": "2",
+      "label": "Loose ground turmeric"
+     },
+     {
+      "value": "3",
+      "label": "Dried roots"
+     },
+     {
+      "value": "4",
+      "label": "Fresh roots"
+     },
+     {
+      "value": "5",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "6",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "mixed_items": [
+     {
+      "value": "1",
+      "label": "Chickpea flour"
+     },
+     {
+      "value": "2",
+      "label": "Rice flour"
+     },
+     {
+      "value": "3",
+      "label": "Spent turmeric"
+     },
+     {
+      "value": "4",
+      "label": "99 Other (specify)"
+     },
+     {
+      "value": "5",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "6",
+      "label": "-888. Refused to answer"
+     },
+     {
+      "value": "7",
+      "label": "None"
+     }
+    ],
+    "non_food_items_mixed": [
+     {
+      "value": "1",
+      "label": "Pigments (does not specify more details)"
+     },
+     {
+      "value": "2",
+      "label": "Lead/ lead chromate"
+     },
+     {
+      "value": "3",
+      "label": "Sawdust"
+     },
+     {
+      "value": "4",
+      "label": "Brickdust"
+     },
+     {
+      "value": "5",
+      "label": "99 Other (specify)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     },
+     {
+      "value": "8",
+      "label": "None"
+     }
+    ],
+    "dried_turmeric_roots_is_impure": [
+     {
+      "value": "1",
+      "label": "Chickpea flour"
+     },
+     {
+      "value": "2",
+      "label": "Rice flour"
+     },
+     {
+      "value": "3",
+      "label": "Spent turmeric"
+     },
+     {
+      "value": "4",
+      "label": "99 Other (specify)"
+     },
+     {
+      "value": "5",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "6",
+      "label": "-888. Refused to answer"
+     },
+     {
+      "value": "7",
+      "label": "None"
+     }
+    ],
+    "non_food_items_not_mixed": [
+     {
+      "value": "1",
+      "label": "Pigments (does not specify more details)"
+     },
+     {
+      "value": "2",
+      "label": "Lead/ lead chromate"
+     },
+     {
+      "value": "3",
+      "label": "Sawdust"
+     },
+     {
+      "value": "4",
+      "label": "Brickdust"
+     },
+     {
+      "value": "5",
+      "label": "99 Other (specify)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     },
+     {
+      "value": "8",
+      "label": "None"
+     }
+    ],
+    "roots_is_adulterated": [
+     {
+      "value": "1",
+      "label": "1"
+     },
+     {
+      "value": "2",
+      "label": "2"
+     },
+     {
+      "value": "3",
+      "label": "3"
+     },
+     {
+      "value": "4",
+      "label": "4"
+     },
+     {
+      "value": "5",
+      "label": "5"
+     },
+     {
+      "value": "6",
+      "label": "6"
+     },
+     {
+      "value": "7",
+      "label": "None of the above"
+     }
+    ],
+    "city": [
+     {
+      "value": "1",
+      "label": "Karachi"
+     },
+     {
+      "value": "2",
+      "label": "Hyderabad"
+     },
+     {
+      "value": "3",
+      "label": "Peshawar"
+     },
+     {
+      "value": "4",
+      "label": "Mardan"
+     }
+    ],
+    "market_name": [
+     {
+      "value": "EMK",
+      "label": "Empress Market (South)-Karachi"
+     },
+     {
+      "value": "BMK",
+      "label": "Babar Market (Korangi-Landhi)-Karachi"
+     },
+     {
+      "value": "FKPBH",
+      "label": "Faqir Ka Pir Bazar-Hyderabad"
+     },
+     {
+      "value": "TJH",
+      "label": "Tando Jam-Hyderabad"
+     },
+     {
+      "value": "BBP",
+      "label": "Board Bazar Peshawar"
+     },
+     {
+      "value": "PMP",
+      "label": "Peepal Mandi Peshawar"
+     }
+    ],
+    "Type_of_survey": [
+     {
+      "value": "RS",
+      "label": "Retailer survey"
+     },
+     {
+      "value": "CS",
+      "label": "Consumer survey"
+     }
+    ],
+    "type_of_vendor": [
+     {
+      "value": "1",
+      "label": "Wholesaler"
+     },
+     {
+      "value": "2",
+      "label": "Retailer"
+     }
+    ],
+    "regularly_buy": [
+     {
+      "value": "1",
+      "label": "Y - HH"
+     },
+     {
+      "value": "2",
+      "label": "Y - business use"
+     },
+     {
+      "value": "3",
+      "label": "Y. both HH and business"
+     },
+     {
+      "value": "4",
+      "label": "N"
+     }
+    ],
+    "socio-economic": [
+     {
+      "value": "1",
+      "label": "Low: Simple clothing, basic shoes or chappals, basic grooming"
+     },
+     {
+      "value": "2",
+      "label": "Middle: Neat casual clothing (shalwar kameez/shirt), proper shoes, well-groomed appearance with basic accessories"
+     },
+     {
+      "value": "3",
+      "label": "Upper Middle: Good quality clothing (branded/tailored), leather shoes, well-maintained grooming, watch or jewelry visible"
+     }
+    ],
+    "Assumed_gender": [
+     {
+      "value": "male",
+      "label": "Male"
+     },
+     {
+      "value": "female",
+      "label": "Female"
+     },
+     {
+      "value": "other",
+      "label": "Other"
+     }
+    ],
+    "years": [
+     {
+      "value": "<20",
+      "label": "a. <20"
+     },
+     {
+      "value": "20-40",
+      "label": "b.20-40"
+     },
+     {
+      "value": "40-60",
+      "label": "c.40-60"
+     },
+     {
+      "value": "60+",
+      "label": "d.60+"
+     }
+    ],
+    "food_cooked": [
+     {
+      "value": "1",
+      "label": "Never"
+     },
+     {
+      "value": "2",
+      "label": "Less often than once every 2 weeks"
+     },
+     {
+      "value": "3",
+      "label": "About once every two weeks"
+     },
+     {
+      "value": "4",
+      "label": "About once per week"
+     },
+     {
+      "value": "5",
+      "label": "Most days (About once per day)"
+     },
+     {
+      "value": "6",
+      "label": "More than one time per day"
+     }
+    ],
+    "turmeric_for_cooking": [
+     {
+      "value": "1",
+      "label": "Grow it/get from my/my neighbor’s field, then dried and grind in the mill"
+     },
+     {
+      "value": "2",
+      "label": "Purchase powdered loose turmeric from bazaar"
+     },
+     {
+      "value": "3",
+      "label": "Purchase powdered packaged turmeric from bazaar"
+     },
+     {
+      "value": "4",
+      "label": "Purchase whole, dried, polished turmeric from bazaar, and grind in the mill"
+     },
+     {
+      "value": "5",
+      "label": "Purchase whole, dried, unpolished turmeric from bazaar and grind in the mill"
+     },
+     {
+      "value": "6",
+      "label": "Purchase whole, fresh (not dried) turmeric root from bazaar, then dried and grind in the mill"
+     },
+     {
+      "value": "7",
+      "label": "Other"
+     }
+    ],
+    "polished_turmeric": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "unpolished_turmeric": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "fresh_turmeric": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "unit": [
+     {
+      "value": "Kg",
+      "label": "Kg"
+     },
+     {
+      "value": "gram",
+      "label": "gram"
+     },
+     {
+      "value": "Roots",
+      "label": "Roots"
+     },
+     {
+      "value": "Packets",
+      "label": "Packets"
+     },
+     {
+      "value": "DK",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "Refused",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "obtain_type": [
+     {
+      "value": "1",
+      "label": "Personal HH consumption"
+     },
+     {
+      "value": "2",
+      "label": "For distributing among other relatives"
+     },
+     {
+      "value": "3",
+      "label": "Other"
+     }
+    ],
+    "Describe_your_business": [
+     {
+      "value": "1",
+      "label": "Retail vendor"
+     },
+     {
+      "value": "2",
+      "label": "Hotel"
+     },
+     {
+      "value": "3",
+      "label": "Restaurant"
+     },
+     {
+      "value": "4",
+      "label": "Herbalist"
+     },
+     {
+      "value": "5",
+      "label": "Other"
+     }
+    ],
+    "consumers_purchase_types": [
+     {
+      "value": "1",
+      "label": "Retail vendor - urban"
+     },
+     {
+      "value": "2",
+      "label": "Retail vendor - rural"
+     },
+     {
+      "value": "3",
+      "label": "Retail vendor - don’t know"
+     },
+     {
+      "value": "4",
+      "label": "Hotel - high-end"
+     },
+     {
+      "value": "5",
+      "label": "Hotel - both"
+     },
+     {
+      "value": "6",
+      "label": "Hotel - don’t know"
+     },
+     {
+      "value": "7",
+      "label": "Restaurant owner - high-end"
+     },
+     {
+      "value": "8",
+      "label": "Restaurant owner - low-end"
+     },
+     {
+      "value": "9",
+      "label": "Restaurant owner - don’t know"
+     },
+     {
+      "value": "10",
+      "label": "HH consumer"
+     },
+     {
+      "value": "11",
+      "label": "Pansaar"
+     },
+     {
+      "value": "12",
+      "label": "Other Specify"
+     }
+    ],
+    "age_groups": [
+     {
+      "value": "<20",
+      "label": "<20"
+     },
+     {
+      "value": "20-40",
+      "label": "20-40"
+     },
+     {
+      "value": "40-60",
+      "label": "40-60"
+     },
+     {
+      "value": "60+",
+      "label": "60+"
+     }
+    ],
+    "socio_economic": [
+     {
+      "value": "1",
+      "label": "High SES"
+     },
+     {
+      "value": "2",
+      "label": "Medium SES"
+     },
+     {
+      "value": "3",
+      "label": "Low SES"
+     }
+    ],
+    "consumers_from": [
+     {
+      "value": "1",
+      "label": "Urban areas"
+     },
+     {
+      "value": "2",
+      "label": "Rural areas"
+     },
+     {
+      "value": "3",
+      "label": "Both"
+     }
+    ],
+    "Which_market": [
+     {
+      "value": "1",
+      "label": "Wholesale market"
+     },
+     {
+      "value": "2",
+      "label": "Retail market"
+     },
+     {
+      "value": "3",
+      "label": "Supermarket"
+     },
+     {
+      "value": "4",
+      "label": "Retail store"
+     }
+    ],
+    "turmeric_product": [
+     {
+      "value": "1",
+      "label": "Price"
+     },
+     {
+      "value": "2",
+      "label": "Origin"
+     },
+     {
+      "value": "3",
+      "label": "Proximity of store"
+     },
+     {
+      "value": "4",
+      "label": "Trust in vendor"
+     },
+     {
+      "value": "5",
+      "label": "Quality"
+     },
+     {
+      "value": "6",
+      "label": "Perceived Purity"
+     },
+     {
+      "value": "7",
+      "label": "Other"
+     }
+    ],
+    "products_may_impure": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Don’t know"
+     }
+    ],
+    "turmeric_sold": [
+     {
+      "value": "1",
+      "label": "Haven’t heard of it"
+     },
+     {
+      "value": "2",
+      "label": "Nonexistent/rare"
+     },
+     {
+      "value": "3",
+      "label": "Uncommon"
+     },
+     {
+      "value": "4",
+      "label": "Common"
+     },
+     {
+      "value": "5",
+      "label": "Very common/Ubiquitous"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "types_most_impure": [
+     {
+      "value": "1",
+      "label": "Packaged ground turmeric"
+     },
+     {
+      "value": "2",
+      "label": "Loose ground turmeric"
+     },
+     {
+      "value": "3",
+      "label": "Dried roots"
+     },
+     {
+      "value": "4",
+      "label": "Fresh roots"
+     },
+     {
+      "value": "5",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "6",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "food_items_mixed": [
+     {
+      "value": "1",
+      "label": "Chickpea flour"
+     },
+     {
+      "value": "2",
+      "label": "Rice flour"
+     },
+     {
+      "value": "3",
+      "label": "Spent turmeric"
+     },
+     {
+      "value": "4",
+      "label": "99 Other (specify)"
+     },
+     {
+      "value": "5",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "6",
+      "label": "-888. Refused to answer"
+     },
+     {
+      "value": "7",
+      "label": "None"
+     }
+    ],
+    "non-food_items": [
+     {
+      "value": "1",
+      "label": "Pigments"
+     },
+     {
+      "value": "2",
+      "label": "Lead/ lead chromate"
+     },
+     {
+      "value": "3",
+      "label": "Sawdust"
+     },
+     {
+      "value": "4",
+      "label": "Brickdust"
+     },
+     {
+      "value": "5",
+      "label": "99 Other (specify)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     },
+     {
+      "value": "8",
+      "label": "None"
+     }
+    ],
+    "dried_turmeric_impure": [
+     {
+      "value": "1",
+      "label": "Chickpea flour"
+     },
+     {
+      "value": "2",
+      "label": "Rice flour"
+     },
+     {
+      "value": "3",
+      "label": "Spent turmeric"
+     },
+     {
+      "value": "4",
+      "label": "99 Other (specify)"
+     },
+     {
+      "value": "5",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "6",
+      "label": "-888. Refused to answer"
+     },
+     {
+      "value": "7",
+      "label": "None"
+     }
+    ],
+    "mixed_dried_turmeric": [
+     {
+      "value": "1",
+      "label": "Pigments"
+     },
+     {
+      "value": "2",
+      "label": "Lead/ lead chromate"
+     },
+     {
+      "value": "3",
+      "label": "Sawdust"
+     },
+     {
+      "value": "4",
+      "label": "Brickdust"
+     },
+     {
+      "value": "5",
+      "label": "99 Other (specify)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     },
+     {
+      "value": "8",
+      "label": "None"
+     }
+    ],
+    "roots_adulterated": [
+     {
+      "value": "1",
+      "label": "1"
+     },
+     {
+      "value": "2",
+      "label": "2"
+     },
+     {
+      "value": "3",
+      "label": "3"
+     },
+     {
+      "value": "4",
+      "label": "4"
+     },
+     {
+      "value": "5",
+      "label": "5"
+     },
+     {
+      "value": "6",
+      "label": "6"
+     },
+     {
+      "value": "7",
+      "label": "None of the above"
+     }
+    ],
+    "turmeric_impure": [
+     {
+      "value": "1",
+      "label": "No concern"
+     },
+     {
+      "value": "2",
+      "label": "Low-level of concern"
+     },
+     {
+      "value": "3",
+      "label": "Moderate-level of concern"
+     },
+     {
+      "value": "4",
+      "label": "High-level of concern"
+     },
+     {
+      "value": "5",
+      "label": "Can't say"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "read_news_media_online": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "Don't read at all"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "go_on_social_media": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "Don't go on social media at all"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "Which_social_media": [
+     {
+      "value": "1",
+      "label": "Facebook"
+     },
+     {
+      "value": "2",
+      "label": "Instagram"
+     },
+     {
+      "value": "3",
+      "label": "Tiktok"
+     },
+     {
+      "value": "4",
+      "label": "WhatsApp"
+     },
+     {
+      "value": "5",
+      "label": "X"
+     },
+     {
+      "value": "6",
+      "label": "Other (specify)"
+     }
+    ],
+    "news_TV": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "radio": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "socioeconomic_status": [
+     {
+      "value": "1",
+      "label": "Upper"
+     },
+     {
+      "value": "2",
+      "label": "Middle"
+     },
+     {
+      "value": "3",
+      "label": "Low"
+     }
+    ],
+    "type_purchase_cooking": [
+     {
+      "value": "1",
+      "label": "1"
+     },
+     {
+      "value": "2",
+      "label": "2"
+     },
+     {
+      "value": "3",
+      "label": "3"
+     },
+     {
+      "value": "4",
+      "label": "4"
+     },
+     {
+      "value": "5",
+      "label": "5"
+     },
+     {
+      "value": "6",
+      "label": "6"
+     },
+     {
+      "value": "7",
+      "label": "None of the above"
+     }
+    ],
+    "purchase_most": [
+     {
+      "value": "1",
+      "label": "1"
+     },
+     {
+      "value": "2",
+      "label": "2"
+     },
+     {
+      "value": "3",
+      "label": "3"
+     },
+     {
+      "value": "4",
+      "label": "4"
+     },
+     {
+      "value": "5",
+      "label": "5"
+     },
+     {
+      "value": "6",
+      "label": "6"
+     }
+    ],
+    "Public_Places": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other Specify"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "listen_radio": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't listen at all"
+     },
+     {
+      "value": "7",
+      "label": "7-888. Refused to answer"
+     }
+    ],
+    "News_TV": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't watch at all"
+     },
+     {
+      "value": "7",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "polished_turmeric_root": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "7",
+      "label": "Refused to answer"
+     }
+    ],
+    "government_advisories": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "media_online": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "social_media": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "Watching-news_TV": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "WhatsApp": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "Listening_radio": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "Listening_podcasts": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "Talking_people": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "Talking_Officials": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     },
+     {
+      "value": "4",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "5",
+      "label": "-888. Refused to answer"
+     }
+    ],
+    "Quality_Appearance": [
+     {
+      "value": "1",
+      "label": "Exterior root color"
+     },
+     {
+      "value": "2",
+      "label": "Interior root color"
+     },
+     {
+      "value": "3",
+      "label": "Thickness of root"
+     },
+     {
+      "value": "4",
+      "label": "Length of root"
+     },
+     {
+      "value": "5",
+      "label": "Smooth"
+     },
+     {
+      "value": "6",
+      "label": "Insect-free"
+     },
+     {
+      "value": "7",
+      "label": "Damage-free"
+     },
+     {
+      "value": "8",
+      "label": "Smell"
+     },
+     {
+      "value": "9",
+      "label": "Taste"
+     }
+    ],
+    "Data_Collector": [
+     {
+      "value": "1",
+      "label": "Kashif Zikriya"
+     },
+     {
+      "value": "2",
+      "label": "Kahlid Huda"
+     },
+     {
+      "value": "3",
+      "label": "M. Suleman"
+     },
+     {
+      "value": "4",
+      "label": "Amir Hussain"
+     },
+     {
+      "value": "5",
+      "label": "Hassan Rajpoot"
+     },
+     {
+      "value": "6",
+      "label": "Safdar Ali"
+     },
+     {
+      "value": "7",
+      "label": "Abdul Halim"
+     },
+     {
+      "value": "8",
+      "label": "Shah Khalid"
+     },
+     {
+      "value": "9",
+      "label": "Sulaiman Khan"
+     },
+     {
+      "value": "10",
+      "label": "Shakeel"
+     },
+     {
+      "value": "11",
+      "label": "Ashfaq Ahmed"
+     },
+     {
+      "value": "12",
+      "label": "Fazil Shehzad"
+     }
+    ],
+    "months": [
+     {
+      "value": "1",
+      "label": "1 - 3 Months"
+     },
+     {
+      "value": "2",
+      "label": "4 - 6 Months"
+     },
+     {
+      "value": "3",
+      "label": "7 - 9 Months"
+     },
+     {
+      "value": "4",
+      "label": "10 - 12 Months"
+     }
+    ],
+    "Who_buy": [
+     {
+      "value": "1",
+      "label": "Wholesaler"
+     },
+     {
+      "value": "2",
+      "label": "Middle man/Broker"
+     },
+     {
+      "value": "3",
+      "label": "Other Retailer"
+     },
+     {
+      "value": "4",
+      "label": "Importer"
+     },
+     {
+      "value": "5",
+      "label": "Farmers"
+     },
+     {
+      "value": "6",
+      "label": "Processors"
+     },
+     {
+      "value": "7",
+      "label": "Other (please specify)"
+     }
+    ],
+    "sales_distribution_change": [
+     {
+      "value": "1",
+      "label": "Yes"
+     },
+     {
+      "value": "2",
+      "label": "No"
+     },
+     {
+      "value": "3",
+      "label": "Dont Know"
+     }
+    ],
+    "sales_distribution_described": [
+     {
+      "value": "1",
+      "label": "Fresh roots are only available in winter (November to February)"
+     },
+     {
+      "value": "2",
+      "label": "Turmeric (except fresh roots) is generally sold more in winter as compared to other seasons"
+     },
+     {
+      "value": "3",
+      "label": "Other (specify)"
+     }
+    ],
+    "month_name": [
+     {
+      "value": "1",
+      "label": "January"
+     },
+     {
+      "value": "2",
+      "label": "February"
+     },
+     {
+      "value": "3",
+      "label": "March"
+     },
+     {
+      "value": "4",
+      "label": "April"
+     },
+     {
+      "value": "5",
+      "label": "May"
+     },
+     {
+      "value": "6",
+      "label": "June"
+     },
+     {
+      "value": "7",
+      "label": "July"
+     },
+     {
+      "value": "8",
+      "label": "August"
+     },
+     {
+      "value": "9",
+      "label": "September"
+     },
+     {
+      "value": "10",
+      "label": "October"
+     },
+     {
+      "value": "11",
+      "label": "November"
+     },
+     {
+      "value": "12",
+      "label": "December"
+     }
+    ],
+    "choose_provider": [
+     {
+      "value": "1",
+      "label": "Good product quality provider"
+     },
+     {
+      "value": "2",
+      "label": "Lowest price provider"
+     },
+     {
+      "value": "3",
+      "label": "Provider who provides on loan"
+     },
+     {
+      "value": "4",
+      "label": "Provider who provides on deferred payment"
+     },
+     {
+      "value": "5",
+      "label": "Nearest provider"
+     },
+     {
+      "value": "6",
+      "label": "Other Specify"
+     }
+    ],
+    "get_information": [
+     {
+      "value": "1",
+      "label": "Other vendors in the market"
+     },
+     {
+      "value": "2",
+      "label": "Based on my experience in buying and selling"
+     },
+     {
+      "value": "3",
+      "label": "Government/Food Authority"
+     },
+     {
+      "value": "4",
+      "label": "TV"
+     },
+     {
+      "value": "5",
+      "label": "Newspaper ads"
+     },
+     {
+      "value": "6",
+      "label": "Social media (e.g., Facebook, WhatsApp groups, YouTube, etc.)"
+     },
+     {
+      "value": "7",
+      "label": "Health service providers"
+     },
+     {
+      "value": "8",
+      "label": "Radio"
+     },
+     {
+      "value": "9",
+      "label": "Posters in the market"
+     },
+     {
+      "value": "10",
+      "label": "Saw difference in color/smell/quality myself"
+     },
+     {
+      "value": "11",
+      "label": "Other (specify)"
+     }
+    ],
+    "visually_compares": [
+     {
+      "value": "1",
+      "label": "Check by rubbing turmeric on hand whether it sticks or not"
+     },
+     {
+      "value": "2",
+      "label": "Smell of the turmeric powder"
+     },
+     {
+      "value": "3",
+      "label": "Color of the powder"
+     },
+     {
+      "value": "4",
+      "label": "Taste on spot"
+     },
+     {
+      "value": "5",
+      "label": "Weight"
+     },
+     {
+      "value": "6",
+      "label": "Other Specify"
+     }
+    ],
+    "roots_visually_compare": [
+     {
+      "value": "1",
+      "label": "Pure roots are brighter in colour"
+     },
+     {
+      "value": "2",
+      "label": "Adulterated roots are brighter in colour"
+     },
+     {
+      "value": "3",
+      "label": "Adulterated roots leave a residue on the hand"
+     },
+     {
+      "value": "4",
+      "label": "Adulterated roots smell different"
+     },
+     {
+      "value": "5",
+      "label": "Adulterated roots taste different"
+     },
+     {
+      "value": "6",
+      "label": "Adulterated roots cost more"
+     },
+     {
+      "value": "7",
+      "label": "Adulterated roots cost less"
+     },
+     {
+      "value": "8",
+      "label": "Other (please specify)"
+     }
+    ],
+    "options_impure": [
+     {
+      "value": "1",
+      "label": "Color"
+     },
+     {
+      "value": "2",
+      "label": "Other Specify"
+     }
+    ],
+    "concerned": [
+     {
+      "value": "1",
+      "label": "No concern"
+     },
+     {
+      "value": "2",
+      "label": "Low-level of concern"
+     },
+     {
+      "value": "3",
+      "label": "Moderate-level of concern"
+     },
+     {
+      "value": "4",
+      "label": "High-level of concern"
+     }
+    ],
+    "avoid_lead_exposure": [
+     {
+      "value": "1",
+      "label": "Avoid consuming dried turmeric roots, opt for other forms of turmeric like packaged powder, loose powder or fresh roots"
+     },
+     {
+      "value": "2",
+      "label": "Avoid consuming bright turmeric roots, opt for dull looking ones"
+     },
+     {
+      "value": "3",
+      "label": "Any other response (specify)"
+     }
+    ],
+    "store_visit": [
+     {
+      "value": "1",
+      "label": "To talk about lead adulteration"
+     },
+     {
+      "value": "2",
+      "label": "To issue a written warning about lead adulteration"
+     },
+     {
+      "value": "3",
+      "label": "Other (please specify)"
+     }
+    ],
+    "Survey_assessment": [
+     {
+      "value": "1",
+      "label": "Very uncomfortable: they asked many questions about our connection to the food authorities and refused to give answers"
+     },
+     {
+      "value": "2",
+      "label": "Somewhat uncomfortable: they asked a few questions and hesitated before giving answers"
+     },
+     {
+      "value": "3",
+      "label": "Neutral"
+     },
+     {
+      "value": "4",
+      "label": "Comfortable: no concerns raised or reluctance to give information"
+     }
+    ],
+    "primary_occupation": [
+     {
+      "value": "1",
+      "label": "Spice trader or vendor (owner or employee)"
+     },
+     {
+      "value": "2",
+      "label": "Pansaar owner or employee"
+     },
+     {
+      "value": "3",
+      "label": "Confectionary shop owner or employee"
+     },
+     {
+      "value": "4",
+      "label": "Restaurant owner or employee"
+     },
+     {
+      "value": "5",
+      "label": "Other food business owner or employee (please specify)"
+     },
+     {
+      "value": "6",
+      "label": "Housewife"
+     },
+     {
+      "value": "7",
+      "label": "All other occupations (non-food related)"
+     }
+    ],
+    "sell_to": [
+     {
+      "value": "1",
+      "label": "A high-end hotel"
+     },
+     {
+      "value": "2",
+      "label": "Rural consumers"
+     },
+     {
+      "value": "3",
+      "label": "Both"
+     }
+    ],
+    "Do_you_run": [
+     {
+      "value": "1",
+      "label": "A high-end hotel"
+     },
+     {
+      "value": "2",
+      "label": "A low-end hotel"
+     },
+     {
+      "value": "3",
+      "label": "Both"
+     }
+    ],
+    "market_called": [
+     {
+      "value": "1",
+      "label": "Jodia Bazar"
+     },
+     {
+      "value": "2",
+      "label": "Empress Market"
+     },
+     {
+      "value": "3",
+      "label": "Babar Market"
+     },
+     {
+      "value": "4",
+      "label": "Nazimabad/Lalookhet Market"
+     },
+     {
+      "value": "5",
+      "label": "Banaras Market"
+     },
+     {
+      "value": "6",
+      "label": "Burns road market"
+     },
+     {
+      "value": "7",
+      "label": "Tower Market"
+     },
+     {
+      "value": "8",
+      "label": "Faqir Ka Pir Bazar"
+     },
+     {
+      "value": "9",
+      "label": "Tando Jam"
+     },
+     {
+      "value": "10",
+      "label": "Other specify"
+     }
+    ],
+    "Get_information": [
+     {
+      "value": "1",
+      "label": "Other vendors in the market"
+     },
+     {
+      "value": "2",
+      "label": "Based on my experience in buying and selling"
+     },
+     {
+      "value": "3",
+      "label": "Government/Food Authority"
+     },
+     {
+      "value": "4",
+      "label": "TV"
+     },
+     {
+      "value": "5",
+      "label": "Newspaper ads"
+     },
+     {
+      "value": "6",
+      "label": "Social media (e.g., Facebook, WhatsApp groups, YouTube, etc.)"
+     },
+     {
+      "value": "7",
+      "label": "Health service providers"
+     },
+     {
+      "value": "8",
+      "label": "Radio"
+     },
+     {
+      "value": "9",
+      "label": "Posters in the market"
+     },
+     {
+      "value": "10",
+      "label": "Saw difference in color/smell/quality myself"
+     },
+     {
+      "value": "11",
+      "label": "Other (specify)"
+     }
+    ],
+    "turmeric_visually_compares": [
+     {
+      "value": "1",
+      "label": "Color"
+     },
+     {
+      "value": "2",
+      "label": "Check by rubbing turmeric on hand if it leaves color on the hand or not"
+     },
+     {
+      "value": "3",
+      "label": "Smell"
+     },
+     {
+      "value": "4",
+      "label": "Taste on spot"
+     },
+     {
+      "value": "5",
+      "label": "Weight"
+     },
+     {
+      "value": "6",
+      "label": "Other Specify"
+     }
+    ],
+    "accounts_follow": [
+     {
+      "value": "1",
+      "label": "Buy & Sell / Marketplace Groups"
+     },
+     {
+      "value": "2",
+      "label": "Community / City-Based Groups"
+     },
+     {
+      "value": "3",
+      "label": "Education & Jobs Groups"
+     },
+     {
+      "value": "4",
+      "label": "Health & Wellness Groups"
+     },
+     {
+      "value": "5",
+      "label": "Women’s Groups"
+     },
+     {
+      "value": "6",
+      "label": "Cooking Groups"
+     },
+     {
+      "value": "7",
+      "label": "Business & Freelancing Groups"
+     },
+     {
+      "value": "8",
+      "label": "Retailers Groups"
+     },
+     {
+      "value": "9",
+      "label": "Wholesalers"
+     },
+     {
+      "value": "10",
+      "label": "Political Discussion Groups"
+     },
+     {
+      "value": "11",
+      "label": "Religious / Islamic Learning Groups"
+     },
+     {
+      "value": "12",
+      "label": "Hobby / Lifestyle Groups"
+     },
+     {
+      "value": "13",
+      "label": "Student & University Groups"
+     },
+     {
+      "value": "14",
+      "label": "Sports Groups"
+     },
+     {
+      "value": "15",
+      "label": "Movies/Drama Groups"
+     },
+     {
+      "value": "16",
+      "label": "Agriculture"
+     },
+     {
+      "value": "17",
+      "label": "Travel Vlogs"
+     },
+     {
+      "value": "18",
+      "label": "Other Specify"
+     }
+    ],
+    "morning_shows": [
+     {
+      "value": "1",
+      "label": "Daily or most days"
+     },
+     {
+      "value": "2",
+      "label": "Weekly"
+     },
+     {
+      "value": "3",
+      "label": "Monthly"
+     },
+     {
+      "value": "4",
+      "label": "Occasionally (4-11 times/year)"
+     },
+     {
+      "value": "5",
+      "label": "Rarely (3 times or less in a year)"
+     },
+     {
+      "value": "6",
+      "label": "Don't watch at all"
+     },
+     {
+      "value": "7",
+      "label": "Refused to answer"
+     }
+    ],
+    "News": [
+     {
+      "value": "1",
+      "label": "Express news"
+     },
+     {
+      "value": "2",
+      "label": "Sama news"
+     },
+     {
+      "value": "3",
+      "label": "ARY News"
+     },
+     {
+      "value": "4",
+      "label": "Geo News"
+     },
+     {
+      "value": "5",
+      "label": "Dawn News"
+     },
+     {
+      "value": "6",
+      "label": "Dunia News"
+     },
+     {
+      "value": "7",
+      "label": "92 News"
+     },
+     {
+      "value": "8",
+      "label": "Bol News"
+     },
+     {
+      "value": "9",
+      "label": "KTN News"
+     },
+     {
+      "value": "10",
+      "label": "Sindh TV News"
+     },
+     {
+      "value": "11",
+      "label": "News"
+     },
+     {
+      "value": "12",
+      "label": "WTN News"
+     },
+     {
+      "value": "13",
+      "label": "Other Specify"
+     }
+    ],
+    "listen_radio_most": [
+     {
+      "value": "1",
+      "label": "Morning"
+     },
+     {
+      "value": "2",
+      "label": "Afternoon"
+     },
+     {
+      "value": "3",
+      "label": "Evening"
+     },
+     {
+      "value": "4",
+      "label": "Night (8-10PM)"
+     },
+     {
+      "value": "5",
+      "label": "Night (After 10PM)"
+     }
+    ],
+    "stations": [
+     {
+      "value": "1",
+      "label": "91"
+     },
+     {
+      "value": "2",
+      "label": "92"
+     },
+     {
+      "value": "3",
+      "label": "5"
+     },
+     {
+      "value": "4",
+      "label": "94"
+     },
+     {
+      "value": "5",
+      "label": "6"
+     },
+     {
+      "value": "6",
+      "label": "99"
+     },
+     {
+      "value": "7",
+      "label": "100"
+     },
+     {
+      "value": "8",
+      "label": "101"
+     },
+     {
+      "value": "9",
+      "label": "103"
+     },
+     {
+      "value": "10",
+      "label": "105"
+     },
+     {
+      "value": "11",
+      "label": "107"
+     },
+     {
+      "value": "12",
+      "label": "6"
+     },
+     {
+      "value": "13",
+      "label": "Other Specify"
+     }
+    ],
+    "concerned_exposure_children": [
+     {
+      "value": "1",
+      "label": "No concern"
+     },
+     {
+      "value": "2",
+      "label": "Low-level of concern"
+     },
+     {
+      "value": "3",
+      "label": "Moderate-level of concern"
+     },
+     {
+      "value": "4",
+      "label": "High-level of concern"
+     }
+    ],
+    "avoid_exposure": [
+     {
+      "value": "1",
+      "label": "Avoid consuming dried turmeric roots, opt for other forms of turmeric like packaged powder, loose powder or fresh roots"
+     },
+     {
+      "value": "2",
+      "label": "Avoid consuming bright turmeric roots, opt for dull looking ones"
+     },
+     {
+      "value": "3",
+      "label": "Any other response (specify)"
+     }
+    ],
+    "times_of_the_day": [
+     {
+      "value": "1",
+      "label": "Morning"
+     },
+     {
+      "value": "2",
+      "label": "Afternoon"
+     },
+     {
+      "value": "3",
+      "label": "Evening"
+     },
+     {
+      "value": "4",
+      "label": "Night (8-10PM)"
+     },
+     {
+      "value": "5",
+      "label": "Night (After 10PM)"
+     }
+    ],
+    "turmeric_types": [
+     {
+      "value": "1",
+      "label": "Packaged branded powders"
+     },
+     {
+      "value": "2",
+      "label": "Packaged unbranded powders"
+     },
+     {
+      "value": "3",
+      "label": "Loose powders"
+     },
+     {
+      "value": "4",
+      "label": "Whole dried roots"
+     },
+     {
+      "value": "5",
+      "label": "Fresh roots"
+     }
+    ],
+    "status_survey": [
+     {
+      "value": "1",
+      "label": "Completed"
+     },
+     {
+      "value": "2",
+      "label": "Partial Complete"
+     },
+     {
+      "value": "3",
+      "label": "Refused because of time"
+     },
+     {
+      "value": "4",
+      "label": "Refused because of lack of interest"
+     },
+     {
+      "value": "5",
+      "label": "Refused because of lack of trust"
+     },
+     {
+      "value": "6",
+      "label": "Refused because of other reasons"
+     },
+     {
+      "value": "7",
+      "label": "Unit was locked/empty"
+     },
+     {
+      "value": "8",
+      "label": "Appointment"
+     }
+    ],
+    "remember": [
+     {
+      "value": "1",
+      "label": "Lead is bad for children’s health and brain development"
+     },
+     {
+      "value": "2",
+      "label": "Whole dried turmeric sometimes contains lead"
+     },
+     {
+      "value": "3",
+      "label": "The brightness/ yellowness of turmeric is not a signal of its quality"
+     },
+     {
+      "value": "4",
+      "label": "Other (specify)"
+     }
+    ],
+    "message_from": [
+     {
+      "value": "1",
+      "label": "Sarwat Gilani"
+     },
+     {
+      "value": "2",
+      "label": "Sindh Food Authority"
+     },
+     {
+      "value": "3",
+      "label": "Animated ad on TV"
+     },
+     {
+      "value": "4",
+      "label": "Morning show host"
+     },
+     {
+      "value": "5",
+      "label": "Do not remember"
+     }
+    ],
+    "times_see": [
+     {
+      "value": "1",
+      "label": "<5 times"
+     },
+     {
+      "value": "2",
+      "label": "5-10 times"
+     },
+     {
+      "value": "3",
+      "label": "> 10 times"
+     },
+     {
+      "value": "4",
+      "label": "Do not remember"
+     }
+    ],
+    "message": [
+     {
+      "value": "1",
+      "label": "Very useful"
+     },
+     {
+      "value": "2",
+      "label": "Mildly useful"
+     },
+     {
+      "value": "3",
+      "label": "Neither useful nor unhelpful"
+     },
+     {
+      "value": "4",
+      "label": "Mildly unhelpful"
+     },
+     {
+      "value": "5",
+      "label": "Very unhelpful"
+     }
+    ]
+   },
+   "source_file": "Awareness Survey Follow-up 202607.xlsx"
+  },
+  "turmeric": {
+   "questions": {
+    "starttime": {
+     "name": "starttime",
+     "type": "start",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "endtime": {
+     "name": "endtime",
+     "type": "end",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "deviceid": {
+     "name": "deviceid",
+     "type": "deviceid",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "subscriberid": {
+     "name": "subscriberid",
+     "type": "subscriberid",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "simid": {
+     "name": "simid",
+     "type": "simserial",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "devicephonenum": {
+     "name": "devicephonenum",
+     "type": "phonenumber",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "username": {
+     "name": "username",
+     "type": "username",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "duration": {
+     "name": "duration",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "caseid": {
+     "name": "caseid",
+     "type": "caseid",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "text_audit_file": {
+     "name": "text_audit_file",
+     "type": "text audit",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "quiet_perc": {
+     "name": "quiet_perc",
+     "type": "sensor_stream conversation",
+     "label": "",
+     "raw_label": "",
+     "group": [],
+     "appearance": "period=#"
+    },
+    "date": {
+     "name": "date",
+     "type": "date",
+     "label": "Date",
+     "raw_label": "Date",
+     "group": [],
+     "required": true,
+     "constraint": ". <= today()",
+     "appearance": "background"
+    },
+    "time": {
+     "name": "time",
+     "type": "time",
+     "label": "Time of the survey",
+     "raw_label": "Time of the survey",
+     "group": [],
+     "required": true,
+     "appearance": "background"
+    },
+    "enum_name": {
+     "name": "enum_name",
+     "type": "select_one",
+     "label": "Conducted by (enumerator)",
+     "raw_label": "Conducted by (enumerator)",
+     "group": [],
+     "list_name": "enum_name",
+     "required": true
+    },
+    "enum_other": {
+     "name": "enum_other",
+     "type": "text",
+     "label": "Please specify enumerator name",
+     "raw_label": "Please specify enumerator name",
+     "group": [],
+     "relevance": "${enum_name}='777'",
+     "required": true
+    },
+    "vendor_id": {
+     "name": "vendor_id",
+     "type": "text",
+     "label": "Vendor ID",
+     "raw_label": "Vendor ID",
+     "group": [],
+     "required": true,
+     "constraint": "string-length(.)=4",
+     "appearance": "numbers"
+    },
+    "sample_city": {
+     "name": "sample_city",
+     "type": "select_one",
+     "label": "City Name",
+     "raw_label": "City Name",
+     "group": [],
+     "list_name": "city_sample"
+    },
+    "enum_label": {
+     "name": "enum_label",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": []
+    },
+    "market_name": {
+     "name": "market_name",
+     "type": "select_one",
+     "label": "Market Type",
+     "raw_label": "Market Type",
+     "group": [],
+     "list_name": "market",
+     "required": true
+    },
+    "locality_retail": {
+     "name": "locality_retail",
+     "type": "select_one",
+     "label": "Locality of Retail Market",
+     "raw_label": "Locality of Retail Market",
+     "group": [],
+     "list_name": "retail_market",
+     "relevance": "${market_name}=2",
+     "required": true
+    },
+    "wholesale_market": {
+     "name": "wholesale_market",
+     "type": "select_one",
+     "label": "Wholesake Market Name",
+     "raw_label": "Wholesake Market Name",
+     "group": [],
+     "list_name": "market_place",
+     "relevance": "${market_name}=1",
+     "required": true
+    },
+    "vendor_name": {
+     "name": "vendor_name",
+     "type": "text",
+     "label": "Vendor/Shop Name",
+     "raw_label": "Vendor/Shop Name",
+     "group": [],
+     "required": true
+    },
+    "shop_sample_type": {
+     "name": "shop_sample_type",
+     "type": "select_multiple",
+     "label": "which type(s) of turmeric the shop sells?",
+     "raw_label": "which type(s) of turmeric the shop sells?",
+     "group": [],
+     "list_name": "sample_type",
+     "required": true
+    },
+    "collected_sample_type": {
+     "name": "collected_sample_type",
+     "type": "select_multiple",
+     "label": "Which type(s) of turmeric did you collect from this shop?",
+     "raw_label": "Which type(s) of turmeric did you collect from this shop?",
+     "group": [],
+     "list_name": "sample_type",
+     "required": true
+    },
+    "gps": {
+     "name": "gps",
+     "type": "geopoint",
+     "label": "GPS location of market",
+     "raw_label": "GPS location of market",
+     "group": [],
+     "required": true
+    },
+    "size_of_shop": {
+     "name": "size_of_shop",
+     "type": "select_one",
+     "label": "Size of Shop",
+     "raw_label": "Size of Shop",
+     "group": [],
+     "list_name": "size_shop",
+     "required": true
+    },
+    "current_sample_type": {
+     "name": "current_sample_type",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": [
+      "sample_type_details"
+     ]
+    },
+    "current_sample_type_label": {
+     "name": "current_sample_type_label",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": [
+      "sample_type_details"
+     ]
+    },
+    "current_type_note": {
+     "name": "current_type_note",
+     "type": "note",
+     "label": "Selected Turmeric Type: ${current_sample_type_label}",
+     "raw_label": "Selected Turmeric Type: ${current_sample_type_label}",
+     "group": [
+      "sample_type_details"
+     ]
+    },
+    "total_samples_collect": {
+     "name": "total_samples_collect",
+     "type": "integer",
+     "label": "Total Samples collected for this type",
+     "raw_label": "Total Samples collected for this type",
+     "group": [
+      "sample_type_details"
+     ],
+     "required": true,
+     "constraint": ". > 0"
+    },
+    "sample_type_2": {
+     "name": "sample_type_2",
+     "type": "select_one",
+     "label": "Basis of sample selection",
+     "raw_label": "Basis of sample selection",
+     "group": [
+      "sample_type_details",
+      "samples_detail"
+     ],
+     "list_name": "sample_type_2",
+     "required": true
+    },
+    "price_sample": {
+     "name": "price_sample",
+     "type": "integer",
+     "label": "Price of this sample (quantity purchased)",
+     "raw_label": "Price of this sample (quantity purchased)",
+     "group": [
+      "sample_type_details",
+      "samples_detail"
+     ],
+     "required": true,
+     "constraint": ". > 0",
+     "appearance": "show_formatted"
+    },
+    "quantity_smaple": {
+     "name": "quantity_smaple",
+     "type": "integer",
+     "label": "Quantity of the sample Collected(Grams)",
+     "raw_label": "Quantity of the sample Collected(Grams)",
+     "group": [
+      "sample_type_details",
+      "samples_detail"
+     ],
+     "required": true,
+     "constraint": ". > 0"
+    },
+    "label_sample": {
+     "name": "label_sample",
+     "type": "note",
+     "label": "Label to be written on sample ${vendor_id}_${current_sample_type}_${sample_type_2}",
+     "raw_label": "Label to be written on sample ${vendor_id}_${current_sample_type}_${sample_type_2}",
+     "group": [
+      "sample_type_details",
+      "samples_detail"
+     ]
+    },
+    "picture_sample": {
+     "name": "picture_sample",
+     "type": "image",
+     "label": "Picture of Sample",
+     "raw_label": "Picture of Sample",
+     "group": [
+      "sample_type_details",
+      "samples_detail"
+     ],
+     "required": true
+    },
+    "survey_status": {
+     "name": "survey_status",
+     "type": "select_one",
+     "label": "Survey status",
+     "raw_label": "Survey status",
+     "group": [],
+     "list_name": "status_survey",
+     "required": true
+    }
+   },
+   "order": [
+    "starttime",
+    "endtime",
+    "deviceid",
+    "subscriberid",
+    "simid",
+    "devicephonenum",
+    "username",
+    "duration",
+    "caseid",
+    "text_audit_file",
+    "quiet_perc",
+    "date",
+    "time",
+    "enum_name",
+    "enum_other",
+    "vendor_id",
+    "sample_city",
+    "enum_label",
+    "market_name",
+    "locality_retail",
+    "wholesale_market",
+    "vendor_name",
+    "shop_sample_type",
+    "collected_sample_type",
+    "gps",
+    "size_of_shop",
+    "current_sample_type",
+    "current_sample_type_label",
+    "current_type_note",
+    "total_samples_collect",
+    "sample_type_2",
+    "price_sample",
+    "quantity_smaple",
+    "label_sample",
+    "picture_sample",
+    "survey_status"
+   ],
+   "choices": {
+    "enum_name": [
+     {
+      "value": "120",
+      "label": "Kashif Zikriya"
+     },
+     {
+      "value": "121",
+      "label": "Kahlid Huda"
+     },
+     {
+      "value": "122",
+      "label": "M. Suleman"
+     },
+     {
+      "value": "123",
+      "label": "Amir Hussain"
+     },
+     {
+      "value": "124",
+      "label": "Hassan Rajpoot"
+     },
+     {
+      "value": "125",
+      "label": "Safdar Ali"
+     },
+     {
+      "value": "126",
+      "label": "Abdul Halim"
+     },
+     {
+      "value": "127",
+      "label": "Shah Khalid"
+     },
+     {
+      "value": "128",
+      "label": "Sulaiman Khan"
+     },
+     {
+      "value": "129",
+      "label": "Shakeel"
+     },
+     {
+      "value": "130",
+      "label": "Ashfaq Ahmed"
+     },
+     {
+      "value": "131",
+      "label": "Fazil Shehzad"
+     },
+     {
+      "value": "132",
+      "label": "M. Khalil Khan"
+     },
+     {
+      "value": "133",
+      "label": "Habib Ullah"
+     },
+     {
+      "value": "134",
+      "label": "Talha"
+     },
+     {
+      "value": "135",
+      "label": "Jarrar"
+     },
+     {
+      "value": "136",
+      "label": "M. Shehzad"
+     },
+     {
+      "value": "777",
+      "label": "Other"
+     }
+    ],
+    "status_survey": [
+     {
+      "value": "1",
+      "label": "Completed"
+     },
+     {
+      "value": "2",
+      "label": "Partial Complete"
+     },
+     {
+      "value": "3",
+      "label": "Refused because of time"
+     },
+     {
+      "value": "4",
+      "label": "Refused because of lack of interest"
+     },
+     {
+      "value": "5",
+      "label": "Refused because of lack of trust"
+     },
+     {
+      "value": "6",
+      "label": "Refused because of other reasons"
+     },
+     {
+      "value": "7",
+      "label": "Unit was locked/empty"
+     },
+     {
+      "value": "8",
+      "label": "Appointment"
+     },
+     {
+      "value": "9",
+      "label": "Criteria not met"
+     },
+     {
+      "value": "10",
+      "label": "Decision maker not available"
+     }
+    ],
+    "market": [
+     {
+      "value": "1",
+      "label": "Wholesale Market"
+     },
+     {
+      "value": "2",
+      "label": "Retail Market"
+     }
+    ],
+    "city_sample": [
+     {
+      "value": "1",
+      "label": "Karachi"
+     },
+     {
+      "value": "2",
+      "label": "Hyderabad"
+     },
+     {
+      "value": "3",
+      "label": "Peshawar"
+     },
+     {
+      "value": "4",
+      "label": "Islamabad"
+     },
+     {
+      "value": "5",
+      "label": "Rawalpindi"
+     },
+     {
+      "value": "6",
+      "label": "Quetta"
+     },
+     {
+      "value": "7",
+      "label": "Lahore"
+     },
+     {
+      "value": "8",
+      "label": "Faisalabad"
+     },
+     {
+      "value": "9",
+      "label": "Multan"
+     },
+     {
+      "value": "10",
+      "label": "Gujranwala"
+     }
+    ],
+    "sample_type": [
+     {
+      "value": "1",
+      "label": "Whole dried roots",
+      "filter": "1"
+     },
+     {
+      "value": "2",
+      "label": "Loose powders",
+      "filter": "2"
+     },
+     {
+      "value": "3",
+      "label": "Packaged unbranded powers",
+      "filter": "3"
+     },
+     {
+      "value": "4",
+      "label": "Packaged branded powders",
+      "filter": "4"
+     }
+    ],
+    "sample_type_2": [
+     {
+      "value": "1",
+      "label": "Recommended by vendor/shopkeeper"
+     },
+     {
+      "value": "2",
+      "label": "Looking Bright/Shiny"
+     },
+     {
+      "value": "3",
+      "label": "Recommended & Bright"
+     },
+     {
+      "value": "4",
+      "label": "others"
+     }
+    ],
+    "size_shop": [
+     {
+      "value": "1",
+      "label": "Small"
+     },
+     {
+      "value": "2",
+      "label": "Medium"
+     },
+     {
+      "value": "3",
+      "label": "Large"
+     }
+    ],
+    "market_place": [
+     {
+      "value": "1",
+      "label": "Jodia Bazaar",
+      "city": "1"
+     },
+     {
+      "value": "2",
+      "label": "Banasari Bazaar",
+      "city": "1"
+     },
+     {
+      "value": "3",
+      "label": "Tower Market",
+      "city": "2"
+     },
+     {
+      "value": "4",
+      "label": "Pepal Mandi",
+      "city": "3"
+     },
+     {
+      "value": "5",
+      "label": "G-9 Parachi Company",
+      "city": "4"
+     },
+     {
+      "value": "6",
+      "label": "Akbari Mandi",
+      "city": "7"
+     },
+     {
+      "value": "7",
+      "label": "New Grain Market",
+      "city": "8"
+     },
+     {
+      "value": "8",
+      "label": "Raja Bazaar",
+      "city": "5"
+     },
+     {
+      "value": "9",
+      "label": "Old Town Market",
+      "city": "10"
+     },
+     {
+      "value": "10",
+      "label": "Ghalla Mandi",
+      "city": "9"
+     },
+     {
+      "value": "11",
+      "label": "Hashmi Market",
+      "city": "6"
+     },
+     {
+      "value": "12",
+      "label": "Liaquat Market",
+      "city": "6"
+     },
+     {
+      "value": "13",
+      "label": "Quazafi Market",
+      "city": "6"
+     }
+    ],
+    "retail_market": [
+     {
+      "value": "1",
+      "label": "Phase 5 DHA Khadda market",
+      "city": "1"
+     },
+     {
+      "value": "2",
+      "label": "PECHS/Tariq Road/Bahadurabad side",
+      "city": "1"
+     },
+     {
+      "value": "3",
+      "label": "Jodia bazar/Empres Market",
+      "city": "1"
+     },
+     {
+      "value": "4",
+      "label": "Landhi Babar Market or Banaras Ali garh market orangi",
+      "city": "1"
+     },
+     {
+      "value": "5",
+      "label": "autoban road nearby shops",
+      "city": "2"
+     },
+     {
+      "value": "6",
+      "label": "Nashtar Colony",
+      "city": "2"
+     },
+     {
+      "value": "7",
+      "label": "faqir ka pir bazar",
+      "city": "2"
+     },
+     {
+      "value": "8",
+      "label": "tower market retails side shops",
+      "city": "2"
+     },
+     {
+      "value": "9",
+      "label": "Landi Sarak Charsada Road",
+      "city": "3"
+     },
+     {
+      "value": "10",
+      "label": "Hayatabad shops",
+      "city": "3"
+     },
+     {
+      "value": "11",
+      "label": "Board Bazar",
+      "city": "3"
+     },
+     {
+      "value": "12",
+      "label": "Pipal mandi",
+      "city": "3"
+     },
+     {
+      "value": "13",
+      "label": "DHA Y block",
+      "city": "7"
+     },
+     {
+      "value": "14",
+      "label": "Johar Town",
+      "city": "7"
+     },
+     {
+      "value": "15",
+      "label": "Yateem Khana",
+      "city": "7"
+     },
+     {
+      "value": "16",
+      "label": "Akbar Mandi wholesale and retail both shops are near by",
+      "city": "7"
+     },
+     {
+      "value": "17",
+      "label": "Dullay Jinnah Road",
+      "city": "10"
+     },
+     {
+      "value": "18",
+      "label": "Garjakh",
+      "city": "10"
+     },
+     {
+      "value": "19",
+      "label": "Muhllaha Islamabad",
+      "city": "10"
+     },
+     {
+      "value": "20",
+      "label": "Guru Nank Pura",
+      "city": "10"
+     },
+     {
+      "value": "21",
+      "label": "Burma Hotel Saryab Road",
+      "city": "6"
+     },
+     {
+      "value": "22",
+      "label": "Wahdat Colony Brewery Road",
+      "city": "6"
+     },
+     {
+      "value": "23",
+      "label": "Mini Market Settelite Town",
+      "city": "6"
+     },
+     {
+      "value": "24",
+      "label": "Main Bazar Area Jinnah Road",
+      "city": "6"
+     },
+     {
+      "value": "25",
+      "label": "Gulgusht Colony",
+      "city": "9"
+     },
+     {
+      "value": "26",
+      "label": "Shah Rukn e Alam",
+      "city": "9"
+     },
+     {
+      "value": "27",
+      "label": "Mumtaz Abad",
+      "city": "9"
+     },
+     {
+      "value": "28",
+      "label": "Farooq Pura",
+      "city": "9"
+     },
+     {
+      "value": "29",
+      "label": "Ghouri Town",
+      "city": "4"
+     },
+     {
+      "value": "30",
+      "label": "Khanna Pull",
+      "city": "4"
+     },
+     {
+      "value": "31",
+      "label": "Lathrar Road Tramri",
+      "city": "4"
+     },
+     {
+      "value": "32",
+      "label": "Sudran",
+      "city": "4"
+     },
+     {
+      "value": "33",
+      "label": "Iqbal Town",
+      "city": "5"
+     },
+     {
+      "value": "34",
+      "label": "Quri Road",
+      "city": "5"
+     },
+     {
+      "value": "35",
+      "label": "Sadiq Abad",
+      "city": "5"
+     },
+     {
+      "value": "36",
+      "label": "Airport Society",
+      "city": "5"
+     },
+     {
+      "value": "37",
+      "label": "Ghulam Muhamad Abad",
+      "city": "8"
+     },
+     {
+      "value": "38",
+      "label": "Wali Pura",
+      "city": "8"
+     },
+     {
+      "value": "39",
+      "label": "Marzi Pura",
+      "city": "8"
+     },
+     {
+      "value": "40",
+      "label": "Sultan Town",
+      "city": "8"
+     }
+    ]
+   },
+   "source_file": "turmeric_sampling_survey.xlsx"
+  }
+ }
+}

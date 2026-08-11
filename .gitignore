@@ -1,0 +1,34 @@
+# ---------------------------------------------------------------
+#  Raw survey exports NEVER go to the repository.
+#  They carry vendor names, GPS fixes and respondent-level answers,
+#  and this repository is public so GitHub Pages can serve it.
+#  Only data/dashboard_data.js (encrypted) is published.
+# ---------------------------------------------------------------
+data_in/**/*.csv
+data_in/**/*.xlsx
+data_in/**/*.xls
+data_in/**/*.dta
+data_in/**/*.sav
+media/
+attachments/
+
+# Never commit an unencrypted build
+data/dashboard_data.plain.js
+*.plain.js
+
+logs/
+*.log
+
+# Office lock files
+~$*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
