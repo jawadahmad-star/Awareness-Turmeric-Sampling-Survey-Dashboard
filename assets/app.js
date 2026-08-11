@@ -1015,8 +1015,10 @@ function showPanel(id, btn) {
 function buildNavSelect() {
   const sel = document.getElementById('navSelect');
   if (!sel) return;
+  // Tabs carry a shortened caption so they fit a laptop; the picker has room
+  // for the full section name, so it uses data-full where present.
   sel.innerHTML = [...document.querySelectorAll('.nav-tab')].map((b, i) =>
-    `<option value="${esc(b.dataset.panel)}">${i + 1}. ${esc(b.textContent.trim())}</option>`).join('');
+    `<option value="${esc(b.dataset.panel)}">${i + 1}. ${esc(b.dataset.full || b.textContent.trim())}</option>`).join('');
   sel.value = currentPanel;
   sel.onchange = () => showPanel(sel.value);
 }
