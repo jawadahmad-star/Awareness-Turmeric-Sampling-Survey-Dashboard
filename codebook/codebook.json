@@ -2,12 +2,20 @@
  "forms": {
   "awareness": {
    "questions": {
-    "ta_meta": {
-     "name": "ta_meta",
+    "text_audit_file": {
+     "name": "text_audit_file",
      "type": "text audit",
      "label": "",
      "raw_label": "",
      "group": []
+    },
+    "quiet_perc": {
+     "name": "quiet_perc",
+     "type": "sensor_stream conversation",
+     "label": "",
+     "raw_label": "",
+     "group": [],
+     "appearance": "period=#"
     },
     "From_ID": {
      "name": "From_ID",
@@ -15,7 +23,9 @@
      "label": "Form ID",
      "raw_label": "Form ID",
      "group": [],
-     "required": true
+     "required": true,
+     "constraint": "string-length(.)=4",
+     "appearance": "numbers"
     },
     "Consent_Form": {
      "name": "Consent_Form",
@@ -108,6 +118,13 @@
      "relevance": "selected(${Consent}, '1')",
      "required": true,
      "appearance": "signature"
+    },
+    "geo_2": {
+     "name": "geo_2",
+     "type": "geopoint",
+     "label": "GPS",
+     "raw_label": "GPS",
+     "group": []
     },
     "Data_Collector": {
      "name": "Data_Collector",
@@ -1984,7 +2001,8 @@
     }
    },
    "order": [
-    "ta_meta",
+    "text_audit_file",
+    "quiet_perc",
     "From_ID",
     "Consent_Form",
     "Consent",
@@ -1998,6 +2016,7 @@
     "duration",
     "caseid",
     "Signature",
+    "geo_2",
     "Data_Collector",
     "city",
     "market_name",
@@ -2548,27 +2567,33 @@
     "market_name": [
      {
       "value": "EMK",
-      "label": "Empress Market (South)-Karachi"
+      "label": "Empress Market (South)-Karachi",
+      "filter": "1"
      },
      {
       "value": "BMK",
-      "label": "Babar Market (Korangi-Landhi)-Karachi"
+      "label": "Babar Market (Korangi-Landhi)-Karachi",
+      "filter": "1"
      },
      {
       "value": "FKPBH",
-      "label": "Faqir Ka Pir Bazar-Hyderabad"
+      "label": "Faqir Ka Pir Bazar-Hyderabad",
+      "filter": "2"
      },
      {
       "value": "TJH",
-      "label": "Tando Jam-Hyderabad"
+      "label": "Tando Jam-Hyderabad",
+      "filter": "2"
      },
      {
       "value": "BBP",
-      "label": "Board Bazar Peshawar"
+      "label": "Board Bazar Peshawar",
+      "filter": "3"
      },
      {
       "value": "PMP",
-      "label": "Peepal Mandi Peshawar"
+      "label": "Peepal Mandi Peshawar",
+      "filter": "3"
      }
     ],
     "Type_of_survey": [
@@ -4808,7 +4833,8 @@
      }
     ]
    },
-   "source_file": "Awareness Survey Follow-up 202607.xlsx"
+   "source_file": "Awareness Survey Follow-up 202607.xlsx",
+   "source_sha256": "d79780bffb3d6852173f44971cf0d7b8387a3f0f0131dfb0da2a6397158f3cd7"
   },
   "turmeric": {
    "questions": {
@@ -4974,10 +5000,10 @@
     "wholesale_market": {
      "name": "wholesale_market",
      "type": "select_one",
-     "label": "Wholesake Market Name",
-     "raw_label": "Wholesake Market Name",
+     "label": "Wholesale Market Name",
+     "raw_label": "Wholesale Market Name",
      "group": [],
-     "list_name": "market_place",
+     "list_name": "wholesale_market",
      "relevance": "${market_name}=1",
      "required": true
     },
@@ -5012,8 +5038,7 @@
      "type": "geopoint",
      "label": "GPS location of market",
      "raw_label": "GPS location of market",
-     "group": [],
-     "required": true
+     "group": []
     },
     "size_of_shop": {
      "name": "size_of_shop",
@@ -5391,7 +5416,7 @@
       "label": "Large"
      }
     ],
-    "market_place": [
+    "wholesale_market": [
      {
       "value": "1",
       "label": "Jodia Bazaar",
@@ -5461,12 +5486,12 @@
     "retail_market": [
      {
       "value": "1",
-      "label": "Phase 5 DHA Khadda market",
+      "label": "DHA Phase 5 Khadda Market Karachi Farmers' Market on weekends",
       "city": "1"
      },
      {
       "value": "2",
-      "label": "PECHS/Tariq Road/Bahadurabad side",
+      "label": "Gulshan e Iqbal_Block 10A PECHS/Tariq Road/Bahadurabad side",
       "city": "1"
      },
      {
@@ -5476,12 +5501,12 @@
      },
      {
       "value": "4",
-      "label": "Landhi Babar Market or Banaras Ali garh market orangi",
+      "label": "Shah Faisal Colony # 01_Sabzi Market Landhi Babar Market Banaras Aligarh Market Orangi",
       "city": "1"
      },
      {
       "value": "5",
-      "label": "autoban road nearby shops",
+      "label": "Latif Abad Unit # 06 Autoban Road near shops",
       "city": "2"
      },
      {
@@ -5491,12 +5516,12 @@
      },
      {
       "value": "7",
-      "label": "faqir ka pir bazar",
+      "label": "Hali Road Faqir ka Pir Bazaar",
       "city": "2"
      },
      {
       "value": "8",
-      "label": "tower market retails side shops",
+      "label": "Liaqat Colony Tower Market",
       "city": "2"
      },
      {
@@ -5506,17 +5531,17 @@
      },
      {
       "value": "10",
-      "label": "Hayatabad shops",
+      "label": "Sardar Ahmad Jan Colony Hayatabad shops",
       "city": "3"
      },
      {
       "value": "11",
-      "label": "Board Bazar",
+      "label": "Khanza & Bakhsho Pull Board Bazaar",
       "city": "3"
      },
      {
       "value": "12",
-      "label": "Pipal mandi",
+      "label": "Yousaf Abad Peepal Mandi",
       "city": "3"
      },
      {
@@ -5536,7 +5561,7 @@
      },
      {
       "value": "16",
-      "label": "Akbar Mandi wholesale and retail both shops are near by",
+      "label": "Shalimar Akbar Mandi (wholesale and retail)",
       "city": "7"
      },
      {
@@ -5571,7 +5596,7 @@
      },
      {
       "value": "23",
-      "label": "Mini Market Settelite Town",
+      "label": "Mini Market Sattelite Town",
       "city": "6"
      },
      {
@@ -5661,7 +5686,8 @@
      }
     ]
    },
-   "source_file": "turmeric_sampling_survey.xlsx"
+   "source_file": "turmeric_sampling_survey.xlsx",
+   "source_sha256": "3f41b6732dd48fff4e74af593f2e7de88240d252aec32d0a1c6ff79c99d4fbe8"
   }
  }
 }

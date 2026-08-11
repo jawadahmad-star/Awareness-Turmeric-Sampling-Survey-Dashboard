@@ -74,6 +74,19 @@ def choices(form, list_name):
     return [c["value"] for c in CB["forms"][form]["choices"].get(list_name, [])]
 
 
+def choices_for(form, question):
+    """
+    Resolve a question's choice list through the question itself.
+
+    Instruments get edited: the wholesale-market list was renamed from
+    `market_place` to `wholesale_market` between revisions. Looking the list up
+    by question name survives that; hard-coding the list name does not.
+    """
+    f = CB["forms"][form]
+    ln = (f["questions"].get(question) or {}).get("list_name")
+    return f["choices"].get(ln, []) if ln else []
+
+
 def pick(seq, weights=None):
     return random.choices(list(seq), weights=weights, k=1)[0]
 
@@ -350,8 +363,8 @@ def gen_turmeric(n_vendors, days):
     main, r1, r2 = [], [], []
     enums = choices("turmeric", "enum_name")
     enums = [e for e in enums if e != "777"]
-    mkt_place = CB["forms"]["turmeric"]["choices"]["market_place"]
-    retail = CB["forms"]["turmeric"]["choices"]["retail_market"]
+    mkt_place = choices_for("turmeric", "wholesale_market")
+    retail = choices_for("turmeric", "locality_retail")
     by_city_ws, by_city_rt = {}, {}
     for c in mkt_place:
         by_city_ws.setdefault(c.get("city"), []).append(c["value"])

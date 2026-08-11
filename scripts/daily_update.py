@@ -23,6 +23,8 @@ Usage:
 """
 
 import argparse
+import hashlib
+import json
 import subprocess
 import sys
 from datetime import datetime
@@ -83,10 +85,35 @@ def count_inputs():
 
 
 def codebook_is_stale():
+    """
+    Compare instrument content hashes with the ones recorded in the codebook.
+
+    An earlier version compared modification times, which silently missed a
+    revised instrument: copying a file in Windows Explorer preserves the
+    original timestamp, so an updated XLSForm can land looking older than the
+    codebook built from its predecessor.
+    """
     if not CODEBOOK.exists():
         return True
-    newest = max((p.stat().st_mtime for p in INSTRUMENTS.glob("*.xlsx")), default=0)
-    return newest > CODEBOOK.stat().st_mtime
+    try:
+        book = json.loads(CODEBOOK.read_text(encoding="utf-8"))
+    except Exception:
+        return True
+
+    recorded = {
+        form.get("source_file"): form.get("source_sha256")
+        for form in book.get("forms", {}).values()
+    }
+    if not any(recorded.values()):
+        return True  # built before hashes were recorded
+
+    for p in INSTRUMENTS.glob("*.xlsx"):
+        if p.name.startswith("~$"):
+            continue
+        digest = hashlib.sha256(p.read_bytes()).hexdigest()
+        if recorded.get(p.name) != digest:
+            return True
+    return False
 
 
 def main():

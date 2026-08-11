@@ -12,6 +12,7 @@ Usage:
     python scripts/build_codebook.py
 """
 
+import hashlib
 import json
 import re
 import sys
@@ -175,6 +176,10 @@ def main():
             continue
         form = build_form(path)
         form["source_file"] = fname
+        # Content hash, not mtime: instruments are usually copied in from
+        # elsewhere, and Windows copies preserve the original timestamp — so a
+        # revised instrument can arrive looking older than the codebook.
+        form["source_sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
         book["forms"][key] = form
         n_sel = sum(1 for q in form["questions"].values() if q["type"].startswith("select"))
         print(
