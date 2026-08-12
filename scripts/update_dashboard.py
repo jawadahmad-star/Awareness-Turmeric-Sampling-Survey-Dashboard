@@ -62,7 +62,7 @@ MISSING = {"", ".", "na", "n/a", "null", "none", "-", "nan"}
 # compressed and encrypted here and only ever decrypted in the browser, after
 # the password is entered. Parameters must match the WebCrypto call in app.js.
 PBKDF2_ITERATIONS = 250_000
-DEFAULT_PASSWORD = "TS2026@RS"
+DEFAULT_PASSWORD = "TS2026_RS"
 # SurveyCTO writes these for don't-know / refused; they must never be counted
 # as substantive answers but should still be visible in distributions.
 SPECIAL = {"-999": "Don't know", "-888": "Refused", "999": "Don't know", "888": "Refused"}
@@ -354,7 +354,7 @@ def build_awareness(book, tables):
 TS_MAIN_FIELDS = ["enum_name", "vendor_id", "sample_city", "market_name",
                   "locality_retail", "wholesale_market", "vendor_name",
                   "shop_sample_type", "collected_sample_type", "size_of_shop",
-                  "survey_status"]
+                  "whole_root_display", "survey_status"]
 
 
 def build_turmeric(book, tables):

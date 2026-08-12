@@ -281,8 +281,12 @@ def gen_awareness(n_target, days):
                         if got & {"4", "5"}:
                             r["Q_11"] = multi(["1", "2", "3", "4", "5", "6", "7"],
                                               [0.2, 0.2, 0.16, 0.14, 0.12, 0.1, 0.08], 1, 3)
-                            if len(r["Q_11"].split()) > 1:
-                                r["Q_12"] = pick(r["Q_11"].split())
+                            # purchase_most lists roots 1-6 only; "None of the
+                            # above" (7) carries over from Q_11 and must not be
+                            # offered back as the type purchased most.
+                            q11 = [c for c in r["Q_11"].split() if c != "7"]
+                            if len(q11) > 1:
+                                r["Q_12"] = pick(q11)
                             r["Q_16b"] = random.choice([250, 500, 750, 1000, 1500, 2000])
                             r["Q_16_b"] = pick(["gram", "Kg"], [0.6, 0.4])
                         if "4" in got:
@@ -302,7 +306,9 @@ def gen_awareness(n_target, days):
                             r["Q_20"] = multi([str(i) for i in range(1, 12)],
                                               [0.16, 0.14, 0.12, 0.10, 0.09, 0.08, 0.08, 0.07, 0.06, 0.06, 0.04], 1, 3)
                             r["Q_22"] = pick(["1", "2", "3"], [0.18, 0.55, 0.27])
-                        r["Q_24"] = multi([str(i) for i in range(1, 6)], [0.3, 0.25, 0.2, 0.15, 0.1], 1, 2)
+                        # Which_market has four options; code 5 was being
+                        # generated and had no label to decode against.
+                        r["Q_24"] = multi(["1", "2", "3", "4"], [0.33, 0.28, 0.22, 0.17], 1, 2)
                         r["Q_26"] = multi(["1", "2", "3", "4", "5", "6", "7"],
                                           [0.26, 0.06, 0.14, 0.17, 0.19, 0.16, 0.02], 1, 3)
 
@@ -420,6 +426,11 @@ def gen_turmeric(n_vendors, days):
             n_col = random.randint(1, len(avail))
             collected = random.sample(avail, n_col)
             row["collected_sample_type"] = " ".join(sorted(collected))
+            # whole_root_display is only asked where the shop stocks whole dried
+            # roots (relevance: selected(${shop_sample_type},'1')), so it stays
+            # blank everywhere else — the dashboard bases it on answered rows.
+            if "1" in avail:
+                row["whole_root_display"] = pick(["1", "2"], [0.62, 0.38])
             main.append(row)
 
             for ti, t in enumerate(sorted(collected), 1):

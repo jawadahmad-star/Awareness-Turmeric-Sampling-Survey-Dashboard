@@ -378,6 +378,9 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
 
 /* ===================== STAT STRIP ===================== */
 .stat-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
+/* Heading for a stat strip that sits inside a panel rather than under a card. */
+.strip-title { font-size:13px; font-weight:700; color:var(--text-2); text-transform:uppercase;
+  letter-spacing:.6px; margin:2px 0 11px; }
 .stat-box { background:var(--surface); border-radius:12px; padding:15px 16px; box-shadow:var(--shadow);
   border-top:3px solid var(--border); }
 .stat-box .sb-val { font-size:22px; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums;
@@ -513,7 +516,11 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
   .stat-box .sb-val { font-size:19px; }
   .insight-box { font-size:12.5px; padding:13px 15px; }
 
-  .funnel-step { padding:11px 13px; gap:10px; min-width:0 !important; }
+  /* The inline min-width:280px would flatten the taper on a phone, but a bare
+     0 lets the deepest steps shrink below their own text and spill the label
+     out of the coloured bar. 150px is the narrowest step that still holds the
+     value at these font sizes. */
+  .funnel-step { padding:11px 13px; gap:10px; min-width:150px !important; }
   .funnel-label { font-size:11.5px; }
   .funnel-sub { font-size:9.5px; }
   .funnel-val { font-size:16px; }

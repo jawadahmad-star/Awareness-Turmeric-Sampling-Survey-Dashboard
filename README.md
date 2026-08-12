@@ -80,7 +80,7 @@ old password stops decrypting.
 ## What is in here
 
 ```
-index.html                    the dashboard (twelve panels)
+index.html                    the dashboard (eleven panels)
 assets/theme.css              design tokens, light + dark, print styles
 assets/app.js                 decryption, filters, aggregation, all charts
 data/dashboard_data.js        encrypted payload  ← the only file that changes daily
@@ -113,7 +113,7 @@ SurveyCTO CSV exports ───────────────────�
 ```
 
 Aggregation happens in the browser, not in Python. The payload is
-record-level, which is what lets the filter bar re-cut all twelve panels
+record-level, which is what lets the filter bar re-cut all eleven panels
 instantly without a server.
 
 ---

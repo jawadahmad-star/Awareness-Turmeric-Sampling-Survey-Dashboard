@@ -4,7 +4,7 @@
 
    The payload in data/dashboard_data.js is record-level, not pre-aggregated.
    Everything on screen is computed here, which is what lets the filter bar
-   re-cut all twelve panels without a round trip to the server.
+   re-cut all eleven panels without a round trip to the server.
    ========================================================================== */
 
 /* ============================ ACCESS GATE ============================ */
@@ -261,6 +261,7 @@ function distOf(rows, ds, tbl, field, opt) {
   if (opt.dropSpecial) out = out.filter(x => !NONSUBSTANTIVE.test(x.label));
   if (opt.sort) out.sort((a, b) => b.value - a.value);
   if (opt.top) out = out.slice(0, opt.top);
+  out.forEach(x => { x.full = x.label; });
   if (opt.maxLabel) out.forEach(x => { x.label = short(x.label, opt.maxLabel); });
   return out;
 }
@@ -286,6 +287,7 @@ function multiOf(rows, ds, tbl, field, opt) {
   if (opt.sort !== false) out.sort((a, b) => b.value - a.value);
   if (opt.top) out = out.slice(0, opt.top);
   if (opt.pct) out.forEach(x => { x.value = base ? Math.round(1000 * x.value / base) / 10 : 0; });
+  out.forEach(x => { x.full = x.label; });
   if (opt.maxLabel) out.forEach(x => { x.label = short(x.label, opt.maxLabel); });
   return { rows: out, base };
 }
@@ -410,6 +412,14 @@ function wrapTick(label, max) {
   return lines.length ? lines : [String(label)];
 }
 
+/* Some survey options run to a hundred characters, so an axis or a legend has
+   to shorten them. The full wording is kept on the series and shown, wrapped,
+   in the tooltip — nothing on a chart is unreadable, it is only abbreviated.
+   `arr` entries may carry `full`; where they do not, the visible label is
+   already complete. */
+const fullLabels = arr => arr.map(x => (x && x.full) || (x && x.label) || '');
+const tipTitle = fulls => it => wrapTick(fulls[it[0].dataIndex] || it[0].label, 44);
+
 /* Phone-width breakpoint, kept in step with the 720px one in theme.css. */
 const isNarrow = () => window.innerWidth <= 720;
 
@@ -498,15 +508,25 @@ function barChart(id, arr, color, horizontal, suffix, showPct) {
   // wrapped lines.
   const narrow = isNarrow();
   const catWrap = horizontal ? (narrow ? 16 : 26) : (narrow ? 8 : 11);
+  const fulls = fullLabels(arr);
+  // A horizontal bar has vertical room the caller cannot know about, so the
+  // option text is re-expanded here to whatever fits in four wrapped lines and
+  // the row height grows with the wrapping. Vertical bars keep the caller's
+  // tighter label, because an x-axis category has no such room.
+  const cats = (horizontal && !arr.noExpand) ? fulls.map(t => short(t, catWrap * 3)) : LBLS(arr);
   const catTicks = {
     font: { family: 'Inter', size: 11 }, color: TXT(), autoSkip: false, maxRotation: 0, minRotation: 0,
     callback: function (v) { return wrapTick(this.getLabelForValue(v), catWrap); },
   };
   const valTicks = { font: { family: 'Inter', size: 11 }, color: TXT(), callback: sfx ? (v => v + sfx) : undefined };
-  if (horizontal) fitHeight(id, arr.length, narrow ? 44 : 32, 46);
+  if (horizontal) {
+    const lines = Math.max(1, ...cats.map(t => wrapTick(t, catWrap).length));
+    const per = Math.min(narrow ? 74 : 58, Math.max(narrow ? 44 : 32, lines * (narrow ? 13 : 15) + 14));
+    fitHeight(id, arr.length, per, 46);
+  }
   mk(id, {
     type: 'bar',
-    data: { labels: LBLS(arr), datasets: [{ data: V(arr), backgroundColor: color || S(1), borderRadius: 6, maxBarThickness: 44 }] },
+    data: { labels: cats, datasets: [{ data: V(arr), backgroundColor: color || S(1), borderRadius: 6, maxBarThickness: 44 }] },
     options: baseOpts({
       indexAxis: horizontal ? 'y' : 'x',
       layout: {
@@ -519,6 +539,7 @@ function barChart(id, arr, color, horizontal, suffix, showPct) {
         legend: { display: false },
         tooltip: {
           callbacks: {
+            title: tipTitle(fullLabels(arr)),
             label: c => withPct
               ? ' ' + fmt(c.raw) + '  (' + pctTxt(c.raw) + '% of ' + fmt(total) + ')'
               : ' ' + fmt(c.raw) + sfx,
@@ -561,7 +582,12 @@ function donutChart(id, arr, colors) {
             boxWidth: 11, padding: isNarrow() ? 7 : 9,
           },
         },
-        tooltip: { callbacks: { label: c => { const t = c.dataset.data.reduce((a, b) => a + b, 0) || 1; return ' ' + c.label + ': ' + fmt(c.raw) + ' (' + Math.round(100 * c.raw / t) + '%)'; } } },
+        tooltip: {
+          callbacks: {
+            title: tipTitle(fullLabels(arr)),
+            label: c => { const t = c.dataset.data.reduce((a, b) => a + b, 0) || 1; return ' ' + fmt(c.raw) + ' (' + Math.round(100 * c.raw / t) + '%)'; },
+          },
+        },
         datalabels: {
           display: true, color: '#fff', font: { family: 'Inter', size: 12, weight: '700' },
           formatter: (v, c) => { const t = c.dataset.data.reduce((a, b) => a + b, 0); const p = t ? Math.round(100 * v / t) : 0; return p >= 6 ? p + '%' : ''; },
@@ -1031,7 +1057,7 @@ function drawPanel(id) {
 }
 
 const PANELS = {
-  overview: drawOverview, ops: drawOps, map: drawMap, sampling: drawSampling,
+  overview: drawOverview, map: drawMap, sampling: drawSampling,
   price: drawPrice, retail: drawRetail, consumer: drawConsumer, adult: drawAdult,
   lead: drawLead, media: drawMedia, coverage: drawCoverage, explorer: drawExplorer,
 };
@@ -1077,6 +1103,27 @@ function drawOverview() {
     callout('amber', '🧠', 'Lead awareness', `${leadKnow.steps[1].pct}% of respondents know what lead is; ${leadKnow.steps[2].pct}% have heard it reaches turmeric.`),
   ].join(''));
 
+  // Field-operations headlines. The Field Ops section was retired; these are
+  // the figures worth keeping in front of the reader, without the exception
+  // list that used to sit beside them.
+  const awDur = nums(con, AW.f.dur).map(x => x / 60);
+  const tsDur = nums(ts, TS.f.dur).map(x => x / 60);
+  const sa = stats(awDur), sv = stats(tsDur);
+  const enums = new Set([...con.map(r => enumOf('aw', r[AW.f.Data_Collector])),
+    ...ts.map(r => enumOf('ts', r[TS.f.enum_name]))].filter(Boolean).map(x => x.trim()));
+  const gpsOk = ts.filter(r => typeof r[TS.f.lat] === 'number').length;
+  setHTML('ov-ops', [
+    statBox(fmt(enums.size), 'Active enumerators', 'Across both surveys', 'var(--series-1)'),
+    statBox(sa ? fmt1(sa.med) + ' min' : '—', 'Median interview length',
+      sa ? `Middle 50%: ${Math.round(sa.q1)}–${Math.round(sa.q3)} min` : '', 'var(--series-3)'),
+    statBox(sv ? fmt1(sv.med) + ' min' : '—', 'Median vendor visit',
+      sv ? `${fmt(sv.n)} visits timed` : '', 'var(--series-8)'),
+    statBox((con.length / Math.max(1, days)).toFixed(1), 'Interviews per field day',
+      `Across ${fmt(days)} active days`, 'var(--series-4)'),
+    statBox(pctOf(gpsOk, ts.length) + '%', 'Vendor visits with GPS',
+      `${fmt(gpsOk)} of ${fmt(ts.length)} located`, 'var(--series-5)'),
+  ].join(''));
+
   dualLine('ovDaily', dailyAw, dailyTs, 'Awareness interviews', 'Vendor visits');
   progressDonut('ovProgAw', con.length, awTarget, 'interviews');
   progressDonut('ovProgTs', ts.length, tsTarget, 'vendors');
@@ -1096,49 +1143,6 @@ function drawOverview() {
 function cityDist(rows, ds, tbl, idx) {
   const m = new Map();
   rows.forEach(r => { const n = cityOf(ds, r[idx]); if (n) m.set(n, (m.get(n) || 0) + 1); });
-  return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }));
-}
-
-/* ---------- 02 FIELD OPS ---------- */
-function drawOps() {
-  const con = Q.con, aw = Q.aw, ts = Q.ts;
-  const awDur = nums(con, AW.f.dur).map(x => x / 60);
-  const tsDur = nums(ts, TS.f.dur).map(x => x / 60);
-  const sa = stats(awDur), st = stats(tsDur);
-  const days = new Set(con.map(r => r[AW.f.date]).filter(Boolean)).size || 1;
-
-  setHTML('op-kpis', [
-    kpi('👥', fmt(new Set([...con.map(r => enumOf('aw', r[AW.f.Data_Collector])), ...ts.map(r => enumOf('ts', r[TS.f.enum_name]))].filter(Boolean)).size), 'Active enumerators', 'Across both surveys', 'navy', 'navy'),
-    kpi('⏱️', sa ? fmt1(sa.med) : '—', 'Median interview (min)', sa ? `Middle 50%: ${Math.round(sa.q1)}–${Math.round(sa.q3)} min` : '', 'navy', 'teal'),
-    kpi('⏲️', st ? fmt1(st.med) : '—', 'Median vendor visit (min)', st ? `${fmt(st.n)} visits timed` : '', 'navy', 'turmeric'),
-    kpi('📈', (con.length / days).toFixed(1), 'Interviews per field day', `Across ${days} active days`, 'navy', 'green'),
-    kpi('✅', pctOf(con.length, aw.length) + '%', 'Consent rate', `${fmt(aw.length - con.length)} of ${fmt(aw.length)} declined`, aw.length && con.length / aw.length > 0.85 ? 'up' : 'neutral', 'purple'),
-    kpi('🚩', fmt((D.quality || []).filter(f => f.sev === 'warn').length), 'Open quality flags', 'Advisory — needs review', 'down', 'amber'),
-  ].join(''));
-
-  const ico = { warn: '⚠️', info: 'ℹ️', ok: '✅', err: '⛔' };
-  setHTML('op-flags', (D.quality || []).map(f =>
-    `<div class="flag ${f.sev}"><span class="flag-ico">${ico[f.sev] || 'ℹ️'}</span>
-     <div><div class="flag-area">${esc(f.area)}</div>${esc(f.msg)}</div></div>`).join('')
-    || '<div class="flag ok"><span class="flag-ico">✅</span><div>No exceptions raised.</div></div>');
-
-  barChart('opEnumAw', enumDist(con, 'aw', AW.f.Data_Collector), S(1), true, '', true);
-  barChart('opEnumTs', enumDist(ts, 'ts', TS.f.enum_name), S(8), true, '', true);
-
-  histChart('opDur', histogram(awDur.filter(x => x < 90), 5), S(3), 'Minutes', ' min');
-  const statusArr = distOf(aw, 'aw', AW, 'survey_status', { sort: true, maxLabel: 34 });
-  const consentArr = [
-    { label: 'Consented', value: con.length },
-    { label: 'Declined', value: aw.length - con.length },
-  ];
-  donutChart('opStatus', has(statusArr) ? statusArr : consentArr);
-
-  buildEnumTable();
-}
-
-function enumDist(rows, ds, idx) {
-  const m = new Map();
-  rows.forEach(r => { const n = enumOf(ds, r[idx]); if (n) m.set(n.trim(), (m.get(n.trim()) || 0) + 1); });
   return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }));
 }
 
@@ -1286,8 +1290,26 @@ function drawSampling() {
   barChart('smColl', coll.rows, S(8), true, '%');
 
   barChart('smType', typeDist(sp), S(4), false, '', true);
-  donutChart('smBasis', distOf(sp, 'ts', SP, 'basis', {}).map(x => ({ ...x, label: short(sampleTypeLabel('sample_type_2', x.code), 30) })));
+  donutChart('smBasis', distOf(sp, 'ts', SP, 'basis', {}).map(x => ({
+    ...x, full: sampleTypeLabel('sample_type_2', x.code),
+    label: short(sampleTypeLabel('sample_type_2', x.code), 34),
+  })));
   donutChart('smSize', distOf(ts, 'ts', TS, 'size_of_shop'), [S(3), S(1), S(4)]);
+
+  // Whole dried roots on open display vs produced on request. Asked only where
+  // the shop stocks whole roots, so the base is the vendors who answered it.
+  // The instrument wording ("Not displayed – brought from back/inside upon
+  // asking") is too long for a donut legend, so the ring uses a compact form
+  // and the tooltip keeps the option exactly as it was asked.
+  const ROOT_SHORT = { '1': 'Openly displayed', '2': 'Brought out on request' };
+  const rootDisp = distOf(ts, 'ts', TS, 'whole_root_display', {})
+    .map(x => ({ ...x, label: ROOT_SHORT[x.code] || short(x.label, 34) }));
+  const rootBase = nonNull(ts, TS, 'whole_root_display');
+  donutChart('smRootDisplay', rootDisp, [S(3), S(6)]);
+  const openShare = shareIn(ts, TS, 'whole_root_display', ['1']);
+  setTxt('smRoot-desc', rootBase
+    ? `Enumerator observation, base ${fmt(rootBase)} vendors stocking whole dried roots — ${openShare.pct}% had them on open display`
+    : 'Enumerator observation: whether whole dried roots were on open display or produced from the back on request');
 
   // basis composition within each product type
   const types = ord('ts', 'collected_sample_type');
@@ -1295,22 +1317,84 @@ function drawSampling() {
   const tl = types.filter(t => sp.some(r => r[SP.f.type] === t));
   if (tl.length) {
     const series = bases.map((b, i) => ({
-      name: short(sampleTypeLabel('sample_type_2', b), 26),
+      name: short(sampleTypeLabel('sample_type_2', b), 34),
       color: S((i % 8) + 1),
       data: tl.map(t => {
         const inT = sp.filter(r => r[SP.f.type] === t);
         return inT.length ? Math.round(100 * inT.filter(r => r[SP.f.basis] === b).length / inT.length) : 0;
       }),
     }));
-    stacked100('smBasisType', tl.map(t => short(lab('ts', 'collected_sample_type', t), 22)), series);
+    stacked100('smBasisType', tl.map(t => short(lab('ts', 'collected_sample_type', t), 30)), series);
   } else noData('smBasisType');
 
+  perVendorChart('smPerVendor', perVendor);
+
+  setTxt('sm-foot', `Sampling protocol: one to three samples per turmeric product type stocked, with the label written as vendor ID _ product type _ selection basis. ${fmt(sp.length)} samples from ${fmt(ts.length)} vendor visits currently banked, totalling ${(grams / 1000).toFixed(1)} kg. Where a shop stocked whole dried roots the enumerator also recorded whether those roots were on open display or produced from the back on request${rootBase ? ` — ${openShare.pct}% openly displayed across ${fmt(rootBase)} such vendors` : ''}. Selection basis matters analytically — samples chosen because they looked bright or shiny are the ones the laboratory results should be read against first.`);
+}
+
+/* How many vendor visits produced 0 samples, 1 sample, 2 samples … Each bar is
+   a count of *visits*, not of samples, so the bars add up to the number of
+   vendor visits in the current filter — a bare "0 / 1 / 2" axis read as a
+   sample count, so the categories and both axes are named explicitly. */
+function perVendorChart(id, perVendor) {
+  if (!perVendor.length) return noData(id);
+  clearEmpty(id);
   const cnt = new Map();
   perVendor.forEach(n => cnt.set(n, (cnt.get(n) || 0) + 1));
-  const pv = [...cnt.entries()].sort((a, b) => a[0] - b[0]).map(([k, v]) => ({ label: String(k), value: v }));
-  barChart('smPerVendor', pv, S(5), false, '', true);
+  const keys = [...cnt.keys()].sort((a, b) => a - b);
+  const visits = perVendor.length;
+  const banked = perVendor.reduce((a, b) => a + b, 0);
+  const labels = keys.map(k => k === 0 ? 'None' : k + (k === 1 ? ' sample' : ' samples'));
+  const data = keys.map(k => cnt.get(k));
+  const pct = v => Math.round(1000 * v / visits) / 10;
+  const narrow = isNarrow();
 
-  setTxt('sm-foot', `Sampling protocol: one to three samples per turmeric product type stocked, with the label written as vendor ID _ product type _ selection basis. ${fmt(sp.length)} samples from ${fmt(ts.length)} vendor visits currently banked, totalling ${(grams / 1000).toFixed(1)} kg. Selection basis matters analytically — samples chosen because they looked bright or shiny are the ones the laboratory results should be read against first.`);
+  mk(id, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: S(5), borderRadius: 6, maxBarThickness: 54 }] },
+    options: baseOpts({
+      layout: { padding: { top: 24 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: it => it[0].label + ' collected at the visit',
+            label: c => ` ${fmt(c.raw)} vendor visits (${pct(c.raw)}% of ${fmt(visits)})`,
+          },
+        },
+        datalabels: {
+          display: true, anchor: 'end', align: 'top', clamp: true, clip: false,
+          color: TXT(), font: { family: 'Inter', size: 11, weight: '700' },
+          formatter: v => narrow ? String(v) : `${fmt(v)}  (${pct(v)}%)`,
+        },
+      },
+      scales: {
+        x: {
+          title: {
+            display: true, text: 'Samples banked at a single vendor visit',
+            font: { family: 'Inter', size: 11, weight: '600' }, color: TXT(),
+          },
+          ticks: {
+            font: { family: 'Inter', size: 11 }, color: TXT(), autoSkip: false, maxRotation: 0,
+            callback: function (v) { return wrapTick(this.getLabelForValue(v), narrow ? 8 : 12); },
+          },
+          grid: { display: false }, border: { display: false },
+        },
+        y: {
+          beginAtZero: true, grace: '16%',
+          title: {
+            display: true, text: 'Vendor visits',
+            font: { family: 'Inter', size: 11, weight: '600' }, color: TXT(),
+          },
+          ticks: { font: { family: 'Inter', size: 11 }, color: TXT() },
+          grid: { color: GRID() }, border: { display: false },
+        },
+      },
+    }),
+  });
+  setTxt('smPerVendor-note',
+    `${fmt(visits)} vendor visits produced ${fmt(banked)} samples — an average of ${(banked / Math.max(1, visits)).toFixed(1)} per visit, `
+    + `most often ${labels[data.indexOf(Math.max(...data))].toLowerCase()}. Bars count visits, not samples, so they add to ${fmt(visits)}.`);
 }
 
 function sampleTypeLabel(field, code) {
@@ -1320,7 +1404,7 @@ function typeDist(sp) {
   const m = new Map();
   sp.forEach(r => { const t = r[SP.f.type]; if (t) m.set(t, (m.get(t) || 0) + 1); });
   return ord('ts', 'collected_sample_type').filter(t => m.has(t))
-    .map(t => ({ code: t, label: short(lab('ts', 'collected_sample_type', t), 26), value: m.get(t) }));
+    .map(t => ({ code: t, label: short(lab('ts', 'collected_sample_type', t), 30), value: m.get(t) }));
 }
 
 /* ---------- 05 PRICE ---------- */
@@ -1352,13 +1436,14 @@ function drawPrice() {
 
   const bases = ord('ts', 'sample_type_2');
   const basisMed = bases.map(b => ({
-    label: short(sampleTypeLabel('sample_type_2', b), 24),
+    full: sampleTypeLabel('sample_type_2', b),
+    label: short(sampleTypeLabel('sample_type_2', b), 34),
     value: Math.round(median(nums(sp.filter(r => r[SP.f.basis] === b), SP.f.price_per_kg)) || 0),
   })).filter(x => x.value);
   barChart('prBasis', basisMed, S(2));
 
   scatterChart('prScatter', types.map(t => ({
-    label: short(lab('ts', 'collected_sample_type', t), 24),
+    label: short(lab('ts', 'collected_sample_type', t), 30),
     points: sp.filter(r => r[SP.f.type] === t && r[SP.f.qty] && r[SP.f.price])
       .map(r => ({ x: r[SP.f.qty], y: r[SP.f.price] })),
   })), 'Quantity collected (grams)', 'Price paid (Rs)');
@@ -1367,7 +1452,7 @@ function drawPrice() {
 
   const mkts = ord('ts', 'market_name');
   groupedBar('prMkt',
-    types.map(t => short(lab('ts', 'collected_sample_type', t), 18)),
+    types.map(t => short(lab('ts', 'collected_sample_type', t), 30)),
     mkts.map((mv, i) => ({
       name: pretty(lab('ts', 'market_name', mv)), color: S(i === 0 ? 1 : 8),
       data: types.map(t => Math.round(median(nums(sp.filter(r => r[SP.f.type] === t && r[SP.f.market] === mv), SP.f.price_per_kg)) || 0)),
@@ -1413,7 +1498,7 @@ function drawRetail() {
   const t3 = distOf(rs, 'aw', AW, 'Q3', { maxLabel: 26 });
   const t3b = distOf(rs, 'aw', AW, 'Q3_b', { maxLabel: 26 });
   const allT = [...new Set([...t3.map(x => x.code), ...t3b.map(x => x.code)])];
-  const gl = allT.map(c => short(lab('aw', 'Q3', c), 20));
+  const gl = allT.map(c => short(lab('aw', 'Q3', c), 36));
   groupedBar('rtTopBottom', gl, [
     { name: 'Highest selling', color: S(6), data: allT.map(c => (t3.find(x => x.code === c) || { value: 0 }).value) },
     { name: 'Lowest selling', color: S(2), data: allT.map(c => (t3b.find(x => x.code === c) || { value: 0 }).value) },
@@ -1426,7 +1511,7 @@ function drawRetail() {
   barChart('rtSource', distOf(rs, 'aw', AW, 'Q16', { sort: true, maxLabel: 30 }), S(3), true, '', true);
   barChart('rtChoose', multiOf(rs, 'aw', AW, 'Q18', { pct: true, maxLabel: 34 }).rows, S(4), true, '%');
   donutChart('rtStable', distOf(rs, 'aw', AW, 'Q17'), [S(6), S(2)]);
-  donutChart('rtComfort', distOf(rs, 'aw', AW, 'Q36', { maxLabel: 30 }));
+  barChart('rtComfort', distOf(rs, 'aw', AW, 'Q36', {}), S(6), true, '', true);
 
   setTxt('rt-foot', `Base: ${fmt(rs.length)} completed retailer interviews. Sales mix is the mean reported share of turnover per product type among retailers who gave a split, so the five bars approximately sum to 100%. Multiple-response questions use the number of retailers asked as the base, so percentages sum above 100.`);
 }
@@ -1457,7 +1542,7 @@ function drawConsumer() {
 
   donutChart('csGender', distOf(cs, 'aw', AW, 'Q_6'), [S(1), S(7), S(4)]);
   barChart('csAge', distOf(cs, 'aw', AW, 'Q_7', { maxLabel: 14 }), S(3), false, '', true);
-  donutChart('csSes', distOf(cs, 'aw', AW, 'Q_2', { maxLabel: 22 }), [S(4), S(3), S(6)]);
+  barChart('csSes', distOf(cs, 'aw', AW, 'Q_2', {}), S(4), true, '', true);
   barChart('csOcc', distOf(cs, 'aw', AW, 'Q_3', { sort: true, maxLabel: 36 }), S(5), true, '', true);
   barChart('csSource', multiOf(cs, 'aw', AW, 'Q_10', { pct: true, maxLabel: 40 }).rows, S(8), true, '%');
   barChart('csFreq', distOf(cs, 'aw', AW, 'Q_9', { maxLabel: 30 }), S(6), true, '', true);
@@ -1570,7 +1655,7 @@ function mergeMulti(pairs, maxLabel) {
     });
   });
   return [...counts.entries()].sort((a, b) => b[1] - a[1])
-    .map(([label, value]) => ({ label: short(label, maxLabel || 34), value }));
+    .map(([label, value]) => ({ full: label, label: short(label, maxLabel || 34), value }));
 }
 
 function buildMatrix(rs, cs) {
@@ -1601,7 +1686,7 @@ function buildMatrix(rs, cs) {
   const textFor = p => (p / maxPct) > 0.55 ? '#fff' : 'var(--text)';
 
   tbl.innerHTML =
-    `<thead><tr><th class="rowhead">Product type</th>${codes.map(c => `<th>${esc(short(lab('aw', scaleField, c), 18))}</th>`).join('')}<th>Base</th></tr></thead>` +
+    `<thead><tr><th class="rowhead">Product type</th>${codes.map(c => `<th title="${esc(pretty(lab('aw', scaleField, c)))}">${esc(short(lab('aw', scaleField, c), 26))}</th>`).join('')}<th>Base</th></tr></thead>` +
     `<tbody>${rowsData.map(r => `<tr><td class="rowhead">${esc(r.label)}</td>${r.pct.map((p, i) =>
       `<td class="cell" style="background:${colorFor(p)};color:${textFor(p)}" title="${esc(r.label)} — ${esc(pretty(lab('aw', scaleField, codes[i])))}: ${r.raw[i]} of ${r.base}">${p}%<small>${r.raw[i]}</small></td>`).join('')}<td class="cell" style="background:var(--surface-2);color:var(--text-2)">${fmt(r.base)}</td></tr>`).join('')}</tbody>`;
 
@@ -1727,7 +1812,7 @@ function drawMedia() {
 
   const cities = [...new Set(con.map(r => cityOf('aw', r[AW.f.city])).filter(Boolean))].sort();
   groupedBar('mdCity', cities, Object.entries(BROADCAST).map(([code, name], i) => ({
-    name: short(name, 22), color: S((i % 8) + 1),
+    name: short(name, 30), color: S((i % 8) + 1),
     data: cities.map(c => shareInMulti(con.filter(r => cityOf('aw', r[AW.f.city]) === c), ['Q33_ii', 'Q_57_ii'], code).pct),
   })));
 
@@ -1747,9 +1832,9 @@ function shareInScale(rs, cs, fRs, fCs, codes) {
 }
 function mergeDist(rs, fRs, cs, fCs) {
   const m = new Map();
-  distOf(rs, 'aw', AW, fRs, { maxLabel: 26 }).forEach(x => m.set(x.label, (m.get(x.label) || 0) + x.value));
-  distOf(cs, 'aw', AW, fCs, { maxLabel: 26 }).forEach(x => m.set(x.label, (m.get(x.label) || 0) + x.value));
-  return [...m.entries()].map(([label, value]) => ({ label, value }));
+  [...distOf(rs, 'aw', AW, fRs, {}), ...distOf(cs, 'aw', AW, fCs, {})]
+    .forEach(x => m.set(x.label, (m.get(x.label) || 0) + x.value));
+  return [...m.entries()].map(([label, value]) => ({ full: label, label: short(label, 30), value }));
 }
 
 /* ---------- 11 COVERAGE ---------- */
@@ -1792,18 +1877,28 @@ function drawCoverage() {
   const mkt = new Map();
   con.forEach(r => { const v = r[AW.f.market_name]; if (v) mkt.set(v, (mkt.get(v) || 0) + 1); });
   barChart('cvAwMkt', [...mkt.entries()].sort((a, b) => b[1] - a[1])
-    .map(([v, n]) => ({ label: short(lab('aw', 'market_name', v), 34), value: n })), S(3), true, '', true);
+    .map(([v, n]) => ({
+      full: pretty(lab('aw', 'market_name', v)),
+      label: short(lab('aw', 'market_name', v), 34), value: n,
+    })), S(3), true, '', true);
 
   const loc = new Map();
   ts.forEach(r => {
     const isW = r[TS.f.market_name] === '1';
     const v = isW ? r[TS.f.wholesale_market] : r[TS.f.locality_retail];
     if (!v) return;
-    const l = short(lab('ts', isW ? 'wholesale_market' : 'locality_retail', v), 32);
+    // Retail localities are multi-line cells in the instrument; the first
+    // line names the locality, the rest are the enumerator's landmarks.
+    const l = pretty(lab('ts', isW ? 'wholesale_market' : 'locality_retail', v));
     loc.set(l, (loc.get(l) || 0) + 1);
   });
-  barChart('cvTsLoc', [...loc.entries()].sort((a, b) => b[1] - a[1]).slice(0, 16)
-    .map(([label, value]) => ({ label, value })), S(8), true, '', true);
+  // Locality names carry the enumerator's landmarks after the place name, so
+  // these bars keep the trimmed name and leave the rest to the tooltip —
+  // sixteen fully-expanded labels would run the card to two screens.
+  const locRows = [...loc.entries()].sort((a, b) => b[1] - a[1]).slice(0, 16)
+    .map(([label, value]) => ({ full: label, label: short(label, 32), value }));
+  locRows.noExpand = true;
+  barChart('cvTsLoc', locRows, S(8), true, '', true);
 
   setTxt('cv-foot', `Type coverage is the share of the four turmeric product types in the sampling protocol that have been collected at least once in that city — a city at 50% has half the product range still to sample. Median price is across all sampled types in that city and is not adjusted for product mix, so cities skewed towards branded packs will read high.`);
 }
@@ -1851,70 +1946,6 @@ function sortCov(k) {
   renderCovTable();
 }
 
-/* ---------- 02b ENUMERATOR TABLE ---------- */
-let enumRows = [], enumSort = { key: 'total', dir: -1 };
-function buildEnumTable() {
-  const names = new Set([
-    ...Q.aw.map(r => (enumOf('aw', r[AW.f.Data_Collector]) || '').trim()),
-    ...Q.ts.map(r => (enumOf('ts', r[TS.f.enum_name]) || '').trim()),
-  ].filter(Boolean));
-
-  enumRows = [...names].map(n => {
-    const a = Q.aw.filter(r => (enumOf('aw', r[AW.f.Data_Collector]) || '').trim() === n);
-    const ac = a.filter(r => r[AW.f.Consent] === '1');
-    const v = Q.ts.filter(r => (enumOf('ts', r[TS.f.enum_name]) || '').trim() === n);
-    const s = Q.sp.filter(r => (enumOf('ts', r[SP.f.enum]) || '').trim() === n);
-    const dur = nums(ac, AW.f.dur).map(x => x / 60);
-    const vdur = nums(v, TS.f.dur).map(x => x / 60);
-    const days = new Set([...a.map(r => r[AW.f.date]), ...v.map(r => r[TS.f.date])].filter(Boolean)).size;
-    return {
-      name: n, interviews: ac.length, vendors: v.length, samples: s.length,
-      total: ac.length + v.length,
-      consent: a.length ? Math.round(1000 * ac.length / a.length) / 10 : null,
-      med: dur.length ? Math.round(median(dur) * 10) / 10 : (vdur.length ? Math.round(median(vdur) * 10) / 10 : null),
-      days, perDay: days ? Math.round(10 * (ac.length + v.length) / days) / 10 : 0,
-    };
-  });
-  renderEnumTable();
-}
-function renderEnumTable() {
-  const q = (document.getElementById('enum-search').value || '').toLowerCase().trim();
-  let rows = enumRows.filter(r => !q || r.name.toLowerCase().includes(q));
-  const k = enumSort.key, d = enumSort.dir;
-  rows.sort((a, b) => {
-    const x = a[k], y = b[k];
-    return (typeof x === 'string' ? x.localeCompare(y) : ((x === null ? -1 : x) - (y === null ? -1 : y))) * d;
-  });
-
-  const cols = [['name', 'Enumerator', false], ['interviews', 'Interviews', true], ['vendors', 'Vendor visits', true],
-  ['samples', 'Samples', true], ['days', 'Field days', true], ['perDay', 'Per day', true],
-  ['med', 'Median mins', true], ['consent', 'Consent %', true]];
-  document.getElementById('enum-head').innerHTML = '<tr>' + cols.map(([k2, l, num]) =>
-    `<th class="${num ? 'num' : ''}" onclick="sortEnum('${k2}')">${esc(l)}${enumSort.key === k2 ? `<span class="arrow">${enumSort.dir > 0 ? '▲' : '▼'}</span>` : ''}</th>`).join('') + '</tr>';
-
-  const medAll = median(enumRows.map(r => r.med).filter(x => x !== null)) || 0;
-  document.getElementById('enum-body').innerHTML = rows.length ? rows.map(r => {
-    const fastFlag = r.med !== null && medAll && r.med < medAll * 0.6;
-    return `<tr>
-      <td class="strong">${esc(r.name)}</td>
-      <td class="num">${fmt(r.interviews)}</td>
-      <td class="num">${fmt(r.vendors)}</td>
-      <td class="num">${fmt(r.samples)}</td>
-      <td class="num">${fmt(r.days)}</td>
-      <td class="num strong">${r.perDay}</td>
-      <td class="num">${r.med === null ? '—' : r.med + (fastFlag ? ' <span class="badge badge-amber">fast</span>' : '')}</td>
-      <td class="num">${r.consent === null ? '—' : `<span class="badge ${r.consent >= 85 ? 'badge-green' : r.consent >= 70 ? 'badge-amber' : 'badge-red'}">${r.consent}%</span>`}</td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="8" class="tbl-empty">No enumerators match.</td></tr>`;
-
-  setTxt('enum-count', `${rows.length} of ${enumRows.length} enumerators`);
-  window.__enumVisible = rows;
-}
-function sortEnum(k) {
-  enumSort = { key: k, dir: enumSort.key === k ? -enumSort.dir : (k === 'name' ? 1 : -1) };
-  renderEnumTable();
-}
-
 /* ---------- 12 EXPLORER ---------- */
 const EXP_COLS = {
   aw: [
@@ -1938,6 +1969,8 @@ const EXP_COLS = {
     ['loc', 'Locality', r => short(lab('ts', r[TS.f.market_name] === '1' ? 'wholesale_market' : 'locality_retail',
       r[TS.f.market_name] === '1' ? r[TS.f.wholesale_market] : r[TS.f.locality_retail]) || '', 30)],
     ['size', 'Shop size', r => pretty(lab('ts', 'size_of_shop', r[TS.f.size_of_shop]))],
+    ['root', 'Roots displayed', r => r[TS.f.whole_root_display]
+      ? short(lab('ts', 'whole_root_display', r[TS.f.whole_root_display]), 28) : '—'],
     ['types', 'Types collected', r => r[TS.f.n_types]],
     ['samples', 'Samples', r => r[TS.f.n_samples]],
     ['enum', 'Enumerator', r => (enumOf('ts', r[TS.f.enum_name]) || '').trim()],
@@ -2009,12 +2042,7 @@ function download(name, text) {
 }
 function exportTable(kind) {
   const stamp = (D.meta.data_through || 'export').replace(/-/g, '');
-  if (kind === 'enum') {
-    const rows = window.__enumVisible || [];
-    const head = ['Enumerator', 'Interviews', 'Vendor visits', 'Samples', 'Field days', 'Per day', 'Median minutes', 'Consent %'];
-    download(`turmeric_enumerators_${stamp}.csv`,
-      [head.join(','), ...rows.map(r => [r.name, r.interviews, r.vendors, r.samples, r.days, r.perDay, r.med, r.consent].map(csvCell).join(','))].join('\n'));
-  } else if (kind === 'cov') {
+  if (kind === 'cov') {
     const rows = window.__covVisible || [];
     const head = ['City', 'Interviews', 'Retailer', 'Consumer', 'Vendors', 'Samples', 'Types sampled', 'Type coverage %', 'Median Rs per kg', 'Scope'];
     download(`turmeric_coverage_${stamp}.csv`,
@@ -2070,7 +2098,6 @@ function boot(payload) {
   buildNavSelect();
   document.getElementById('cov-search').oninput = renderCovTable;
   document.getElementById('cov-filter').onchange = renderCovTable;
-  document.getElementById('enum-search').oninput = renderEnumTable;
   document.getElementById('exp-search').oninput = renderExplorer;
   document.getElementById('exp-dataset').onchange = () => { expSort = { i: 0, dir: -1 }; renderExplorer(); };
 
