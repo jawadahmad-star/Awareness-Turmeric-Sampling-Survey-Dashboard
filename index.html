@@ -78,7 +78,6 @@
     </div>
     <nav class="nav-tabs" id="navTabs">
       <button class="nav-tab active" data-panel="overview" data-full="Overview">📊 Overview</button>
-      <button class="nav-tab" data-panel="ops" data-full="Field Operations & Quality">🛠️ Field Ops</button>
       <button class="nav-tab" data-panel="map" data-full="Sampling Map">🗺️ Map</button>
       <button class="nav-tab" data-panel="sampling" data-full="Sample Collection">🧪 Sampling</button>
       <button class="nav-tab" data-panel="price" data-full="Price Analytics">💰 Prices</button>
@@ -90,7 +89,7 @@
       <button class="nav-tab" data-panel="coverage" data-full="Coverage Tracker">📋 Coverage</button>
       <button class="nav-tab" data-panel="explorer" data-full="Data Explorer">🔎 Explorer</button>
     </nav>
-    <!-- Twelve tabs cannot fit a phone without being clipped, so below the
+    <!-- The tab strip cannot fit a phone without being clipped, so below the
          tablet breakpoint the nav becomes a native picker instead. Populated
          from the buttons above by app.js, so the two never drift apart. -->
     <div class="nav-select-wrap">
@@ -158,6 +157,10 @@
   </div>
   <div class="kpi-grid" id="ov-kpis"></div>
   <div class="callout-row" id="ov-callouts"></div>
+  <!-- Field-operations headlines. The old Field Ops section was retired; only
+       these summary figures survive here, with no exception list. -->
+  <h3 class="strip-title">Field Operations at a Glance</h3>
+  <div class="stat-strip" id="ov-ops"></div>
   <div class="chart-grid cols-2">
     <div class="chart-card full">
       <h3>Daily Field Output — Both Surveys</h3>
@@ -209,67 +212,12 @@
   <p class="footnote" id="ov-foot"></p>
 </div>
 
-<!-- ---------- 02 FIELD OPS & QUALITY ---------- -->
-<div class="panel" id="panel-ops">
-  <div class="section-header">
-    <div class="section-header-accent"></div>
-    <div>
-      <div class="eyebrow">Section 02</div>
-      <h2>Field Operations &amp; Data Quality</h2>
-      <p>Team-level output, interview length, consent outcomes and the automated data-quality exceptions raised by the nightly build. These are the three signals that usually surface a fieldwork problem before it shows up in the substantive results.</p>
-    </div>
-  </div>
-  <div class="kpi-grid" id="op-kpis"></div>
-  <div class="chart-card full" style="margin-bottom:20px">
-    <h3>Automated Quality Exceptions</h3>
-    <div class="chart-desc">Raised each time the data is rebuilt — resolve or annotate these before the dataset is signed off</div>
-    <div class="flag-list" id="op-flags"></div>
-  </div>
-  <div class="chart-grid cols-2">
-    <div class="chart-card">
-      <h3>Awareness Interviews by Enumerator</h3>
-      <div class="chart-desc">Consented interviews completed per data collector</div>
-      <div class="chart-wrap auto"><canvas id="opEnumAw"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Vendor Visits by Enumerator</h3>
-      <div class="chart-desc">Sampling visits completed per enumerator</div>
-      <div class="chart-wrap auto"><canvas id="opEnumTs"></canvas></div>
-    </div>
-  </div>
-  <div class="chart-grid cols-2">
-    <div class="chart-card">
-      <h3>Interview Duration Distribution</h3>
-      <div class="chart-desc">Awareness interview length in minutes — a long left tail is the classic signature of rushed interviewing</div>
-      <div class="chart-wrap"><canvas id="opDur"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Consent &amp; Attempt Outcome</h3>
-      <div class="chart-desc">Result of every approach recorded on the awareness survey</div>
-      <div class="chart-wrap"><canvas id="opStatus"></canvas></div>
-    </div>
-  </div>
-  <div class="chart-card full" style="margin-bottom:20px">
-    <h3>Enumerator Scorecard</h3>
-    <div class="chart-desc">Output, median interview length and consent rate per enumerator. Sort any column; a short median paired with a high volume is worth a listen-back.</div>
-    <div class="tbl-toolbar">
-      <input type="text" class="tbl-search" id="enum-search" placeholder="Search enumerator…" />
-      <span class="tbl-count" id="enum-count">—</span>
-      <button class="tbl-export" onclick="exportTable('enum')">⤓ Export CSV</button>
-    </div>
-    <div class="tbl-wrap"><div class="tbl-scroll">
-      <table class="dtable" id="enum-table"><thead id="enum-head"></thead><tbody id="enum-body"></tbody></table>
-    </div></div>
-  </div>
-  <p class="footnote">Median durations exclude interviews that ended at the consent stage. Quality exceptions are recomputed on every data rebuild and are advisory — they flag records for human review, they do not drop anything from the dataset.</p>
-</div>
-
 <!-- ---------- 03 MAP ---------- -->
 <div class="panel" id="panel-map">
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 03</div>
+      <div class="eyebrow">Section 02</div>
       <h2>Sampling Geography <span class="scope-tag ts">Sampling survey</span></h2>
       <p>Every vendor visit carries a GPS fix taken at the shop. Points are clustered by proximity — zoom in to separate individual vendors, and click any marker for the vendor record, the turmeric types collected and what was paid.</p>
     </div>
@@ -301,7 +249,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 04</div>
+      <div class="eyebrow">Section 03</div>
       <h2>Sample Collection <span class="scope-tag ts">Sampling survey</span></h2>
       <p>What is actually being banked for the laboratory: which turmeric product types are available on the shelf, which of those were collected, on what basis the enumerator picked each sample, and the profile of the shops being visited.</p>
     </div>
@@ -338,15 +286,21 @@
       <div class="chart-wrap"><canvas id="smSize"></canvas></div>
     </div>
     <div class="chart-card">
-      <h3>Selection Basis by Product Type</h3>
-      <div class="chart-desc">How selection basis varies across product types — 100% stacked</div>
-      <div class="chart-wrap"><canvas id="smBasisType"></canvas></div>
+      <h3>Whole Dried Roots — Display Practice</h3>
+      <div class="chart-desc" id="smRoot-desc">Enumerator observation: whether whole dried roots were on open display or produced from the back on request</div>
+      <div class="chart-wrap"><canvas id="smRootDisplay"></canvas></div>
     </div>
   </div>
+  <div class="chart-card full" style="margin-bottom:20px">
+    <h3>Selection Basis by Product Type</h3>
+    <div class="chart-desc">How selection basis varies across product types — 100% stacked</div>
+    <div class="chart-wrap"><canvas id="smBasisType"></canvas></div>
+  </div>
   <div class="chart-card full">
-    <h3>Samples Banked per Vendor</h3>
-    <div class="chart-desc">How many individual samples each vendor visit yielded — the sampling protocol allows one to three per turmeric type stocked</div>
+    <h3>Samples Banked per Vendor Visit</h3>
+    <div class="chart-desc">Read one bar as: this many vendor visits ended with that many physical samples. The protocol allows one to three samples per turmeric type stocked, so a shop carrying more types yields more samples — and a visit with none is a visit worth checking.</div>
     <div class="chart-wrap"><canvas id="smPerVendor"></canvas></div>
+    <div class="map-note" id="smPerVendor-note"></div>
   </div>
   <p class="footnote" id="sm-foot"></p>
 </div>
@@ -356,7 +310,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 05</div>
+      <div class="eyebrow">Section 04</div>
       <h2>Price &amp; Quantity Analytics <span class="scope-tag ts">Sampling survey</span></h2>
       <p>Every sample records what was paid and how much was bought, so price is normalised to <strong>rupees per kilogram</strong> and made comparable across pack sizes. The question underneath is whether the cheap end of the market — where adulteration pressure is highest — is systematically different.</p>
     </div>
@@ -411,7 +365,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 06</div>
+      <div class="eyebrow">Section 05</div>
       <h2>Retailer Insights <span class="scope-tag aw">Awareness · Retailer module</span></h2>
       <p>The supply side: what vendors stock and sell, how their turnover splits across product types, who they buy from and what drives that choice. This is the commercial context the adulteration findings sit inside.</p>
     </div>
@@ -483,7 +437,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 07</div>
+      <div class="eyebrow">Section 06</div>
       <h2>Consumer Insights <span class="scope-tag aw">Awareness · Consumer module</span></h2>
       <p>The demand side: who is buying turmeric, in what form, how often, how much, and what governs the choice. Purchase form matters directly for exposure — whole roots, loose powder and packaged powder carry very different adulteration risk.</p>
     </div>
@@ -550,7 +504,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 08</div>
+      <div class="eyebrow">Section 07</div>
       <h2>Adulteration Awareness <span class="scope-tag aw">Awareness survey</span></h2>
       <p>The core of the study. Both instruments ask how common adulteration is believed to be, product type by product type, on the same five-point scale — so retailer and consumer perception can be read side by side. Below that: what people believe is being mixed in, and whether lead is named unprompted.</p>
     </div>
@@ -611,7 +565,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 09</div>
+      <div class="eyebrow">Section 08</div>
       <h2>Lead (Sisa) Awareness <span class="scope-tag aw">Awareness survey</span></h2>
       <p>The awareness cascade the campaign is trying to move: knowing what lead is → knowing it reaches turmeric → being concerned about children → knowing what to do about it → actually doing it. Each step loses people, and the size of each drop is where the communication strategy earns or loses its money.</p>
     </div>
@@ -673,7 +627,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 10</div>
+      <div class="eyebrow">Section 09</div>
       <h2>Media &amp; Campaign Recall <span class="scope-tag aw">Awareness survey</span></h2>
       <p>Where the lead-in-turmeric message is actually reaching people, what they retained from it, who they attribute it to, and whether they found it useful. Attribution and message recall together are the closest thing this instrument has to a campaign effectiveness read.</p>
     </div>
@@ -726,7 +680,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 11</div>
+      <div class="eyebrow">Section 10</div>
       <h2>Coverage Tracker</h2>
       <p>City-by-city progress across both workstreams in one table — awareness interviews completed, vendors visited, samples banked, and how much of each city's turmeric product range has actually been covered. Sort any column, search, or export the whole thing.</p>
     </div>
@@ -770,7 +724,7 @@
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 12</div>
+      <div class="eyebrow">Section 11</div>
       <h2>Data Explorer</h2>
       <p>Record-level access to both datasets, honouring whatever filters are set above. Switch dataset, search across every visible column, sort, and export exactly what you are looking at — useful for pulling a case list for back-checks or verification calls.</p>
     </div>
@@ -805,7 +759,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="data/dashboard_data.js?v=20260811194534"></script>
+<script src="data/dashboard_data.js?v=20260812133959"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

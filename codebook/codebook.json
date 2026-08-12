@@ -5145,6 +5145,16 @@
      ],
      "required": true
     },
+    "whole_root_display": {
+     "name": "whole_root_display",
+     "type": "select_one",
+     "label": "Were the whole dried roots openly displayed, or brought from the back/inside the store upon asking?",
+     "raw_label": "Were the whole dried roots openly displayed, or brought from the back/inside the store upon asking?",
+     "group": [],
+     "list_name": "root_display",
+     "relevance": "selected(${shop_sample_type}, '1')",
+     "required": true
+    },
     "survey_status": {
      "name": "survey_status",
      "type": "select_one",
@@ -5191,6 +5201,7 @@
     "quantity_smaple",
     "label_sample",
     "picture_sample",
+    "whole_root_display",
     "survey_status"
    ],
    "choices": {
@@ -5684,10 +5695,20 @@
       "label": "Sultan Town",
       "city": "8"
      }
+    ],
+    "root_display": [
+     {
+      "value": "1",
+      "label": "Openly displayed (visible to customers)"
+     },
+     {
+      "value": "2",
+      "label": "Not displayed – brought from back/inside upon asking"
+     }
     ]
    },
    "source_file": "turmeric_sampling_survey.xlsx",
-   "source_sha256": "3f41b6732dd48fff4e74af593f2e7de88240d252aec32d0a1c6ff79c99d4fbe8"
+   "source_sha256": "95b35fc12773d257a04292dd54c8713f8fc4dcac6b3d954e6b353ab7f03ff6bd"
   }
  }
 }
