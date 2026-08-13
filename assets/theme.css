@@ -336,6 +336,10 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
 
 .tbl-wrap { background:var(--surface); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
 .tbl-scroll { max-height:620px; overflow:auto; }
+/* Horizontal-only scroll for wide tables that don't need the vertical cap —
+   .tbl-scroll's overflow:auto would also clip its own sticky header once
+   scrolled, which this avoids by never scrolling vertically. */
+.tbl-scroll-x { overflow-x:auto; }
 .dtable { width:100%; border-collapse:collapse; font-size:12.5px; }
 .dtable th { background:var(--rs-navy); color:rgba(255,255,255,.92); font-weight:600; text-align:left;
   padding:12px 13px; font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; cursor:pointer;
