@@ -1037,10 +1037,12 @@ function drawOverview() {
   })();
   const rsRetail = Q.rs.filter(r => vendorTypeOf(r) !== 'wholesaler').length;
   const rsWholesale = Q.rs.filter(r => vendorTypeOf(r) === 'wholesaler').length;
+  const tsWholesale = ts.filter(r => r[TS.f.market_name] === '1').length;
+  const tsRetail = ts.length - tsWholesale;
   const leadKnow = leadCascade(con);
   setHTML('ov-callouts', [
     callout('teal', '🗣️', 'Awareness Survey', `${fmt(rsRetail)} retailer, ${fmt(rsWholesale)} wholesaler and ${fmt(Q.cs.length)} consumer interviews completed against a ${fmt(awTarget)} target.`),
-    callout('turmeric', '🧪', 'Sampling Survey', `${fmt(sp.length)} physical samples from ${fmt(ts.length)} vendor visits, averaging ${(sp.length / Math.max(1, ts.length)).toFixed(1)} samples per visit.`),
+    callout('turmeric', '🧪', 'Sampling Survey', `${fmt(tsRetail)} retail-market and ${fmt(tsWholesale)} wholesale-market vendor visits — ${fmt(sp.length)} samples banked, ${(sp.length / Math.max(1, ts.length)).toFixed(1)} per visit.`),
     callout('purple', '📍', 'Heaviest sampling city', `${topCity} samples collected — the largest single-city contribution to the laboratory batch.`),
     callout('amber', '🧠', 'Lead awareness', `${leadKnow.steps[1].pct}% of respondents know what lead is; ${leadKnow.steps[2].pct}% have heard it reaches turmeric.`),
   ].join(''));
@@ -1097,11 +1099,13 @@ function vendorTypeOf(awRow) {
 /* Enumerator-wise collection counts, kept strictly apart by survey: the
    Awareness Survey has no GPS field at all (only vendor visits under the
    Sampling Survey carry a GPS fix), so the two are never blended into one
-   number. */
+   number. Sampling visits split the same way the Market filter does —
+   market_name ('1'=wholesale) says whether that specific vendor is a
+   retail-market or wholesale-market vendor. */
 function enumCollectionRows() {
   const map = new Map();
   const row = name => {
-    if (!map.has(name)) map.set(name, { name, retailer: 0, wholesaler: 0, consumer: 0, awTotal: 0, visits: 0, gps: 0 });
+    if (!map.has(name)) map.set(name, { name, retailer: 0, wholesaler: 0, consumer: 0, awTotal: 0, tsRetail: 0, tsWholesale: 0, visits: 0, gps: 0 });
     return map.get(name);
   };
   Q.con.forEach(r => {
@@ -1118,6 +1122,7 @@ function enumCollectionRows() {
     const name = (enumOf('ts', r[TS.f.enum_name]) || '').trim();
     if (!name) return;
     const rw = row(name);
+    if (r[TS.f.market_name] === '1') rw.tsWholesale++; else rw.tsRetail++;
     rw.visits++;
     if (typeof r[TS.f.lat] === 'number') rw.gps++;
   });
@@ -1134,10 +1139,12 @@ function drawEnumTable() {
     <td class="num">${r.wholesaler ? fmt(r.wholesaler) : '—'}</td>
     <td class="num">${r.consumer ? fmt(r.consumer) : '—'}</td>
     <td class="num strong">${r.awTotal ? fmt(r.awTotal) : '—'}</td>
-    <td class="num">${r.visits ? fmt(r.visits) : '—'}</td>
+    <td class="num">${r.tsRetail ? fmt(r.tsRetail) : '—'}</td>
+    <td class="num">${r.tsWholesale ? fmt(r.tsWholesale) : '—'}</td>
+    <td class="num strong">${r.visits ? fmt(r.visits) : '—'}</td>
     <td class="num">${r.visits ? fmt(r.gps) : '—'}</td>
     <td class="num">${r.visits ? pctOf(r.gps, r.visits) + '%' : '—'}</td>
-  </tr>`).join('') : `<tr><td colspan="8" class="tbl-empty">No field data under the current filters.</td></tr>`;
+  </tr>`).join('') : `<tr><td colspan="10" class="tbl-empty">No field data under the current filters.</td></tr>`;
 }
 
 function cityDist(rows, ds, tbl, idx) {
@@ -1274,9 +1281,11 @@ function drawSampling() {
   const ts = Q.ts, sp = Q.sp;
   const grams = nums(sp, SP.f.qty).reduce((a, b) => a + b, 0);
   const perVendor = ts.map(r => r[TS.f.n_samples] || 0);
+  const tsWholesale = ts.filter(r => r[TS.f.market_name] === '1').length;
+  const tsRetail = ts.length - tsWholesale;
 
   setHTML('sm-kpis', [
-    kpi('🏪', fmt(ts.length), 'Vendor visits', `${fmt(new Set(ts.map(r => cityOf('ts', r[TS.f.sample_city]))).size)} cities`, 'navy', 'turmeric'),
+    kpi('🏪', fmt(ts.length), 'Vendor visits', `${fmt(tsRetail)} retail-market · ${fmt(tsWholesale)} wholesale-market`, 'navy', 'turmeric'),
     kpi('🧪', fmt(sp.length), 'Samples banked', `${(sp.length / Math.max(1, ts.length)).toFixed(1)} per vendor`, 'navy', 'purple'),
     kpi('⚖️', (grams / 1000).toFixed(1), 'Kilograms collected', `Median ${fmt(median(nums(sp, SP.f.qty)))} g per sample`, 'navy', 'teal'),
     kpi('🎨', fmt(new Set(sp.map(r => r[SP.f.type]).filter(Boolean)).size), 'Product types sampled', 'Of 4 in the protocol', 'navy', 'amber'),
