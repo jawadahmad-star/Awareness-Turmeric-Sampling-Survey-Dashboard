@@ -1868,15 +1868,14 @@ function exportTable() {
 
 /* The header is sticky and its height changes with viewport width (the meta
    block wraps), so the filter bar's sticky offset has to be measured, not
-   hard-coded. Same story one layer down: the enumerator table's own two
-   header rows stack below the filter bar, and their row height shifts with
-   the narrow-viewport font-size override, so that offset is measured too. */
+   hard-coded. The enumerator table's own second header row sticks below its
+   first within their shared scroll box (see .tbl-scroll on #ov-enum-table),
+   and that row's height shifts with the narrow-viewport font-size override,
+   so it's measured here too. */
 function syncStickyOffset() {
   const h = document.querySelector('.header');
   if (!h) return;
   document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
-  const fb = document.querySelector('.filterbar');
-  if (fb) document.documentElement.style.setProperty('--filterbar-h', fb.offsetHeight + 'px');
   const r1 = document.querySelector('#ov-enum-table thead tr:first-child');
   if (r1) document.documentElement.style.setProperty('--enum-row1-h', r1.offsetHeight + 'px');
 }
