@@ -1055,7 +1055,8 @@ function drawOverview() {
   const sa = stats(awDur), sv = stats(tsDur);
   const enums = new Set([...con.map(r => enumOf('aw', r[AW.f.Data_Collector])),
     ...ts.map(r => enumOf('ts', r[TS.f.enum_name]))].filter(Boolean).map(x => x.trim()));
-  const gpsOk = ts.filter(r => typeof r[TS.f.lat] === 'number').length;
+  const tsGpsOk = ts.filter(r => typeof r[TS.f.lat] === 'number').length;
+  const awGpsOk = con.filter(r => typeof r[AW.f.lat] === 'number').length;
   setHTML('ov-ops', [
     statBox(fmt(enums.size), 'Active enumerators', 'Across both surveys', 'var(--series-1)'),
     statBox(sa ? fmt1(sa.med) + ' min' : '—', 'Median interview length',
@@ -1064,8 +1065,10 @@ function drawOverview() {
       sv ? `${fmt(sv.n)} visits timed` : '', 'var(--series-8)'),
     statBox((con.length / Math.max(1, days)).toFixed(1), 'Interviews per field day',
       `Across ${fmt(days)} active days`, 'var(--series-4)'),
-    statBox(pctOf(gpsOk, ts.length) + '%', 'Sampling visits with GPS',
-      `${fmt(gpsOk)} of ${fmt(ts.length)} located`, 'var(--series-5)'),
+    statBox(pctOf(awGpsOk, con.length) + '%', 'Awareness interviews with GPS',
+      `${fmt(awGpsOk)} of ${fmt(con.length)} located`, 'var(--series-2)'),
+    statBox(pctOf(tsGpsOk, ts.length) + '%', 'Sampling visits with GPS',
+      `${fmt(tsGpsOk)} of ${fmt(ts.length)} located`, 'var(--series-5)'),
   ].join(''));
 
   drawEnumTable();
@@ -1096,16 +1099,17 @@ function vendorTypeOf(awRow) {
   return pretty(lab('aw', 'type_of_vendor', awRow[i])) === 'Wholesaler' ? 'wholesaler' : 'retailer';
 }
 
-/* Enumerator-wise collection counts, kept strictly apart by survey: the
-   Awareness Survey has no GPS field at all (only vendor visits under the
-   Sampling Survey carry a GPS fix), so the two are never blended into one
+/* Enumerator-wise collection counts, kept strictly apart by survey.
+   Each instrument carries its own GPS question -- geo_2 on the awareness
+   interview itself, "gps" on the sampling vendor visit -- so the two GPS
+   figures are computed and shown separately, never blended into one
    number. Sampling visits split the same way the Market filter does —
    market_name ('1'=wholesale) says whether that specific vendor is a
    retail-market or wholesale-market vendor. */
 function enumCollectionRows() {
   const map = new Map();
   const row = name => {
-    if (!map.has(name)) map.set(name, { name, retailer: 0, wholesaler: 0, consumer: 0, awTotal: 0, tsRetail: 0, tsWholesale: 0, visits: 0, gps: 0 });
+    if (!map.has(name)) map.set(name, { name, retailer: 0, wholesaler: 0, consumer: 0, awTotal: 0, awGps: 0, tsRetail: 0, tsWholesale: 0, visits: 0, tsGps: 0 });
     return map.get(name);
   };
   Q.con.forEach(r => {
@@ -1117,6 +1121,7 @@ function enumCollectionRows() {
       if (vendorTypeOf(r) === 'wholesaler') rw.wholesaler++; else rw.retailer++;
       rw.awTotal++;
     }
+    if (typeof r[AW.f.lat] === 'number') rw.awGps++;
   });
   Q.ts.forEach(r => {
     const name = (enumOf('ts', r[TS.f.enum_name]) || '').trim();
@@ -1124,7 +1129,7 @@ function enumCollectionRows() {
     const rw = row(name);
     if (r[TS.f.market_name] === '1') rw.tsWholesale++; else rw.tsRetail++;
     rw.visits++;
-    if (typeof r[TS.f.lat] === 'number') rw.gps++;
+    if (typeof r[TS.f.lat] === 'number') rw.tsGps++;
   });
   return [...map.values()].sort((a, b) => (b.awTotal + b.visits) - (a.awTotal + a.visits));
 }
@@ -1139,12 +1144,14 @@ function drawEnumTable() {
     <td class="num">${r.wholesaler ? fmt(r.wholesaler) : '—'}</td>
     <td class="num">${r.consumer ? fmt(r.consumer) : '—'}</td>
     <td class="num strong">${r.awTotal ? fmt(r.awTotal) : '—'}</td>
+    <td class="num">${r.awTotal ? fmt(r.awGps) : '—'}</td>
+    <td class="num">${r.awTotal ? pctOf(r.awGps, r.awTotal) + '%' : '—'}</td>
     <td class="num">${r.tsRetail ? fmt(r.tsRetail) : '—'}</td>
     <td class="num">${r.tsWholesale ? fmt(r.tsWholesale) : '—'}</td>
     <td class="num strong">${r.visits ? fmt(r.visits) : '—'}</td>
-    <td class="num">${r.visits ? fmt(r.gps) : '—'}</td>
-    <td class="num">${r.visits ? pctOf(r.gps, r.visits) + '%' : '—'}</td>
-  </tr>`).join('') : `<tr><td colspan="10" class="tbl-empty">No field data under the current filters.</td></tr>`;
+    <td class="num">${r.visits ? fmt(r.tsGps) : '—'}</td>
+    <td class="num">${r.visits ? pctOf(r.tsGps, r.visits) + '%' : '—'}</td>
+  </tr>`).join('') : `<tr><td colspan="12" class="tbl-empty">No field data under the current filters.</td></tr>`;
 }
 
 function cityDist(rows, ds, tbl, idx) {
@@ -1861,11 +1868,17 @@ function exportTable() {
 
 /* The header is sticky and its height changes with viewport width (the meta
    block wraps), so the filter bar's sticky offset has to be measured, not
-   hard-coded. */
+   hard-coded. Same story one layer down: the enumerator table's own two
+   header rows stack below the filter bar, and their row height shifts with
+   the narrow-viewport font-size override, so that offset is measured too. */
 function syncStickyOffset() {
   const h = document.querySelector('.header');
   if (!h) return;
   document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+  const fb = document.querySelector('.filterbar');
+  if (fb) document.documentElement.style.setProperty('--filterbar-h', fb.offsetHeight + 'px');
+  const r1 = document.querySelector('#ov-enum-table thead tr:first-child');
+  if (r1) document.documentElement.style.setProperty('--enum-row1-h', r1.offsetHeight + 'px');
 }
 
 /* =============================== BOOT =============================== */

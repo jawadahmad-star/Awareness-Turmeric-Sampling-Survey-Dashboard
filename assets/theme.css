@@ -353,7 +353,18 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
 .dtable .strong { font-weight:600; color:var(--text); }
 .dtable .sub { font-size:10.5px; color:var(--text-3); text-transform:uppercase; letter-spacing:.4px; }
 .tbl-empty { text-align:center; padding:36px 14px; color:var(--text-3); font-size:13px; }
-#ov-enum-table th { cursor:default; position:static; }
+/* Two header rows, two sticky offsets: row 1 (group labels, plus the
+   rowspan Enumerator cell) sticks right below the site header + filter bar;
+   row 2 (column labels) sticks below row 1 in turn. --enum-row1-h is
+   measured in syncStickyOffset() since row height shifts with the
+   narrow-viewport font/padding overrides below. */
+#ov-enum-table th { cursor:default; }
+#ov-enum-table thead tr:first-child th {
+  position:sticky; top:calc(var(--header-h, 0px) + var(--filterbar-h, 0px)); z-index:3;
+}
+#ov-enum-table thead tr:last-child th {
+  position:sticky; top:calc(var(--header-h, 0px) + var(--filterbar-h, 0px) + var(--enum-row1-h, 0px)); z-index:3;
+}
 #ov-enum-table th.grp-aw { background:var(--teal-700); }
 #ov-enum-table th.grp-ts { background:var(--turmeric-dark); }
 .bar-mini { height:7px; width:88px; background:var(--track); border-radius:99px; overflow:hidden;

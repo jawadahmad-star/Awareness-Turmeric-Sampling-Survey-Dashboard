@@ -321,7 +321,12 @@ def build_awareness(book, tables):
         for rows in tables.values():
             rows_in.extend(rows)
 
-    fields = ["key", "date", "dur"] + AW_META + AW_RS + AW_CS
+    # geo_2 is the instrument's GPS question for the awareness interview
+    # itself (separate from, and named differently to, the sampling side's
+    # "gps" vendor-visit field). Not every export carries it yet -- read_geo
+    # returns (None, None, None) when the column is absent, same as it does
+    # for a skipped fix, so this stays harmless until real coordinates land.
+    fields = ["key", "date", "dur", "lat", "lon", "acc"] + AW_META + AW_RS + AW_CS
     out = []
     for r in rows_in:
         rec = []
@@ -330,10 +335,14 @@ def build_awareness(book, tables):
         if dur is None:
             st, en = parse_dt(r.get("starttime")), parse_dt(r.get("endtime"))
             dur = int((en - st).total_seconds()) if st and en else None
+        lat, lon, acc = read_geo(r, field="geo_2")
         rec.append(norm(r.get("KEY") or r.get("instanceID") or ""))
         rec.append(d)
         rec.append(dur)
-        for f in fields[3:]:
+        rec.append(lat)
+        rec.append(lon)
+        rec.append(acc)
+        for f in fields[6:]:
             k = book.kind(f)
             if k == "select_multiple":
                 rec.append(collect_multi(r, f, book.values(f)) or None)
@@ -624,7 +633,7 @@ def main():
     payload = {
         "meta": meta,
         "labels": {
-            "aw": label_pack(aw_book, aw_fields[3:]),
+            "aw": label_pack(aw_book, aw_fields[6:]),
             "ts": label_pack(ts_book, TS_MAIN_FIELDS + ["sample_type_2"]),
         },
         "aw": {"fields": aw_fields, "rows": aw_rows},
