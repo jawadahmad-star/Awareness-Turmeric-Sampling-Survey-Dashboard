@@ -188,19 +188,12 @@ function buildDimensions() {
 }
 
 /* --- filter state --------------------------------------------------- */
-const F = { city: new Set(), enum: new Set(), resp: new Set(), mktType: new Set(), mktName: new Set(), from: null, to: null };
+const F = { city: new Set(), enum: new Set(), resp: new Set(), mktType: new Set(), mktName: new Set() };
 
-function dateOk(d) {
-  if (!d) return !(F.from || F.to);
-  if (F.from && d < F.from) return false;
-  if (F.to && d > F.to) return false;
-  return true;
-}
 const setOk = (set, v) => set.size === 0 || (v !== null && set.has(v));
 
 function awFiltered() {
   return AW.rows.filter(r =>
-    dateOk(r[AW.f.date]) &&
     setOk(F.city, cityOf('aw', r[AW.f.city])) &&
     setOk(F.enum, (enumOf('aw', r[AW.f.Data_Collector]) || '').trim()) &&
     setOk(F.resp, r[AW.f.Type_of_survey]) &&
@@ -209,7 +202,6 @@ function awFiltered() {
 }
 function tsFiltered() {
   return TS.rows.filter(r =>
-    dateOk(r[TS.f.date]) &&
     setOk(F.city, cityOf('ts', r[TS.f.sample_city])) &&
     setOk(F.enum, (enumOf('ts', r[TS.f.enum_name]) || '').trim()) &&
     setOk(F.mktType, r[TS.f.market_name])
@@ -217,14 +209,13 @@ function tsFiltered() {
 }
 function spFiltered() {
   return SP.rows.filter(r =>
-    dateOk(r[SP.f.date]) &&
     setOk(F.city, cityOf('ts', r[SP.f.city])) &&
     setOk(F.enum, (enumOf('ts', r[SP.f.enum]) || '').trim()) &&
     setOk(F.mktType, r[SP.f.market])
   );
 }
 const filtersActive = () =>
-  F.city.size || F.enum.size || F.resp.size || F.mktType.size || F.mktName.size || F.from || F.to;
+  F.city.size || F.enum.size || F.resp.size || F.mktType.size || F.mktName.size;
 
 /* Working sets, recomputed once per render pass. */
 let Q = {};
@@ -857,22 +848,10 @@ function buildFilterUI() {
   });
   document.addEventListener('click', () => document.querySelectorAll('.fb-menu').forEach(m => m.classList.remove('open')));
   document.querySelectorAll('.fb-menu').forEach(m => m.onclick = e => e.stopPropagation());
-
-  const from = document.getElementById('fb-from'), to = document.getElementById('fb-to');
-  const days = [...new Set([...AW.rows.map(r => r[AW.f.date]), ...TS.rows.map(r => r[TS.f.date])].filter(Boolean))].sort();
-  if (days.length) {
-    from.min = to.min = days[0];
-    from.max = to.max = days[days.length - 1];
-  }
-  from.onchange = () => { F.from = from.value || null; renderAll(); };
-  to.onchange = () => { F.to = to.value || null; renderAll(); };
 }
 
 function clearFilters() {
   F.city.clear(); F.enum.clear(); F.resp.clear(); F.mktType.clear(); F.mktName.clear();
-  F.from = F.to = null;
-  document.getElementById('fb-from').value = '';
-  document.getElementById('fb-to').value = '';
   document.querySelectorAll('.fb-menu input').forEach(cb => { cb.checked = false; });
   renderAll();
   toast('Filters cleared');
@@ -970,8 +949,8 @@ function drawOverview() {
   const grams = nums(sp, SP.f.qty).reduce((a, b) => a + b, 0);
 
   setHTML('ov-kpis', [
-    kpi('🗣️', fmt(con.length), 'Awareness interviews', pctOf(con.length, awTarget) + '% of target', 'navy', 'teal'),
-    kpi('🏪', fmt(ts.length), 'Vendors visited', pctOf(ts.length, tsTarget) + '% of target', 'navy', 'turmeric'),
+    kpi('🗣️', fmt(con.length), 'Awareness Survey interviews', pctOf(con.length, awTarget) + '% of target', 'navy', 'teal'),
+    kpi('🏪', fmt(ts.length), 'Sampling Survey visits', pctOf(ts.length, tsTarget) + '% of target', 'navy', 'turmeric'),
     kpi('🧪', fmt(sp.length), 'Samples banked', (grams / 1000).toFixed(1) + ' kg collected', 'green', 'purple'),
     kpi('📅', fmt(days), 'Field days', dailyAw.length ? 'Avg ' + Math.round(con.length / Math.max(1, days)) + ' interviews/day' : '', 'navy', 'navy'),
     kpi('🏙️', fmt(new Set([...con.map(r => cityOf('aw', r[AW.f.city])), ...ts.map(r => cityOf('ts', r[TS.f.sample_city]))].filter(Boolean)).size), 'Cities active', 'Across both surveys', 'navy', 'amber'),
@@ -983,10 +962,12 @@ function drawOverview() {
     const e = [...c.entries()].sort((a, b) => b[1] - a[1])[0];
     return e ? e[0] + ' (' + e[1] + ')' : '—';
   })();
+  const rsRetail = Q.rs.filter(r => vendorTypeOf(r) !== 'wholesaler').length;
+  const rsWholesale = Q.rs.filter(r => vendorTypeOf(r) === 'wholesaler').length;
   const leadKnow = leadCascade(con);
   setHTML('ov-callouts', [
-    callout('teal', '🗣️', 'Awareness workstream', `${fmt(Q.rs.length)} retailer and ${fmt(Q.cs.length)} consumer interviews completed against a ${fmt(awTarget)} target.`),
-    callout('turmeric', '🧪', 'Sampling workstream', `${fmt(sp.length)} physical samples from ${fmt(ts.length)} vendors, averaging ${(sp.length / Math.max(1, ts.length)).toFixed(1)} samples per vendor.`),
+    callout('teal', '🗣️', 'Awareness Survey', `${fmt(rsRetail)} retailer, ${fmt(rsWholesale)} wholesaler and ${fmt(Q.cs.length)} consumer interviews completed against a ${fmt(awTarget)} target.`),
+    callout('turmeric', '🧪', 'Sampling Survey', `${fmt(sp.length)} physical samples from ${fmt(ts.length)} vendor visits, averaging ${(sp.length / Math.max(1, ts.length)).toFixed(1)} samples per visit.`),
     callout('purple', '📍', 'Heaviest sampling city', `${topCity} samples collected — the largest single-city contribution to the laboratory batch.`),
     callout('amber', '🧠', 'Lead awareness', `${leadKnow.steps[1].pct}% of respondents know what lead is; ${leadKnow.steps[2].pct}% have heard it reaches turmeric.`),
   ].join(''));
@@ -1004,28 +985,86 @@ function drawOverview() {
     statBox(fmt(enums.size), 'Active enumerators', 'Across both surveys', 'var(--series-1)'),
     statBox(sa ? fmt1(sa.med) + ' min' : '—', 'Median interview length',
       sa ? `Middle 50%: ${Math.round(sa.q1)}–${Math.round(sa.q3)} min` : '', 'var(--series-3)'),
-    statBox(sv ? fmt1(sv.med) + ' min' : '—', 'Median vendor visit',
+    statBox(sv ? fmt1(sv.med) + ' min' : '—', 'Median sampling visit',
       sv ? `${fmt(sv.n)} visits timed` : '', 'var(--series-8)'),
     statBox((con.length / Math.max(1, days)).toFixed(1), 'Interviews per field day',
       `Across ${fmt(days)} active days`, 'var(--series-4)'),
-    statBox(pctOf(gpsOk, ts.length) + '%', 'Vendor visits with GPS',
+    statBox(pctOf(gpsOk, ts.length) + '%', 'Sampling visits with GPS',
       `${fmt(gpsOk)} of ${fmt(ts.length)} located`, 'var(--series-5)'),
   ].join(''));
 
-  dualLine('ovDaily', dailyAw, dailyTs, 'Awareness interviews', 'Vendor visits');
+  drawEnumTable();
+
+  dualLine('ovDaily', dailyAw, dailyTs, 'Awareness Survey', 'Sampling Survey');
   progressDonut('ovProgAw', con.length, awTarget, 'interviews');
-  progressDonut('ovProgTs', ts.length, tsTarget, 'vendors');
+  progressDonut('ovProgTs', ts.length, tsTarget, 'vendor visits');
   donutChart('ovMix', [
-    { label: 'Retailer survey', value: Q.rs.length },
-    { label: 'Consumer survey', value: Q.cs.length },
-  ], [S(1), S(8)]);
+    { label: 'Retailer', value: rsRetail },
+    { label: 'Wholesaler', value: rsWholesale },
+    { label: 'Consumer', value: Q.cs.length },
+  ], [S(1), S(5), S(8)]);
 
   barChart('ovAwCity', cityDist(con, 'aw', AW, AW.f.city), S(3), true, '', true);
   barChart('ovTsCity', cityDist(sp, 'ts', SP, SP.f.city), S(8), true, '', true);
   cumulativeChart('ovCumAw', dailyAw, null, 'Cumulative interviews', S(6));
   cumulativeChart('ovCumTs', byDay(sp, SP.f.date), null, 'Cumulative samples', S(4));
 
-  setTxt('ov-foot', `Awareness target ${fmt(awTarget)} consented interviews across ${m.aw.n_cities} cities; sampling target ${fmt(tsTarget)} vendor visits across ${m.ts.n_cities} cities. Data through ${m.data_through || '—'}. ${m.is_demo ? 'DEMONSTRATION DATA — figures are synthetic and generated from the instrument structure, not from fieldwork.' : 'Live fieldwork data.'} Dashboard by Research Solutions (M&A Research Solutions LLC) | www.rs.org.pk`);
+  setTxt('ov-foot', `Awareness Survey target ${fmt(awTarget)} consented interviews across ${m.aw.n_cities} cities; Sampling Survey target ${fmt(tsTarget)} vendor visits across ${m.ts.n_cities} cities. Data through ${m.data_through || '—'}. ${m.is_demo ? 'DEMONSTRATION DATA — figures are synthetic and generated from the instrument structure, not from fieldwork.' : 'Live fieldwork data.'} Dashboard by Research Solutions (M&A Research Solutions LLC) | www.rs.org.pk`);
+}
+
+/* Awareness Survey respondents come in three types: the Retailer_survey
+   instrument covers both Retailer and Wholesaler vendors (told apart by
+   type_of_vendor), and the Consumer_survey instrument covers Consumers. */
+function vendorTypeOf(awRow) {
+  const i = AW.f.type_of_vendor;
+  if (i === undefined) return null;
+  return pretty(lab('aw', 'type_of_vendor', awRow[i])) === 'Wholesaler' ? 'wholesaler' : 'retailer';
+}
+
+/* Enumerator-wise collection counts, kept strictly apart by survey: the
+   Awareness Survey has no GPS field at all (only vendor visits under the
+   Sampling Survey carry a GPS fix), so the two are never blended into one
+   number. */
+function enumCollectionRows() {
+  const map = new Map();
+  const row = name => {
+    if (!map.has(name)) map.set(name, { name, retailer: 0, wholesaler: 0, consumer: 0, awTotal: 0, visits: 0, gps: 0 });
+    return map.get(name);
+  };
+  Q.con.forEach(r => {
+    const name = (enumOf('aw', r[AW.f.Data_Collector]) || '').trim();
+    if (!name) return;
+    const rw = row(name);
+    if (r[AW.f.Type_of_survey] === 'CS') { rw.consumer++; rw.awTotal++; }
+    else if (r[AW.f.Type_of_survey] === 'RS') {
+      if (vendorTypeOf(r) === 'wholesaler') rw.wholesaler++; else rw.retailer++;
+      rw.awTotal++;
+    }
+  });
+  Q.ts.forEach(r => {
+    const name = (enumOf('ts', r[TS.f.enum_name]) || '').trim();
+    if (!name) return;
+    const rw = row(name);
+    rw.visits++;
+    if (typeof r[TS.f.lat] === 'number') rw.gps++;
+  });
+  return [...map.values()].sort((a, b) => (b.awTotal + b.visits) - (a.awTotal + a.visits));
+}
+
+function drawEnumTable() {
+  const body = document.getElementById('ov-enum-body');
+  if (!body) return;
+  const rows = enumCollectionRows();
+  body.innerHTML = rows.length ? rows.map(r => `<tr>
+    <td class="strong">${esc(r.name)}</td>
+    <td class="num">${r.retailer ? fmt(r.retailer) : '—'}</td>
+    <td class="num">${r.wholesaler ? fmt(r.wholesaler) : '—'}</td>
+    <td class="num">${r.consumer ? fmt(r.consumer) : '—'}</td>
+    <td class="num strong">${r.awTotal ? fmt(r.awTotal) : '—'}</td>
+    <td class="num">${r.visits ? fmt(r.visits) : '—'}</td>
+    <td class="num">${r.visits ? fmt(r.gps) : '—'}</td>
+    <td class="num">${r.visits ? pctOf(r.gps, r.visits) + '%' : '—'}</td>
+  </tr>`).join('') : `<tr><td colspan="8" class="tbl-empty">No field data under the current filters.</td></tr>`;
 }
 
 function cityDist(rows, ds, tbl, idx) {

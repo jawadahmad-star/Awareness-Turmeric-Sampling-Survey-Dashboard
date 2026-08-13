@@ -128,10 +128,6 @@
       <div class="fb-menu" id="fb-mkt-menu"></div>
     </div>
 
-    <span class="fb-label" style="margin-left:6px">Dates</span>
-    <input type="date" class="fb-date" id="fb-from" title="From date" />
-    <input type="date" class="fb-date" id="fb-to" title="To date" />
-
     <div class="fb-reset">
       <span class="fb-status" id="fb-status">—</span>
       <button class="fb-clear" onclick="clearFilters()">Reset</button>
@@ -158,10 +154,38 @@
        these summary figures survive here, with no exception list. -->
   <h3 class="strip-title">Field Operations at a Glance</h3>
   <div class="stat-strip" id="ov-ops"></div>
+
+  <h3 class="strip-title">Enumerator-wise Field Collection</h3>
+  <div class="chart-card full" style="margin-bottom:20px">
+    <h3>Records Collected per Enumerator <span class="scope-tag aw" style="margin-right:4px">Awareness survey</span><span class="scope-tag ts">Sampling survey</span></h3>
+    <div class="chart-desc">Two separate field teams, two separate instruments. Awareness Survey interviews are split into its three respondent types — Retailer, Wholesaler and Consumer. Sampling Survey rows are vendor visits made to collect physical samples; GPS is captured only on those visits, not on awareness interviews.</div>
+    <div class="tbl-wrap">
+      <table class="dtable" id="ov-enum-table">
+        <thead>
+          <tr>
+            <th rowspan="2">Enumerator</th>
+            <th colspan="4" class="num grp-aw">Awareness Survey</th>
+            <th colspan="3" class="num grp-ts">Sampling Survey</th>
+          </tr>
+          <tr>
+            <th class="num">Retailer</th>
+            <th class="num">Wholesaler</th>
+            <th class="num">Consumer</th>
+            <th class="num">Total</th>
+            <th class="num">Vendor visits</th>
+            <th class="num">GPS-located</th>
+            <th class="num">GPS %</th>
+          </tr>
+        </thead>
+        <tbody id="ov-enum-body"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="chart-grid cols-2">
     <div class="chart-card full">
       <h3>Daily Field Output — Both Surveys</h3>
-      <div class="chart-desc">Interviews and vendor visits completed on each field day</div>
+      <div class="chart-desc">Awareness Survey interviews and Sampling Survey vendor visits completed on each field day</div>
       <div class="chart-wrap tall"><canvas id="ovDaily"></canvas></div>
     </div>
   </div>
@@ -172,13 +196,13 @@
       <div class="chart-wrap"><canvas id="ovProgAw"></canvas></div>
     </div>
     <div class="chart-card">
-      <h3>Vendor Sampling vs Target</h3>
+      <h3>Sampling Survey vs Target</h3>
       <div class="chart-desc">Vendor visits completed against the sampling target</div>
       <div class="chart-wrap"><canvas id="ovProgTs"></canvas></div>
     </div>
     <div class="chart-card">
-      <h3>Respondent Mix</h3>
-      <div class="chart-desc">Split of consented awareness interviews between the retailer and consumer instruments</div>
+      <h3>Awareness Survey — Respondent Mix</h3>
+      <div class="chart-desc">Split of consented awareness interviews across its three respondent types — Retailer, Wholesaler and Consumer</div>
       <div class="chart-wrap"><canvas id="ovMix"></canvas></div>
     </div>
   </div>

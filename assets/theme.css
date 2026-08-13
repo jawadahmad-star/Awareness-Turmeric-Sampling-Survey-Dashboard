@@ -186,9 +186,6 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
 .fb-mini { flex:1; padding:6px; border:1px solid var(--border); border-radius:7px; background:transparent;
   color:var(--text-2); font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; cursor:pointer; }
 .fb-mini:hover { background:var(--rs-navy-50); color:var(--text); }
-.fb-date { padding:7px 10px; border:1.5px solid var(--border); border-radius:9px; background:var(--surface);
-  color:var(--text); font-family:'Inter',sans-serif; font-size:12px; outline:none; }
-.fb-date:focus { border-color:var(--rs-red); }
 .fb-reset { margin-left:auto; display:flex; align-items:center; gap:10px; }
 .fb-status { font-size:11.5px; color:var(--text-2); font-weight:600; font-variant-numeric:tabular-nums; }
 .fb-status b { color:var(--rs-red); }
@@ -352,6 +349,9 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
 .dtable .strong { font-weight:600; color:var(--text); }
 .dtable .sub { font-size:10.5px; color:var(--text-3); text-transform:uppercase; letter-spacing:.4px; }
 .tbl-empty { text-align:center; padding:36px 14px; color:var(--text-3); font-size:13px; }
+#ov-enum-table th { cursor:default; position:static; }
+#ov-enum-table th.grp-aw { background:var(--teal-700); }
+#ov-enum-table th.grp-ts { background:var(--turmeric-dark); }
 .bar-mini { height:7px; width:88px; background:var(--track); border-radius:99px; overflow:hidden;
   display:inline-block; vertical-align:middle; margin-right:8px; }
 .bar-mini > span { display:block; height:100%; border-radius:99px; }
@@ -473,7 +473,7 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
     -webkit-overflow-scrolling:touch; padding:9px 13px; gap:8px; }
   .filterbar-inner::-webkit-scrollbar { display:none; }
   .fb-label { display:none; }
-  .fb-btn, .fb-date, .fb-clear { flex-shrink:0; font-size:12px; padding:8px 11px; }
+  .fb-btn, .fb-clear { flex-shrink:0; font-size:12px; padding:8px 11px; }
   .fb-reset { margin-left:0; flex-shrink:0; gap:8px; }
   .fb-status { display:none; }
   .fb-menu { max-height:60vh; min-width:210px; }
