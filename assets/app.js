@@ -160,10 +160,23 @@ const NONSUBSTANTIVE = /^(don't know|refused|none|n\/a|not recorded|no response)
 /* --- unified dimensions -------------------------------------------- */
 /* The two instruments use different city and enumerator code frames but
    overlapping real-world names, so every filter works on the name. */
-let CITY_LIST = [], ENUM_LIST = [], MKT_TYPE_LIST = [], MKT_NAME_LIST = [];
+let CITY_LIST = [], ENUM_LIST = [], MKT_TYPE_LIST = [], MKT_NAME_LIST = [], MKT_LOC_LIST = [];
+let TS_BY_KEY = new Map();
 
 function cityOf(ds, code) { return ds === 'aw' ? lab('aw', 'city', code) : lab('ts', 'sample_city', code); }
 function enumOf(ds, code) { return ds === 'aw' ? lab('aw', 'Data_Collector', code) : lab('ts', 'enum_name', code); }
+
+/* Every Sampling Survey vendor visit is either a retail-locality visit or a
+   wholesale-market visit, never both — market_name ('1'=wholesale,
+   '2'=retail) picks which of the two named fields is populated. This key
+   ("field:code") is what the Market filter and locOk() both match on. */
+function samplingLocKey(tsRow) {
+  const isW = tsRow[TS.f.market_name] === '1';
+  const fld = isW ? 'wholesale_market' : 'locality_retail';
+  const v = tsRow[TS.f[fld]];
+  if (v === null || v === undefined || v === '') return null;
+  return fld + ':' + v;
+}
 
 function buildDimensions() {
   const cities = new Set(), enums = new Set();
@@ -185,18 +198,50 @@ function buildDimensions() {
     if (v && !seen.has(v)) { seen.add(v); MKT_NAME_LIST.push({ v, l: lab('aw', 'market_name', v) }); }
   });
   MKT_NAME_LIST.sort((a, b) => a.l.localeCompare(b.l));
+
+  TS_BY_KEY = new Map(TS.rows.map(r => [r[TS.f.key], r]));
+  const locSeen = new Set();
+  MKT_LOC_LIST = [];
+  TS.rows.forEach(r => {
+    const k = samplingLocKey(r);
+    if (!k || locSeen.has(k)) return;
+    locSeen.add(k);
+    const isW = k.startsWith('wholesale_market:');
+    MKT_LOC_LIST.push({ v: k, l: pretty(lab('ts', isW ? 'wholesale_market' : 'locality_retail', r[TS.f[isW ? 'wholesale_market' : 'locality_retail']])), isW });
+  });
+  MKT_LOC_LIST.sort((a, b) => (a.isW === b.isW) ? a.l.localeCompare(b.l) : (a.isW ? -1 : 1));
 }
 
 /* --- filter state --------------------------------------------------- */
-const F = { city: new Set(), enum: new Set(), resp: new Set(), mktType: new Set(), mktName: new Set() };
+const F = { city: new Set(), enum: new Set(), resp: new Set(), mktType: new Set(), mktName: new Set(), mktLoc: new Set() };
 
 const setOk = (set, v) => set.size === 0 || (v !== null && set.has(v));
+
+/* Awareness Survey respondents are filtered on their real-world type, not
+   the raw instrument code: the Retailer_survey instrument's type_of_vendor
+   splits Retailer vs Wholesaler, and the Consumer_survey instrument's Q_1
+   (bought for HH or business use) splits Household vs Business — a "both"
+   answer belongs to both consumer categories at once. */
+function respCategoriesOf(awRow) {
+  const t = awRow[AW.f.Type_of_survey];
+  if (t === 'RS') return [vendorTypeOf(awRow)];
+  if (t === 'CS') {
+    const v = pretty(lab('aw', 'Q_1', awRow[AW.f.Q_1]));
+    const cats = [];
+    if (/HH|both/i.test(v)) cats.push('hh');
+    if (/business|both/i.test(v)) cats.push('biz');
+    return cats;
+  }
+  return [];
+}
+const respOk = r => F.resp.size === 0 || respCategoriesOf(r).some(c => F.resp.has(c));
+const locOk = tsRow => F.mktLoc.size === 0 || F.mktLoc.has(samplingLocKey(tsRow));
 
 function awFiltered() {
   return AW.rows.filter(r =>
     setOk(F.city, cityOf('aw', r[AW.f.city])) &&
     setOk(F.enum, (enumOf('aw', r[AW.f.Data_Collector]) || '').trim()) &&
-    setOk(F.resp, r[AW.f.Type_of_survey]) &&
+    respOk(r) &&
     setOk(F.mktName, r[AW.f.market_name])
   );
 }
@@ -204,18 +249,20 @@ function tsFiltered() {
   return TS.rows.filter(r =>
     setOk(F.city, cityOf('ts', r[TS.f.sample_city])) &&
     setOk(F.enum, (enumOf('ts', r[TS.f.enum_name]) || '').trim()) &&
-    setOk(F.mktType, r[TS.f.market_name])
+    setOk(F.mktType, r[TS.f.market_name]) &&
+    locOk(r)
   );
 }
 function spFiltered() {
   return SP.rows.filter(r =>
     setOk(F.city, cityOf('ts', r[SP.f.city])) &&
     setOk(F.enum, (enumOf('ts', r[SP.f.enum]) || '').trim()) &&
-    setOk(F.mktType, r[SP.f.market])
+    setOk(F.mktType, r[SP.f.market]) &&
+    (F.mktLoc.size === 0 || (TS_BY_KEY.has(r[SP.f.vkey]) && locOk(TS_BY_KEY.get(r[SP.f.vkey]))))
   );
 }
 const filtersActive = () =>
-  F.city.size || F.enum.size || F.resp.size || F.mktType.size || F.mktName.size;
+  F.city.size || F.enum.size || F.resp.size || F.mktType.size || F.mktName.size || F.mktLoc.size;
 
 /* Working sets, recomputed once per render pass. */
 let Q = {};
@@ -814,24 +861,50 @@ function buildFilterUI() {
 
   mkMenu('fb-city-menu', CITY_LIST, F.city);
   mkMenu('fb-enum-menu', ENUM_LIST, F.enum);
-  mkMenu('fb-resp-menu', [{ v: 'RS', l: 'Retailer survey' }, { v: 'CS', l: 'Consumer survey' }], F.resp);
 
+  // Respondent is Awareness-Survey-only and always names the real-world
+  // type, grouped by which instrument asks it — never the bare word
+  // "Retailer" on its own, which is also a Sampling Survey market type.
+  const grpHead = (label, first) => `<div style="font-size:9.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);padding:${first ? '4px' : '9px'} 9px 5px${first ? '' : ';border-top:1px solid var(--border);margin-top:6px'}">${esc(label)}</div>`;
+  const respOpt = (v, l) => `<label class="fb-opt"><input type="checkbox" value="${esc(v)}" ${F.resp.has(v) ? 'checked' : ''}><span>${esc(l)}</span></label>`;
+  const respMenu = document.getElementById('fb-resp-menu');
+  respMenu.innerHTML =
+    grpHead('Awareness · Retailer survey', true) +
+    respOpt('retailer', 'Retailer') + respOpt('wholesaler', 'Wholesaler') +
+    grpHead('Awareness · Consumer survey', false) +
+    respOpt('hh', 'Household consumer') + respOpt('biz', 'Business consumer') +
+    `<div class="fb-menu-foot"><button class="fb-mini" data-act="none">Clear</button></div>`;
+  respMenu.querySelectorAll('input').forEach(cb => {
+    cb.onchange = () => { cb.checked ? F.resp.add(cb.value) : F.resp.delete(cb.value); renderAll(); };
+  });
+  respMenu.querySelector('.fb-mini').onclick = () => {
+    F.resp.clear();
+    respMenu.querySelectorAll('input').forEach(cb => { cb.checked = false; });
+    renderAll();
+  };
+
+  // Market covers both surveys but keeps them in clearly separate groups:
+  // the Sampling Survey's broad market type, then its actual named retail
+  // localities and wholesale markets, then the Awareness Survey's named
+  // markets — three groups, never mixed.
   const mktMenu = document.getElementById('fb-mkt-menu');
   mktMenu.innerHTML =
-    `<div style="font-size:9.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);padding:4px 9px 5px">Market type · sampling</div>` +
+    grpHead('Market type · sampling', true) +
     MKT_TYPE_LIST.map(it => `<label class="fb-opt"><input type="checkbox" data-g="t" value="${esc(it.v)}"><span>${esc(it.l)}</span></label>`).join('') +
-    `<div style="font-size:9.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);padding:9px 9px 5px;border-top:1px solid var(--border);margin-top:6px">Named market · awareness</div>` +
+    grpHead('Named market · sampling', false) +
+    MKT_LOC_LIST.map(it => `<label class="fb-opt"><input type="checkbox" data-g="l" value="${esc(it.v)}"><span>${esc(short(it.l, 34))} <span style="opacity:.55">· ${it.isW ? 'Wholesale' : 'Retail'}</span></span></label>`).join('') +
+    grpHead('Named market · awareness', false) +
     MKT_NAME_LIST.map(it => `<label class="fb-opt"><input type="checkbox" data-g="n" value="${esc(it.v)}"><span>${esc(short(it.l, 34))}</span></label>`).join('') +
     `<div class="fb-menu-foot"><button class="fb-mini" data-act="none">Clear all</button></div>`;
   mktMenu.querySelectorAll('input').forEach(cb => {
     cb.onchange = () => {
-      const set = cb.dataset.g === 't' ? F.mktType : F.mktName;
+      const set = cb.dataset.g === 't' ? F.mktType : cb.dataset.g === 'l' ? F.mktLoc : F.mktName;
       cb.checked ? set.add(cb.value) : set.delete(cb.value);
       renderAll();
     };
   });
   mktMenu.querySelector('.fb-mini').onclick = () => {
-    F.mktType.clear(); F.mktName.clear();
+    F.mktType.clear(); F.mktLoc.clear(); F.mktName.clear();
     mktMenu.querySelectorAll('input').forEach(cb => { cb.checked = false; });
     renderAll();
   };
@@ -851,7 +924,7 @@ function buildFilterUI() {
 }
 
 function clearFilters() {
-  F.city.clear(); F.enum.clear(); F.resp.clear(); F.mktType.clear(); F.mktName.clear();
+  F.city.clear(); F.enum.clear(); F.resp.clear(); F.mktType.clear(); F.mktName.clear(); F.mktLoc.clear();
   document.querySelectorAll('.fb-menu input').forEach(cb => { cb.checked = false; });
   renderAll();
   toast('Filters cleared');
@@ -869,7 +942,7 @@ function paintFilterButtons() {
   set('fb-enum-btn', F.enum, '👤 Enumerator');
   set('fb-resp-btn', F.resp, '🧍 Respondent');
   const mb = document.getElementById('fb-mkt-btn');
-  const nm = F.mktType.size + F.mktName.size;
+  const nm = F.mktType.size + F.mktLoc.size + F.mktName.size;
   mb.classList.toggle('on', nm > 0);
   mb.innerHTML = '🏬 Market ' + (nm ? `<span class="fb-count">${nm}</span>` : '') + ' <span class="fb-caret">▼</span>';
 
