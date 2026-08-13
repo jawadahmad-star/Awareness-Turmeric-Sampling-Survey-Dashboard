@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
-<meta name="description" content="Turmeric Quality Programme — awareness follow-up and market sampling analytics. Research Solutions." />
-<title>Turmeric Quality Dashboard — Research Solutions</title>
+<meta name="description" content="Turmeric Study Dashboard — awareness follow-up and market sampling analytics. Research Solutions." />
+<title>Turmeric Study Dashboard — Research Solutions</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🟡</text></svg>" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
   <div class="auth-card">
     <div class="auth-logo">🟡</div>
     <div class="auth-demo" id="auth-demo-chip" style="display:none">Demonstration Data</div>
-    <div class="auth-title">Turmeric Quality Dashboard</div>
+    <div class="auth-title">Turmeric Study Dashboard</div>
     <div class="auth-subtitle">Awareness Follow-up &amp; Market Sampling<br>Restricted access — authorised programme staff only.</div>
     <label class="auth-label" for="auth-pw">Access Password</label>
     <input id="auth-pw" class="auth-input" type="password" placeholder="Enter password"
@@ -63,7 +63,7 @@
         </div>
       </div>
       <div class="header-study">
-        <div class="header-study-title">Turmeric Quality Programme <span class="demo-chip" id="hdr-demo-chip" style="display:none">Demo Data</span></div>
+        <div class="header-study-title">Turmeric Study Dashboard <span class="demo-chip" id="hdr-demo-chip" style="display:none">Demo Data</span></div>
         <div class="header-study-sub">Awareness Follow-up · Market Sampling · Lead Adulteration Surveillance</div>
       </div>
       <div class="header-meta">
@@ -80,14 +80,11 @@
       <button class="nav-tab active" data-panel="overview" data-full="Overview">📊 Overview</button>
       <button class="nav-tab" data-panel="map" data-full="Sampling Map">🗺️ Map</button>
       <button class="nav-tab" data-panel="sampling" data-full="Sample Collection">🧪 Sampling</button>
-      <button class="nav-tab" data-panel="price" data-full="Price Analytics">💰 Prices</button>
       <button class="nav-tab" data-panel="retail" data-full="Retailer Insights">🏪 Retailers</button>
       <button class="nav-tab" data-panel="consumer" data-full="Consumer Insights">🛒 Consumers</button>
       <button class="nav-tab" data-panel="adult" data-full="Adulteration Awareness">⚠️ Adulteration</button>
       <button class="nav-tab" data-panel="lead" data-full="Lead (Sisa) Awareness">🧠 Lead</button>
-      <button class="nav-tab" data-panel="media" data-full="Media & Campaign Recall">📻 Media</button>
       <button class="nav-tab" data-panel="coverage" data-full="Coverage Tracker">📋 Coverage</button>
-      <button class="nav-tab" data-panel="explorer" data-full="Data Explorer">🔎 Explorer</button>
     </nav>
     <!-- The tab strip cannot fit a phone without being clipped, so below the
          tablet breakpoint the nav becomes a native picker instead. Populated
@@ -164,7 +161,7 @@
   <div class="chart-grid cols-2">
     <div class="chart-card full">
       <h3>Daily Field Output — Both Surveys</h3>
-      <div class="chart-desc">Interviews and vendor visits completed each field day, with a 3-day rolling average on each series</div>
+      <div class="chart-desc">Interviews and vendor visits completed on each field day</div>
       <div class="chart-wrap tall"><canvas id="ovDaily"></canvas></div>
     </div>
   </div>
@@ -200,7 +197,7 @@
   <div class="chart-grid cols-2">
     <div class="chart-card">
       <h3>Cumulative Awareness Interviews</h3>
-      <div class="chart-desc">Running total of consented interviews against the target line</div>
+      <div class="chart-desc">Running total of consented interviews to date</div>
       <div class="chart-wrap"><canvas id="ovCumAw"></canvas></div>
     </div>
     <div class="chart-card">
@@ -212,7 +209,7 @@
   <p class="footnote" id="ov-foot"></p>
 </div>
 
-<!-- ---------- 03 MAP ---------- -->
+<!-- ---------- 02 MAP ---------- -->
 <div class="panel" id="panel-map">
   <div class="section-header">
     <div class="section-header-accent"></div>
@@ -244,7 +241,7 @@
   <p class="footnote">Basemap © OpenStreetMap contributors. GPS points are jittered only by device accuracy, not deliberately — vendor coordinates should be treated as commercially sensitive and not republished outside the programme.</p>
 </div>
 
-<!-- ---------- 04 SAMPLING ---------- -->
+<!-- ---------- 03 SAMPLING ---------- -->
 <div class="panel" id="panel-sampling">
   <div class="section-header">
     <div class="section-header-accent"></div>
@@ -305,67 +302,12 @@
   <p class="footnote" id="sm-foot"></p>
 </div>
 
-<!-- ---------- 05 PRICE ---------- -->
-<div class="panel" id="panel-price">
-  <div class="section-header">
-    <div class="section-header-accent"></div>
-    <div>
-      <div class="eyebrow">Section 04</div>
-      <h2>Price &amp; Quantity Analytics <span class="scope-tag ts">Sampling survey</span></h2>
-      <p>Every sample records what was paid and how much was bought, so price is normalised to <strong>rupees per kilogram</strong> and made comparable across pack sizes. The question underneath is whether the cheap end of the market — where adulteration pressure is highest — is systematically different.</p>
-    </div>
-  </div>
-  <div class="kpi-grid" id="pr-kpis"></div>
-  <div class="chart-card full" style="margin-bottom:20px">
-    <h3>Price Spread by Product Type</h3>
-    <div class="chart-desc">Box shows the middle half of samples (25th–75th percentile), the line inside is the median, whiskers reach the 5th and 95th percentile. Rs per kg.</div>
-    <div class="chart-wrap tall"><canvas id="prBox"></canvas></div>
-  </div>
-  <div class="chart-grid cols-2">
-    <div class="chart-card">
-      <h3>Median Price by City</h3>
-      <div class="chart-desc">Median rupees per kilogram across all sampled product types</div>
-      <div class="chart-wrap auto"><canvas id="prCity"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Price by Selection Basis</h3>
-      <div class="chart-desc">Median Rs/kg by why the sample was chosen — a premium on visibly bright product is the pattern to watch</div>
-      <div class="chart-wrap"><canvas id="prBasis"></canvas></div>
-    </div>
-  </div>
-  <div class="chart-grid cols-2">
-    <div class="chart-card">
-      <h3>Price vs Quantity Purchased</h3>
-      <div class="chart-desc">Each point is one sample — total price paid against grams collected, coloured by product type. Quantities cluster on standard collection weights, so read the vertical spread within each band.</div>
-      <div class="chart-wrap tall"><canvas id="prScatter"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Price Distribution</h3>
-      <div class="chart-desc">How all sampled prices per kilogram are spread across the market</div>
-      <div class="chart-wrap tall"><canvas id="prHist"></canvas></div>
-    </div>
-  </div>
-  <div class="chart-grid cols-2">
-    <div class="chart-card">
-      <h3>Wholesale vs Retail Price</h3>
-      <div class="chart-desc">Median Rs/kg by market type and product type</div>
-      <div class="chart-wrap"><canvas id="prMkt"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Sample Quantity Collected</h3>
-      <div class="chart-desc">Grams collected per sample against protocol expectations</div>
-      <div class="chart-wrap"><canvas id="prQty"></canvas></div>
-    </div>
-  </div>
-  <p class="footnote" id="pr-foot"></p>
-</div>
-
-<!-- ---------- 06 RETAILER ---------- -->
+<!-- ---------- 04 RETAILER ---------- -->
 <div class="panel" id="panel-retail">
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 05</div>
+      <div class="eyebrow">Section 04</div>
       <h2>Retailer Insights <span class="scope-tag aw">Awareness · Retailer module</span></h2>
       <p>The supply side: what vendors stock and sell, how their turnover splits across product types, who they buy from and what drives that choice. This is the commercial context the adulteration findings sit inside.</p>
     </div>
@@ -432,12 +374,12 @@
   <p class="footnote" id="rt-foot"></p>
 </div>
 
-<!-- ---------- 07 CONSUMER ---------- -->
+<!-- ---------- 05 CONSUMER ---------- -->
 <div class="panel" id="panel-consumer">
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 06</div>
+      <div class="eyebrow">Section 05</div>
       <h2>Consumer Insights <span class="scope-tag aw">Awareness · Consumer module</span></h2>
       <p>The demand side: who is buying turmeric, in what form, how often, how much, and what governs the choice. Purchase form matters directly for exposure — whole roots, loose powder and packaged powder carry very different adulteration risk.</p>
     </div>
@@ -499,12 +441,12 @@
   <p class="footnote" id="cs-foot"></p>
 </div>
 
-<!-- ---------- 08 ADULTERATION ---------- -->
+<!-- ---------- 06 ADULTERATION ---------- -->
 <div class="panel" id="panel-adult">
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 07</div>
+      <div class="eyebrow">Section 06</div>
       <h2>Adulteration Awareness <span class="scope-tag aw">Awareness survey</span></h2>
       <p>The core of the study. Both instruments ask how common adulteration is believed to be, product type by product type, on the same five-point scale — so retailer and consumer perception can be read side by side. Below that: what people believe is being mixed in, and whether lead is named unprompted.</p>
     </div>
@@ -560,12 +502,12 @@
   <p class="footnote" id="ad-foot"></p>
 </div>
 
-<!-- ---------- 09 LEAD ---------- -->
+<!-- ---------- 07 LEAD ---------- -->
 <div class="panel" id="panel-lead">
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 08</div>
+      <div class="eyebrow">Section 07</div>
       <h2>Lead (Sisa) Awareness <span class="scope-tag aw">Awareness survey</span></h2>
       <p>The awareness cascade the campaign is trying to move: knowing what lead is → knowing it reaches turmeric → being concerned about children → knowing what to do about it → actually doing it. Each step loses people, and the size of each drop is where the communication strategy earns or loses its money.</p>
     </div>
@@ -622,65 +564,12 @@
   <p class="footnote" id="ld-foot"></p>
 </div>
 
-<!-- ---------- 10 MEDIA ---------- -->
-<div class="panel" id="panel-media">
-  <div class="section-header">
-    <div class="section-header-accent"></div>
-    <div>
-      <div class="eyebrow">Section 09</div>
-      <h2>Media &amp; Campaign Recall <span class="scope-tag aw">Awareness survey</span></h2>
-      <p>Where the lead-in-turmeric message is actually reaching people, what they retained from it, who they attribute it to, and whether they found it useful. Attribution and message recall together are the closest thing this instrument has to a campaign effectiveness read.</p>
-    </div>
-  </div>
-  <div class="kpi-grid" id="md-kpis"></div>
-  <div class="chart-card full" style="margin-bottom:20px">
-    <h3>Information Channels Reaching Respondents</h3>
-    <div class="chart-desc">Every channel named as a source of lead-in-turmeric information, across both instruments — multiple answers per respondent</div>
-    <div class="chart-wrap auto"><canvas id="mdChannels"></canvas></div>
-  </div>
-  <div class="chart-grid cols-2">
-    <div class="chart-card">
-      <h3>What Was Remembered</h3>
-      <div class="chart-desc">Message content recalled by those exposed through media</div>
-      <div class="chart-wrap auto"><canvas id="mdRemember"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Message Attributed To</h3>
-      <div class="chart-desc">Who respondents believed the message came from</div>
-      <div class="chart-wrap auto"><canvas id="mdFrom"></canvas></div>
-    </div>
-  </div>
-  <div class="chart-grid cols-3">
-    <div class="chart-card">
-      <h3>Exposure Frequency</h3>
-      <div class="chart-desc">How many times the message was seen or heard</div>
-      <div class="chart-wrap short"><canvas id="mdTimes"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Perceived Usefulness</h3>
-      <div class="chart-desc">What respondents thought of the message</div>
-      <div class="chart-wrap short"><canvas id="mdUseful"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Anything Not Understood</h3>
-      <div class="chart-desc">Whether part of the message was unclear</div>
-      <div class="chart-wrap short"><canvas id="mdUnclear"></canvas></div>
-    </div>
-  </div>
-  <div class="chart-card full">
-    <h3>Channel Reach by City</h3>
-    <div class="chart-desc">Share of respondents in each city reached through the four broadcast and social channels the campaign uses</div>
-    <div class="chart-wrap tall"><canvas id="mdCity"></canvas></div>
-  </div>
-  <p class="footnote" id="md-foot"></p>
-</div>
-
-<!-- ---------- 11 COVERAGE ---------- -->
+<!-- ---------- 08 COVERAGE ---------- -->
 <div class="panel" id="panel-coverage">
   <div class="section-header">
     <div class="section-header-accent"></div>
     <div>
-      <div class="eyebrow">Section 10</div>
+      <div class="eyebrow">Section 08</div>
       <h2>Coverage Tracker</h2>
       <p>City-by-city progress across both workstreams in one table — awareness interviews completed, vendors visited, samples banked, and how much of each city's turmeric product range has actually been covered. Sort any column, search, or export the whole thing.</p>
     </div>
@@ -698,7 +587,7 @@
         <option value="aw">Awareness only</option>
       </select>
       <span class="tbl-count" id="cov-count">—</span>
-      <button class="tbl-export" onclick="exportTable('cov')">⤓ Export CSV</button>
+      <button class="tbl-export" onclick="exportTable()">⤓ Export CSV</button>
     </div>
     <div class="tbl-wrap"><div class="tbl-scroll">
       <table class="dtable" id="cov-table"><thead id="cov-head"></thead><tbody id="cov-body"></tbody></table>
@@ -719,38 +608,10 @@
   <p class="footnote" id="cv-foot"></p>
 </div>
 
-<!-- ---------- 12 EXPLORER ---------- -->
-<div class="panel" id="panel-explorer">
-  <div class="section-header">
-    <div class="section-header-accent"></div>
-    <div>
-      <div class="eyebrow">Section 11</div>
-      <h2>Data Explorer</h2>
-      <p>Record-level access to both datasets, honouring whatever filters are set above. Switch dataset, search across every visible column, sort, and export exactly what you are looking at — useful for pulling a case list for back-checks or verification calls.</p>
-    </div>
-  </div>
-  <div class="chart-card full">
-    <div class="tbl-toolbar">
-      <select class="tbl-filter" id="exp-dataset">
-        <option value="aw">Awareness — submissions</option>
-        <option value="ts">Sampling — vendor visits</option>
-        <option value="sp">Sampling — individual samples</option>
-      </select>
-      <input type="text" class="tbl-search" id="exp-search" placeholder="Search across all columns…" />
-      <span class="tbl-count" id="exp-count">—</span>
-      <button class="tbl-export" onclick="exportTable('exp')">⤓ Export CSV</button>
-    </div>
-    <div class="tbl-wrap"><div class="tbl-scroll">
-      <table class="dtable" id="exp-table"><thead id="exp-head"></thead><tbody id="exp-body"></tbody></table>
-    </div></div>
-    <p class="footnote" id="exp-foot">Showing the first 400 matching records for responsiveness — the CSV export contains every record that matches the current filters and search.</p>
-  </div>
-</div>
-
 </div><!-- /main -->
 
 <div class="page-footer">
-  <strong>Turmeric Quality Programme</strong> — Awareness Follow-up &amp; Market Sampling<br>
+  <strong>Turmeric Study Dashboard</strong> — Awareness Follow-up &amp; Market Sampling<br>
   Dashboard by <strong>Research Solutions</strong> (M&amp;A Research Solutions LLC) · www.rs.org.pk · turmericstudy.rs.org.pk<br>
   <span id="foot-build">—</span>
 </div>

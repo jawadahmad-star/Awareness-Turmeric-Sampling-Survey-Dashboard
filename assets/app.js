@@ -1,10 +1,10 @@
 /* ==========================================================================
-   Turmeric Quality Dashboard — application logic
+   Turmeric Study Dashboard — application logic
    Research Solutions (M&A Research Solutions LLC)
 
    The payload in data/dashboard_data.js is record-level, not pre-aggregated.
    Everything on screen is computed here, which is what lets the filter bar
-   re-cut all eleven panels without a round trip to the server.
+   re-cut all eight panels without a round trip to the server.
    ========================================================================== */
 
 /* ============================ ACCESS GATE ============================ */
@@ -603,16 +603,13 @@ function dualLine(id, seriesA, seriesB, nameA, nameB) {
   clearEmpty(id);
   const pick = (s, d) => { const h = s.find(x => x.date === d); return h ? h.count : 0; };
   const a = dates.map(d => pick(seriesA, d)), b = dates.map(d => pick(seriesB, d));
-  const roll = v => v.map((_, i) => { const s = Math.max(0, i - 2), w = v.slice(s, i + 1); return +(w.reduce((x, y) => x + y, 0) / w.length).toFixed(1); });
   mk(id, {
     type: 'line',
     data: {
       labels: dates,
       datasets: [
-        { label: nameA, data: a, borderColor: S(1), backgroundColor: 'rgba(60,84,157,.10)', fill: true, tension: .3, pointBackgroundColor: S(1), pointRadius: 3, pointHoverRadius: 6, borderWidth: 2.5, order: 3 },
-        { label: nameB, data: b, borderColor: S(8), backgroundColor: 'rgba(204,133,27,.10)', fill: true, tension: .3, pointBackgroundColor: S(8), pointRadius: 3, pointHoverRadius: 6, borderWidth: 2.5, order: 4 },
-        { label: nameA + ' · 3-day avg', data: roll(a), borderColor: S(1), borderDash: [6, 5], borderWidth: 1.6, pointRadius: 0, fill: false, tension: .35, order: 1 },
-        { label: nameB + ' · 3-day avg', data: roll(b), borderColor: S(8), borderDash: [6, 5], borderWidth: 1.6, pointRadius: 0, fill: false, tension: .35, order: 2 },
+        { label: nameA, data: a, borderColor: S(1), backgroundColor: 'rgba(60,84,157,.10)', fill: true, tension: .3, pointBackgroundColor: S(1), pointRadius: 3, pointHoverRadius: 6, borderWidth: 2.5, order: 1 },
+        { label: nameB, data: b, borderColor: S(8), backgroundColor: 'rgba(204,133,27,.10)', fill: true, tension: .3, pointBackgroundColor: S(8), pointRadius: 3, pointHoverRadius: 6, borderWidth: 2.5, order: 2 },
       ],
     },
     options: baseOpts({
@@ -730,114 +727,6 @@ function stacked100(id, labels, series, horizontal) {
       scales: {
         x: { stacked: true, max: horizontal ? 100 : undefined, ticks: { font: { family: 'Inter', size: 11 }, color: TXT(), autoSkip: false, maxRotation: 0, callback: function (v) { return horizontal ? v + '%' : wrapTick(this.getLabelForValue(v), 14); } }, grid: { display: horizontal, color: GRID() }, border: { display: false } },
         y: { stacked: true, max: horizontal ? undefined : 100, ticks: { font: { family: 'Inter', size: 11 }, color: TXT(), autoSkip: false, callback: function (v) { return horizontal ? wrapTick(this.getLabelForValue(v), 22) : v + '%'; } }, grid: { display: !horizontal, color: GRID() }, border: { display: false } },
-      },
-    }),
-  });
-}
-
-/* Box plot built from floating bars plus a plugin for median and whiskers.
-   Chart.js has no native box type and the study does not warrant pulling in
-   another dependency for four boxes. */
-function boxPlot(id, groups, unit) {
-  const g = groups.filter(x => x.s);
-  if (!g.length) return noData(id);
-  clearEmpty(id);
-  const u = unit || '';
-  mk(id, {
-    type: 'bar',
-    data: {
-      labels: g.map(x => x.label),
-      datasets: [{
-        label: 'Interquartile range',
-        data: g.map(x => [x.s.q1, x.s.q3]),
-        backgroundColor: g.map((_, i) => S((i % 8) + 1) + 'CC'),
-        borderColor: g.map((_, i) => S((i % 8) + 1)),
-        borderWidth: 1.5, borderSkipped: false, borderRadius: 4, maxBarThickness: 74,
-      }],
-    },
-    options: baseOpts({
-      layout: { padding: { top: 26, bottom: 6 } },
-      plugins: {
-        legend: { display: false },
-        datalabels: { display: false },
-        tooltip: {
-          callbacks: {
-            title: it => g[it[0].dataIndex].label,
-            label: c => {
-              const s = g[c.dataIndex].s;
-              return [
-                ' Median: ' + fmt(Math.round(s.med)) + u,
-                ' Middle 50%: ' + fmt(Math.round(s.q1)) + ' – ' + fmt(Math.round(s.q3)) + u,
-                ' 5th–95th: ' + fmt(Math.round(s.p05)) + ' – ' + fmt(Math.round(s.p95)) + u,
-                ' Samples: ' + fmt(s.n),
-              ];
-            },
-          },
-        },
-      },
-      scales: {
-        x: { ticks: { font: { family: 'Inter', size: isNarrow() ? 9.5 : 11.5, weight: '600' }, color: TXT(), autoSkip: false, maxRotation: 0, callback: function (v) { return wrapTick(this.getLabelForValue(v), isNarrow() ? 9 : 16); } }, grid: { display: false }, border: { display: false } },
-        y: { beginAtZero: false, grace: '10%', ticks: { font: { family: 'Inter', size: 11 }, color: TXT(), callback: v => fmt(v) }, grid: { color: GRID() }, border: { display: false }, title: { display: !!u, text: 'Rupees per kilogram', font: { family: 'Inter', size: 11, weight: '600' }, color: TXT() } },
-      },
-    }),
-    plugins: [{
-      id: 'boxwhisker',
-      afterDatasetsDraw(c) {
-        const { ctx, scales: { y } } = c;
-        const els = c.getDatasetMeta(0).data;
-        ctx.save();
-        els.forEach((el, i) => {
-          const s = g[i].s;
-          const cx = el.x, w = (el.width || 40) * 0.62, half = w / 2;
-          const col = S((i % 8) + 1);
-          // whiskers
-          ctx.strokeStyle = col; ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(cx, y.getPixelForValue(s.q3)); ctx.lineTo(cx, y.getPixelForValue(s.p95));
-          ctx.moveTo(cx - half * .5, y.getPixelForValue(s.p95)); ctx.lineTo(cx + half * .5, y.getPixelForValue(s.p95));
-          ctx.moveTo(cx, y.getPixelForValue(s.q1)); ctx.lineTo(cx, y.getPixelForValue(s.p05));
-          ctx.moveTo(cx - half * .5, y.getPixelForValue(s.p05)); ctx.lineTo(cx + half * .5, y.getPixelForValue(s.p05));
-          ctx.stroke();
-          // median
-          ctx.strokeStyle = SURF(); ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(cx - half, y.getPixelForValue(s.med)); ctx.lineTo(cx + half, y.getPixelForValue(s.med));
-          ctx.stroke();
-          // median label
-          ctx.fillStyle = TXT1(); ctx.font = '800 11.5px Inter'; ctx.textAlign = 'center';
-          ctx.fillText(fmt(Math.round(s.med)), cx, y.getPixelForValue(s.p95) - 8);
-          ctx.fillStyle = CV('--text-3'); ctx.font = '600 10px Inter';
-          ctx.fillText('n=' + fmt(s.n), cx, c.chartArea.bottom + 0);
-        });
-        ctx.restore();
-      },
-    }],
-  });
-}
-
-function scatterChart(id, groups, xLabel, yLabel) {
-  const g = groups.filter(x => x.points.length);
-  if (!g.length) return noData(id);
-  clearEmpty(id);
-  mk(id, {
-    type: 'scatter',
-    data: {
-      /* Quantity is collected in a handful of standard weights, so the cloud
-         reads as vertical strips. Small, translucent points let the density
-         within each strip carry the information. */
-      datasets: g.map((x, i) => ({
-        label: x.label, data: x.points, backgroundColor: S((i % 8) + 1) + '66',
-        borderColor: S((i % 8) + 1) + '99', pointRadius: 2.6, pointHoverRadius: 6, borderWidth: .5,
-      })),
-    },
-    options: baseOpts({
-      plugins: {
-        legend: { position: 'top', labels: { font: { family: 'Inter', size: isNarrow() ? 9.5 : 10.5 }, color: TXT(), boxWidth: 11, padding: isNarrow() ? 6 : 8, usePointStyle: true } },
-        tooltip: { callbacks: { label: c => ' ' + c.dataset.label + ': ' + fmt(c.parsed.x) + ' g · Rs ' + fmt(c.parsed.y) } },
-      },
-      scales: {
-        x: { title: { display: true, text: xLabel, font: { family: 'Inter', size: 11, weight: '600' }, color: TXT() }, ticks: { font: { family: 'Inter', size: 11 }, color: TXT() }, grid: { color: GRID() }, border: { display: false }, beginAtZero: true },
-        y: { title: { display: true, text: yLabel, font: { family: 'Inter', size: 11, weight: '600' }, color: TXT() }, ticks: { font: { family: 'Inter', size: 11 }, color: TXT(), callback: v => fmt(v) }, grid: { color: GRID() }, border: { display: false }, beginAtZero: true },
       },
     }),
   });
@@ -1058,8 +947,8 @@ function drawPanel(id) {
 
 const PANELS = {
   overview: drawOverview, map: drawMap, sampling: drawSampling,
-  price: drawPrice, retail: drawRetail, consumer: drawConsumer, adult: drawAdult,
-  lead: drawLead, media: drawMedia, coverage: drawCoverage, explorer: drawExplorer,
+  retail: drawRetail, consumer: drawConsumer, adult: drawAdult,
+  lead: drawLead, coverage: drawCoverage,
 };
 
 function renderAll() {
@@ -1085,7 +974,6 @@ function drawOverview() {
     kpi('🏪', fmt(ts.length), 'Vendors visited', pctOf(ts.length, tsTarget) + '% of target', 'navy', 'turmeric'),
     kpi('🧪', fmt(sp.length), 'Samples banked', (grams / 1000).toFixed(1) + ' kg collected', 'green', 'purple'),
     kpi('📅', fmt(days), 'Field days', dailyAw.length ? 'Avg ' + Math.round(con.length / Math.max(1, days)) + ' interviews/day' : '', 'navy', 'navy'),
-    kpi('✅', m.aw.consent_rate + '%', 'Consent rate', fmt(Q.aw.length - con.length) + ' declined', 'neutral', 'green'),
     kpi('🏙️', fmt(new Set([...con.map(r => cityOf('aw', r[AW.f.city])), ...ts.map(r => cityOf('ts', r[TS.f.sample_city]))].filter(Boolean)).size), 'Cities active', 'Across both surveys', 'navy', 'amber'),
   ].join(''));
 
@@ -1134,7 +1022,7 @@ function drawOverview() {
 
   barChart('ovAwCity', cityDist(con, 'aw', AW, AW.f.city), S(3), true, '', true);
   barChart('ovTsCity', cityDist(sp, 'ts', SP, SP.f.city), S(8), true, '', true);
-  cumulativeChart('ovCumAw', dailyAw, awTarget, 'Cumulative interviews', S(6));
+  cumulativeChart('ovCumAw', dailyAw, null, 'Cumulative interviews', S(6));
   cumulativeChart('ovCumTs', byDay(sp, SP.f.date), null, 'Cumulative samples', S(4));
 
   setTxt('ov-foot', `Awareness target ${fmt(awTarget)} consented interviews across ${m.aw.n_cities} cities; sampling target ${fmt(tsTarget)} vendor visits across ${m.ts.n_cities} cities. Data through ${m.data_through || '—'}. ${m.is_demo ? 'DEMONSTRATION DATA — figures are synthetic and generated from the instrument structure, not from fieldwork.' : 'Live fieldwork data.'} Dashboard by Research Solutions (M&A Research Solutions LLC) | www.rs.org.pk`);
@@ -1146,7 +1034,7 @@ function cityDist(rows, ds, tbl, idx) {
   return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }));
 }
 
-/* ---------- 03 MAP ---------- */
+/* ---------- 02 MAP ---------- */
 let MAP = null, MAP_LAYER = null;
 function drawMap() {
   const ts = Q.ts, sp = Q.sp;
@@ -1269,7 +1157,7 @@ function drawMap() {
   });
 }
 
-/* ---------- 04 SAMPLING ---------- */
+/* ---------- 03 SAMPLING ---------- */
 function drawSampling() {
   const ts = Q.ts, sp = Q.sp;
   const grams = nums(sp, SP.f.qty).reduce((a, b) => a + b, 0);
@@ -1407,66 +1295,7 @@ function typeDist(sp) {
     .map(t => ({ code: t, label: short(lab('ts', 'collected_sample_type', t), 30), value: m.get(t) }));
 }
 
-/* ---------- 05 PRICE ---------- */
-function drawPrice() {
-  const sp = Q.sp;
-  const ppk = nums(sp, SP.f.price_per_kg);
-  const s = stats(ppk);
-
-  setHTML('pr-kpis', [
-    kpi('💰', s ? 'Rs ' + fmt(Math.round(s.med)) : '—', 'Median price per kg', s ? `Across ${fmt(s.n)} samples` : '', 'navy', 'turmeric'),
-    kpi('📊', s ? 'Rs ' + fmt(Math.round(s.q1)) + '–' + fmt(Math.round(s.q3)) : '—', 'Middle 50% range', 'Interquartile spread', 'navy', 'teal'),
-    kpi('🔻', s ? 'Rs ' + fmt(Math.round(s.p05)) : '—', '5th percentile', 'Cheapest end of market', 'down', 'amber'),
-    kpi('🔺', s ? 'Rs ' + fmt(Math.round(s.p95)) : '—', '95th percentile', 'Premium end of market', 'up', 'green'),
-    kpi('🧾', 'Rs ' + fmt(Math.round(nums(sp, SP.f.price).reduce((a, b) => a + b, 0))), 'Total spent on samples', `${fmt(sp.length)} purchases`, 'navy', 'purple'),
-    kpi('⚖️', fmt(median(nums(sp, SP.f.qty))) + ' g', 'Median quantity', 'Per individual sample', 'navy', 'navy'),
-  ].join(''));
-
-  const types = ord('ts', 'collected_sample_type');
-  boxPlot('prBox', types.map(t => ({
-    label: short(lab('ts', 'collected_sample_type', t), 30),
-    s: stats(nums(sp.filter(r => r[SP.f.type] === t), SP.f.price_per_kg)),
-  })), '');
-
-  const cities = [...new Set(sp.map(r => cityOf('ts', r[SP.f.city])).filter(Boolean))];
-  const cityMed = cities.map(c => ({
-    label: c, value: Math.round(median(nums(sp.filter(r => cityOf('ts', r[SP.f.city]) === c), SP.f.price_per_kg)) || 0),
-  })).filter(x => x.value).sort((a, b) => b.value - a.value);
-  barChart('prCity', cityMed, S(1), true);
-
-  const bases = ord('ts', 'sample_type_2');
-  const basisMed = bases.map(b => ({
-    full: sampleTypeLabel('sample_type_2', b),
-    label: short(sampleTypeLabel('sample_type_2', b), 34),
-    value: Math.round(median(nums(sp.filter(r => r[SP.f.basis] === b), SP.f.price_per_kg)) || 0),
-  })).filter(x => x.value);
-  barChart('prBasis', basisMed, S(2));
-
-  scatterChart('prScatter', types.map(t => ({
-    label: short(lab('ts', 'collected_sample_type', t), 30),
-    points: sp.filter(r => r[SP.f.type] === t && r[SP.f.qty] && r[SP.f.price])
-      .map(r => ({ x: r[SP.f.qty], y: r[SP.f.price] })),
-  })), 'Quantity collected (grams)', 'Price paid (Rs)');
-
-  histChart('prHist', histogram(ppk, 100), S(4), 'Rs per kg', '');
-
-  const mkts = ord('ts', 'market_name');
-  groupedBar('prMkt',
-    types.map(t => short(lab('ts', 'collected_sample_type', t), 30)),
-    mkts.map((mv, i) => ({
-      name: pretty(lab('ts', 'market_name', mv)), color: S(i === 0 ? 1 : 8),
-      data: types.map(t => Math.round(median(nums(sp.filter(r => r[SP.f.type] === t && r[SP.f.market] === mv), SP.f.price_per_kg)) || 0)),
-    })), '', undefined);
-
-  const qty = nums(sp, SP.f.qty);
-  const qm = new Map();
-  qty.forEach(v => qm.set(v, (qm.get(v) || 0) + 1));
-  barChart('prQty', [...qm.entries()].sort((a, b) => a[0] - b[0]).map(([k, v]) => ({ label: k + ' g', value: v })), S(6));
-
-  setTxt('pr-foot', `Price per kilogram is derived as price paid ÷ quantity collected, so pack sizes are directly comparable. ${s ? `Median Rs ${fmt(Math.round(s.med))}/kg across ${fmt(s.n)} samples, ranging Rs ${fmt(Math.round(s.min))} to Rs ${fmt(Math.round(s.max))}.` : ''} Prices at the low end of the distribution are the ones worth cross-referencing against laboratory lead results — adulteration is an economic substitution, and the incentive is strongest where margins are thinnest.`);
-}
-
-/* ---------- 06 RETAILER ---------- */
+/* ---------- 04 RETAILER ---------- */
 function drawRetail() {
   const rs = Q.rs;
   if (!rs.length) {
@@ -1520,7 +1349,7 @@ function avgMultiCount(rows, idx) {
   return c.length ? c.reduce((a, b) => a + b, 0) / c.length : 0;
 }
 
-/* ---------- 07 CONSUMER ---------- */
+/* ---------- 05 CONSUMER ---------- */
 function drawConsumer() {
   const cs = Q.cs;
   if (!cs.length) {
@@ -1562,7 +1391,7 @@ function drawConsumer() {
   setTxt('cs-foot', `Base: ${fmt(cs.length)} completed consumer interviews. Monthly quantity is normalised to grams for respondents who reported in kilograms or grams; those answering in roots or packets are excluded from that chart only. Purchase form is the operative exposure variable — loose powder and whole roots carry materially different adulteration risk from sealed branded packs.`);
 }
 
-/* ---------- 08 ADULTERATION ---------- */
+/* ---------- 06 ADULTERATION ---------- */
 const AD_ROWS = [
   { label: 'Turmeric overall', rs: 'Q19', cs: 'Q_30' },
   { label: 'Packaged ground turmeric', rs: 'Q20', cs: 'Q_31' },
@@ -1694,7 +1523,7 @@ function buildMatrix(rs, cs) {
   setTxt('ad-legend-txt', `0% to ${maxPct}% of the row base`);
 }
 
-/* ---------- 09 LEAD ---------- */
+/* ---------- 07 LEAD ---------- */
 function leadCascade(con) {
   const isRS = r => r[AW.f.Type_of_survey] === 'RS';
   const any = (r, pairs) => pairs.some(([f, test]) => test(r[AW.f[f]]));
@@ -1778,66 +1607,7 @@ function drawLead() {
   setTxt('ld-foot', `The cascade combines both instruments: retailers answer Q33/Q34/Q35 and consumers answer Q57a/Q57b/Q57c, which are the same constructs worded for each audience. Every step is a percentage of all ${fmt(c.base)} consented respondents, so the drops are additive and comparable. The step that matters commercially is the gap between knowing a protective action and taking one — ${(st[4].pct - st[5].pct).toFixed(1)} percentage points here.`);
 }
 
-/* ---------- 10 MEDIA ---------- */
-const BROADCAST = { '3': 'Government / Food Authority', '4': 'TV', '6': 'Social media', '8': 'Radio' };
-
-function drawMedia() {
-  const con = Q.con, rs = Q.rs, cs = Q.cs;
-  const channels = mergeMulti([[rs, 'Q24'], [rs, 'Q33_i'], [rs, 'Q33_ii'], [cs, 'Q_29'], [cs, 'Q_57_ii']], 44);
-  const exposed = con.filter(r =>
-    ['Q33_ii', 'Q_57_ii'].some(f => { const v = r[AW.f[f]]; return Array.isArray(v) && v.some(c => BROADCAST[c]); }));
-  const tvReach = shareInMulti(con, ['Q33_ii', 'Q_57_ii'], '4');
-  const smReach = shareInMulti(con, ['Q33_ii', 'Q_57_ii'], '6');
-  const usefulRs = shareIn(rs, AW, 'Q41', ['1', '2']);
-  const usefulCs = shareIn(cs, AW, 'Q_57g', ['1', '2']);
-  const usefulPct = (usefulRs.base + usefulCs.base)
-    ? Math.round(1000 * (usefulRs.n + usefulCs.n) / (usefulRs.base + usefulCs.base)) / 10 : 0;
-
-  setHTML('md-kpis', [
-    kpi('📡', pctOf(exposed.length, con.length) + '%', 'Reached via broadcast/social', `${fmt(exposed.length)} respondents`, 'up', 'teal'),
-    kpi('📺', tvReach.pct + '%', 'Reached via TV', `${fmt(tvReach.n)} respondents`, 'navy', 'purple'),
-    kpi('📱', smReach.pct + '%', 'Reached via social media', `${fmt(smReach.n)} respondents`, 'navy', 'turmeric'),
-    kpi('👍', usefulPct + '%', 'Found message useful', 'Very or mildly useful', 'up', 'green'),
-    kpi('🔁', shareInScale(rs, cs, 'Q40', 'Q_57f', ['2', '3']) + '%', 'Saw it 5+ times', 'Repeat exposure', 'navy', 'amber'),
-    kpi('❓', shareInScale(rs, cs, 'Q42', 'Q_57h', ['1']) + '%', 'Something unclear', 'Comprehension gap', 'down', 'navy'),
-  ].join(''));
-
-  barChart('mdChannels', channels, S(1), true, '', true);
-  barChart('mdRemember', mergeMulti([[rs, 'Q38'], [cs, 'Q_57d']], 52), S(6), true, '', true);
-  barChart('mdFrom', mergeMulti([[rs, 'Q39'], [cs, 'Q_57e']], 34), S(5), true, '', true);
-
-  donutChart('mdTimes', mergeDist(rs, 'Q40', cs, 'Q_57f'));
-  donutChart('mdUseful', mergeDist(rs, 'Q41', cs, 'Q_57g'));
-  donutChart('mdUnclear', mergeDist(rs, 'Q42', cs, 'Q_57h'), [S(2), S(6)]);
-
-  const cities = [...new Set(con.map(r => cityOf('aw', r[AW.f.city])).filter(Boolean))].sort();
-  groupedBar('mdCity', cities, Object.entries(BROADCAST).map(([code, name], i) => ({
-    name: short(name, 30), color: S((i % 8) + 1),
-    data: cities.map(c => shareInMulti(con.filter(r => cityOf('aw', r[AW.f.city]) === c), ['Q33_ii', 'Q_57_ii'], code).pct),
-  })));
-
-  setTxt('md-foot', `Channel questions are asked only of respondents who had heard about lead in turmeric, so the base for recall and attribution is narrower than the full sample — ${fmt(exposed.length)} of ${fmt(con.length)} consented respondents. Percentages on the reach charts use all consented respondents as the base, which is the figure a campaign report should quote.`);
-}
-function shareInMulti(rows, fields, code) {
-  let n = 0;
-  rows.forEach(r => {
-    if (fields.some(f => { const v = r[AW.f[f]]; return Array.isArray(v) && v.includes(code); })) n++;
-  });
-  return { n, pct: rows.length ? Math.round(1000 * n / rows.length) / 10 : 0 };
-}
-function shareInScale(rs, cs, fRs, fCs, codes) {
-  const a = shareIn(rs, AW, fRs, codes), b = shareIn(cs, AW, fCs, codes);
-  const base = a.base + b.base;
-  return base ? Math.round(1000 * (a.n + b.n) / base) / 10 : 0;
-}
-function mergeDist(rs, fRs, cs, fCs) {
-  const m = new Map();
-  [...distOf(rs, 'aw', AW, fRs, {}), ...distOf(cs, 'aw', AW, fCs, {})]
-    .forEach(x => m.set(x.label, (m.get(x.label) || 0) + x.value));
-  return [...m.entries()].map(([label, value]) => ({ full: label, label: short(label, 30), value }));
-}
-
-/* ---------- 11 COVERAGE ---------- */
+/* ---------- 08 COVERAGE ---------- */
 let covRows = [], covSort = { key: 'samples', dir: -1 };
 function drawCoverage() {
   const con = Q.con, ts = Q.ts, sp = Q.sp;
@@ -1946,86 +1716,6 @@ function sortCov(k) {
   renderCovTable();
 }
 
-/* ---------- 12 EXPLORER ---------- */
-const EXP_COLS = {
-  aw: [
-    ['date', 'Date', r => r[AW.f.date]],
-    ['city', 'City', r => cityOf('aw', r[AW.f.city])],
-    ['market', 'Market', r => pretty(lab('aw', 'market_name', r[AW.f.market_name]))],
-    ['enum', 'Enumerator', r => (enumOf('aw', r[AW.f.Data_Collector]) || '').trim()],
-    ['consent', 'Consent', r => r[AW.f.Consent] === '1' ? 'Yes' : 'No'],
-    ['type', 'Instrument', r => r[AW.f.Type_of_survey] === 'RS' ? 'Retailer' : r[AW.f.Type_of_survey] === 'CS' ? 'Consumer' : '—'],
-    ['dur', 'Minutes', r => r[AW.f.dur] ? Math.round(r[AW.f.dur] / 60) : null],
-    ['adult', 'Adulteration common?', r => pretty(lab('aw', 'Q19', r[AW.f.Q19]) || lab('aw', 'Q_30', r[AW.f.Q_30]))],
-    ['lead', 'Knows lead', r => (r[AW.f.Q33] === '1' || r[AW.f.Q_57a] === '1') ? 'Yes' : (r[AW.f.Q33] === '0' || r[AW.f.Q_57a] === '0') ? 'No' : '—'],
-    ['status', 'Status', r => pretty(lab('aw', 'survey_status', r[AW.f.survey_status]))],
-  ],
-  ts: [
-    ['date', 'Date', r => r[TS.f.date]],
-    ['vendor', 'Vendor ID', r => r[TS.f.vendor_id]],
-    ['name', 'Vendor name', r => r[TS.f.vendor_name]],
-    ['city', 'City', r => cityOf('ts', r[TS.f.sample_city])],
-    ['market', 'Market type', r => pretty(lab('ts', 'market_name', r[TS.f.market_name]))],
-    ['loc', 'Locality', r => short(lab('ts', r[TS.f.market_name] === '1' ? 'wholesale_market' : 'locality_retail',
-      r[TS.f.market_name] === '1' ? r[TS.f.wholesale_market] : r[TS.f.locality_retail]) || '', 30)],
-    ['size', 'Shop size', r => pretty(lab('ts', 'size_of_shop', r[TS.f.size_of_shop]))],
-    ['root', 'Roots displayed', r => r[TS.f.whole_root_display]
-      ? short(lab('ts', 'whole_root_display', r[TS.f.whole_root_display]), 28) : '—'],
-    ['types', 'Types collected', r => r[TS.f.n_types]],
-    ['samples', 'Samples', r => r[TS.f.n_samples]],
-    ['enum', 'Enumerator', r => (enumOf('ts', r[TS.f.enum_name]) || '').trim()],
-    ['gps', 'GPS', r => r[TS.f.lat] ? r[TS.f.lat].toFixed(4) + ', ' + r[TS.f.lon].toFixed(4) : '—'],
-  ],
-  sp: [
-    ['date', 'Date', r => r[SP.f.date]],
-    ['city', 'City', r => cityOf('ts', r[SP.f.city])],
-    ['market', 'Market type', r => pretty(lab('ts', 'market_name', r[SP.f.market]))],
-    ['type', 'Product type', r => short(lab('ts', 'collected_sample_type', r[SP.f.type]) || '', 30)],
-    ['basis', 'Selection basis', r => short(lab('ts', 'sample_type_2', r[SP.f.basis]) || '', 30)],
-    ['qty', 'Quantity (g)', r => r[SP.f.qty]],
-    ['price', 'Price (Rs)', r => r[SP.f.price]],
-    ['ppk', 'Rs per kg', r => r[SP.f.price_per_kg]],
-    ['size', 'Shop size', r => pretty(lab('ts', 'size_of_shop', r[SP.f.shop_size]))],
-    ['enum', 'Enumerator', r => (enumOf('ts', r[SP.f.enum]) || '').trim()],
-  ],
-};
-let expSort = { i: 0, dir: -1 };
-
-function drawExplorer() { renderExplorer(); }
-function expSource() {
-  const ds = document.getElementById('exp-dataset').value;
-  return { ds, rows: ds === 'aw' ? Q.aw : ds === 'ts' ? Q.ts : Q.sp, cols: EXP_COLS[ds] };
-}
-function renderExplorer() {
-  const { ds, rows, cols } = expSource();
-  const q = (document.getElementById('exp-search').value || '').toLowerCase().trim();
-
-  let out = rows.map(r => cols.map(c => c[2](r)));
-  if (q) out = out.filter(vals => vals.some(v => String(v === null || v === undefined ? '' : v).toLowerCase().includes(q)));
-  const i = Math.min(expSort.i, cols.length - 1), d = expSort.dir;
-  out.sort((a, b) => {
-    const x = a[i], y = b[i];
-    const nx = typeof x === 'number', ny = typeof y === 'number';
-    if (nx && ny) return (x - y) * d;
-    return String(x === null ? '' : x).localeCompare(String(y === null ? '' : y)) * d;
-  });
-
-  document.getElementById('exp-head').innerHTML = '<tr>' + cols.map((c, j) =>
-    `<th onclick="sortExp(${j})">${esc(c[1])}${i === j ? `<span class="arrow">${d > 0 ? '▲' : '▼'}</span>` : ''}</th>`).join('') + '</tr>';
-  const shown = out.slice(0, 400);
-  document.getElementById('exp-body').innerHTML = shown.length
-    ? shown.map(vals => '<tr>' + vals.map((v, j) =>
-      `<td class="${j === 0 ? 'strong' : ''}">${esc(v === null || v === undefined ? '—' : (typeof v === 'number' ? fmt(v) : v))}</td>`).join('') + '</tr>').join('')
-    : `<tr><td colspan="${cols.length}" class="tbl-empty">No records match.</td></tr>`;
-
-  setTxt('exp-count', `${fmt(out.length)} record${out.length === 1 ? '' : 's'}${out.length > 400 ? ' · showing first 400' : ''}`);
-  window.__expVisible = { cols, rows: out, ds };
-}
-function sortExp(j) {
-  expSort = { i: j, dir: expSort.i === j ? -expSort.dir : 1 };
-  renderExplorer();
-}
-
 /* ============================== EXPORT ============================== */
 function csvCell(v) {
   const s = (v === null || v === undefined) ? '' : String(v);
@@ -2040,19 +1730,12 @@ function download(name, text) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1500);
   toast('CSV downloaded');
 }
-function exportTable(kind) {
+function exportTable() {
   const stamp = (D.meta.data_through || 'export').replace(/-/g, '');
-  if (kind === 'cov') {
-    const rows = window.__covVisible || [];
-    const head = ['City', 'Interviews', 'Retailer', 'Consumer', 'Vendors', 'Samples', 'Types sampled', 'Type coverage %', 'Median Rs per kg', 'Scope'];
-    download(`turmeric_coverage_${stamp}.csv`,
-      [head.join(','), ...rows.map(r => [r.city, r.aw, r.rs, r.cs, r.vendors, r.samples, r.types, r.typePct, r.price, r.scope].map(csvCell).join(','))].join('\n'));
-  } else {
-    const v = window.__expVisible;
-    if (!v) return;
-    download(`turmeric_${v.ds}_records_${stamp}.csv`,
-      [v.cols.map(c => c[1]).map(csvCell).join(','), ...v.rows.map(r => r.map(csvCell).join(','))].join('\n'));
-  }
+  const rows = window.__covVisible || [];
+  const head = ['City', 'Interviews', 'Retailer', 'Consumer', 'Vendors', 'Samples', 'Types sampled', 'Type coverage %', 'Median Rs per kg', 'Scope'];
+  download(`turmeric_coverage_${stamp}.csv`,
+    [head.join(','), ...rows.map(r => [r.city, r.aw, r.rs, r.cs, r.vendors, r.samples, r.types, r.typePct, r.price, r.scope].map(csvCell).join(','))].join('\n'));
 }
 
 /* The header is sticky and its height changes with viewport width (the meta
@@ -2098,8 +1781,6 @@ function boot(payload) {
   buildNavSelect();
   document.getElementById('cov-search').oninput = renderCovTable;
   document.getElementById('cov-filter').onchange = renderCovTable;
-  document.getElementById('exp-search').oninput = renderExplorer;
-  document.getElementById('exp-dataset').onchange = () => { expSort = { i: 0, dir: -1 }; renderExplorer(); };
 
   syncStickyOffset();
   let rz, wasNarrow = isNarrow();
