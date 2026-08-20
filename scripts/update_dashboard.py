@@ -29,6 +29,7 @@ import argparse
 import base64
 import csv
 import difflib
+import hashlib
 import json
 import math
 import os
@@ -90,28 +91,43 @@ def encrypt_payload(obj, password):
     return base64.b64encode(salt + iv + ct).decode("ascii"), len(raw), len(packed)
 
 
-def stamp_index(version):
+def stamp_index():
     """
-    Pin a build stamp onto the payload's <script src> in index.html.
+    Version every local asset in index.html by content hash.
 
-    GitHub Pages serves assets with a ten-minute cache, and browsers hold the
-    file longer still on revalidation. Without a changing URL a returning
-    viewer keeps yesterday's figures after a daily rebuild, which defeats the
-    point of rebuilding daily.
+    GitHub Pages serves with a ten-minute cache and browsers hold a file
+    longer still on revalidation, so an unversioned URL means a returning
+    viewer keeps whatever they downloaded last. Stamping only the payload was
+    not enough and shipped a broken site once: index.html changed, assets/app.js
+    changed too, but the browser kept its cached copy of the script and
+    combined the new page with the old code -- every getElementById on an
+    element the new page no longer had threw inside boot(), so the dashboard
+    rendered its shell and not one chart.
+
+    Hashing rather than timestamping means a file that actually changed is
+    always re-fetched, and one that did not is still served from cache.
     """
     idx = ROOT / "index.html"
     if not idx.exists():
-        return False
+        return []
     html = idx.read_text(encoding="utf-8")
-    new, n = re.subn(
-        r'(<script src="data/dashboard_data\.js)(\?v=[^"]*)?(")',
-        lambda m: f"{m.group(1)}?v={version}{m.group(3)}",
-        html,
-    )
-    if n and new != html:
+    stamped = []
+
+    def sub(m):
+        rel = m.group(2)
+        f = ROOT / rel
+        if not f.exists():
+            return m.group(0)
+        ver = hashlib.sha256(f.read_bytes()).hexdigest()[:10]
+        stamped.append(f"{rel}?v={ver}")
+        return f"{m.group(1)}{rel}?v={ver}{m.group(4)}"
+
+    new = re.sub(
+        r'((?:src|href)=")((?:assets|data)/[A-Za-z0-9_.\-]+\.(?:js|css))(\?v=[^"]*)?(")',
+        sub, html)
+    if new != html:
         idx.write_text(new, encoding="utf-8")
-        return True
-    return False
+    return stamped
 
 
 def norm(s):
@@ -818,9 +834,8 @@ def main():
     )
     print(f"  encryption: AES-256-GCM, PBKDF2-SHA256 x{PBKDF2_ITERATIONS:,}")
 
-    version = datetime.now().strftime("%Y%m%d%H%M%S")
-    if stamp_index(version):
-        print(f"  cache stamp: index.html -> dashboard_data.js?v={version}")
+    for stamp in stamp_index():
+        print(f"  cache stamp: {stamp}")
 
 
 if __name__ == "__main__":
