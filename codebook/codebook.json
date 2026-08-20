@@ -17,11 +17,11 @@
      "group": [],
      "appearance": "period=#"
     },
-    "From_ID": {
-     "name": "From_ID",
+    "resp_id": {
+     "name": "resp_id",
      "type": "integer",
-     "label": "Form ID",
-     "raw_label": "Form ID",
+     "label": "Respondent ID",
+     "raw_label": "Respondent ID",
      "group": [],
      "required": true,
      "constraint": "string-length(.)=4",
@@ -124,7 +124,8 @@
      "type": "geopoint",
      "label": "GPS",
      "raw_label": "GPS",
-     "group": []
+     "group": [],
+     "relevance": "selected(${Consent}, '1')"
     },
     "Data_Collector": {
      "name": "Data_Collector",
@@ -133,6 +134,7 @@
      "raw_label": "Name of Data Collector",
      "group": [],
      "list_name": "Data_Collector",
+     "relevance": "selected(${Consent}, '1')",
      "required": true
     },
     "city": {
@@ -142,6 +144,7 @@
      "raw_label": "City",
      "group": [],
      "list_name": "city",
+     "relevance": "selected(${Consent}, '1')",
      "required": true
     },
     "market_name": {
@@ -151,6 +154,16 @@
      "raw_label": "Market Name",
      "group": [],
      "list_name": "market_name",
+     "relevance": "selected(${Consent}, '1')",
+     "required": true
+    },
+    "market_name_other": {
+     "name": "market_name_other",
+     "type": "text",
+     "label": "Other Specify",
+     "raw_label": "Other Specify",
+     "group": [],
+     "relevance": "selected(${market_name}, '777')",
      "required": true
     },
     "Q1": {
@@ -2003,7 +2016,7 @@
    "order": [
     "text_audit_file",
     "quiet_perc",
-    "From_ID",
+    "resp_id",
     "Consent_Form",
     "Consent",
     "no_consent",
@@ -2020,6 +2033,7 @@
     "Data_Collector",
     "city",
     "market_name",
+    "market_name_other",
     "Q1",
     "Type_of_survey",
     "type_of_vendor",
@@ -2266,6 +2280,14 @@
      {
       "value": "4",
       "label": "N/A"
+     },
+     {
+      "value": "5",
+      "label": "Don't Know"
+     },
+     {
+      "value": "6",
+      "label": "Refused to answer"
      }
     ],
     "kind_of_business": [
@@ -2544,6 +2566,14 @@
      {
       "value": "7",
       "label": "None of the above"
+     },
+     {
+      "value": "8",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "9",
+      "label": "-888. Refused to answer"
      }
     ],
     "city": [
@@ -2576,6 +2606,11 @@
       "filter": "1"
      },
      {
+      "value": "777",
+      "label": "Other",
+      "filter": "1"
+     },
+     {
       "value": "FKPBH",
       "label": "Faqir Ka Pir Bazar-Hyderabad",
       "filter": "2"
@@ -2594,6 +2629,36 @@
       "value": "PMP",
       "label": "Peepal Mandi Peshawar",
       "filter": "3"
+     },
+     {
+      "value": "SBM",
+      "label": "Shaheedan Bazaar-Mardan",
+      "filter": "4"
+     },
+     {
+      "value": "KGBM",
+      "label": "Khwaja Gunj Bazaar-Mardan",
+      "filter": "4"
+     },
+     {
+      "value": "BRM",
+      "label": "Bank Road-Mardan",
+      "filter": "4"
+     },
+     {
+      "value": "CCM",
+      "label": "Chato Chowk-Mardan",
+      "filter": "4"
+     },
+     {
+      "value": "GKRM",
+      "label": "Gajju Khan Road-Mardan",
+      "filter": "4"
+     },
+     {
+      "value": "CRM",
+      "label": "Charsadda Road-Mardan",
+      "filter": "4"
      }
     ],
     "Type_of_survey": [
@@ -3258,6 +3323,14 @@
      {
       "value": "7",
       "label": "None of the above"
+     },
+     {
+      "value": "8",
+      "label": "-999. Don't know"
+     },
+     {
+      "value": "9",
+      "label": "-888. Refused to answer"
      }
     ],
     "turmeric_impure": [
@@ -3902,6 +3975,10 @@
      {
       "value": "12",
       "label": "Fazil Shehzad"
+     },
+     {
+      "value": "13",
+      "label": "Adil Amin"
      }
     ],
     "months": [
@@ -3963,7 +4040,7 @@
      },
      {
       "value": "3",
-      "label": "Dont Know"
+      "label": "Don't Know"
      }
     ],
     "sales_distribution_described": [
@@ -4100,6 +4177,14 @@
      {
       "value": "11",
       "label": "Other (specify)"
+     },
+     {
+      "value": "12",
+      "label": "Don't Know"
+     },
+     {
+      "value": "13",
+      "label": "Refused to answer"
      }
     ],
     "visually_compares": [
@@ -4160,6 +4245,10 @@
      {
       "value": "8",
       "label": "Other (please specify)"
+     },
+     {
+      "value": "9",
+      "label": "Don't Know"
      }
     ],
     "options_impure": [
@@ -4202,6 +4291,10 @@
      {
       "value": "3",
       "label": "Any other response (specify)"
+     },
+     {
+      "value": "4",
+      "label": "Don't Know"
      }
     ],
     "store_visit": [
@@ -4380,6 +4473,14 @@
      {
       "value": "11",
       "label": "Other (specify)"
+     },
+     {
+      "value": "12",
+      "label": "Don't Know"
+     },
+     {
+      "value": "13",
+      "label": "Refused to answer"
      }
     ],
     "turmeric_visually_compares": [
@@ -4406,6 +4507,14 @@
      {
       "value": "6",
       "label": "Other Specify"
+     },
+     {
+      "value": "7",
+      "label": "Don't Know"
+     },
+     {
+      "value": "8",
+      "label": "Refused to answer"
      }
     ],
     "accounts_follow": [
@@ -4768,6 +4877,14 @@
      {
       "value": "4",
       "label": "Other (specify)"
+     },
+     {
+      "value": "5",
+      "label": "Don't watch at all"
+     },
+     {
+      "value": "6",
+      "label": "Refused to answer"
      }
     ],
     "message_from": [
@@ -4834,7 +4951,7 @@
     ]
    },
    "source_file": "Awareness Survey Follow-up 202607.xlsx",
-   "source_sha256": "d79780bffb3d6852173f44971cf0d7b8387a3f0f0131dfb0da2a6397158f3cd7"
+   "source_sha256": "f91be211424b66837a46c8198c703638b5d3d734ab8421bb189e3af38cc224e8"
   },
   "turmeric": {
    "questions": {
@@ -4969,7 +5086,8 @@
      "label": "City Name",
      "raw_label": "City Name",
      "group": [],
-     "list_name": "city_sample"
+     "list_name": "city_sample",
+     "required": true
     },
     "enum_label": {
      "name": "enum_label",
@@ -4997,6 +5115,15 @@
      "relevance": "${market_name}=2",
      "required": true
     },
+    "locality_retail_other": {
+     "name": "locality_retail_other",
+     "type": "text",
+     "label": "Please specify other",
+     "raw_label": "Please specify other",
+     "group": [],
+     "relevance": "${market_name}=2 and ${locality_retail}=777",
+     "required": true
+    },
     "wholesale_market": {
      "name": "wholesale_market",
      "type": "select_one",
@@ -5007,6 +5134,15 @@
      "relevance": "${market_name}=1",
      "required": true
     },
+    "wholesale_market_other": {
+     "name": "wholesale_market_other",
+     "type": "text",
+     "label": "Please specify other",
+     "raw_label": "Please specify other",
+     "group": [],
+     "relevance": "${market_name}=1 and ${wholesale_market}=777",
+     "required": true
+    },
     "vendor_name": {
      "name": "vendor_name",
      "type": "text",
@@ -5014,6 +5150,13 @@
      "raw_label": "Vendor/Shop Name",
      "group": [],
      "required": true
+    },
+    "gps": {
+     "name": "gps",
+     "type": "geopoint",
+     "label": "GPS location of market",
+     "raw_label": "GPS location of market",
+     "group": []
     },
     "shop_sample_type": {
      "name": "shop_sample_type",
@@ -5032,13 +5175,6 @@
      "group": [],
      "list_name": "sample_type",
      "required": true
-    },
-    "gps": {
-     "name": "gps",
-     "type": "geopoint",
-     "label": "GPS location of market",
-     "raw_label": "GPS location of market",
-     "group": []
     },
     "size_of_shop": {
      "name": "size_of_shop",
@@ -5076,6 +5212,16 @@
       "sample_type_details"
      ]
     },
+    "whole_root_note": {
+     "name": "whole_root_note",
+     "type": "note",
+     "label": "Note: For whole dried roots, collect ALL available samples from this shop (do not select — take every sample).",
+     "raw_label": "Note: For whole dried roots, collect ALL available samples from this shop (do not select — take every sample).",
+     "group": [
+      "sample_type_details"
+     ],
+     "relevance": "${current_sample_type} = '1'"
+    },
     "total_samples_collect": {
      "name": "total_samples_collect",
      "type": "integer",
@@ -5087,6 +5233,16 @@
      "required": true,
      "constraint": ". > 0"
     },
+    "sample_no": {
+     "name": "sample_no",
+     "type": "calculate",
+     "label": "",
+     "raw_label": "",
+     "group": [
+      "sample_type_details",
+      "samples_detail"
+     ]
+    },
     "sample_type_2": {
      "name": "sample_type_2",
      "type": "select_one",
@@ -5097,6 +5253,7 @@
       "samples_detail"
      ],
      "list_name": "sample_type_2",
+     "relevance": "${current_sample_type} != '1'",
      "required": true
     },
     "price_sample": {
@@ -5127,8 +5284,8 @@
     "label_sample": {
      "name": "label_sample",
      "type": "note",
-     "label": "Label to be written on sample ${vendor_id}_${current_sample_type}_${sample_type_2}",
-     "raw_label": "Label to be written on sample ${vendor_id}_${current_sample_type}_${sample_type_2}",
+     "label": "Label to be written on sample ${vendor_id}_${current_sample_type}_${sample_no}",
+     "raw_label": "Label to be written on sample ${vendor_id}_${current_sample_type}_${sample_no}",
      "group": [
       "sample_type_details",
       "samples_detail"
@@ -5186,16 +5343,20 @@
     "enum_label",
     "market_name",
     "locality_retail",
+    "locality_retail_other",
     "wholesale_market",
+    "wholesale_market_other",
     "vendor_name",
+    "gps",
     "shop_sample_type",
     "collected_sample_type",
-    "gps",
     "size_of_shop",
     "current_sample_type",
     "current_sample_type_label",
     "current_type_note",
+    "whole_root_note",
     "total_samples_collect",
+    "sample_no",
     "sample_type_2",
     "price_sample",
     "quantity_smaple",
@@ -5439,6 +5600,11 @@
       "city": "1"
      },
      {
+      "value": "777",
+      "label": "Other",
+      "city": "1"
+     },
+     {
       "value": "3",
       "label": "Tower Market",
       "city": "2"
@@ -5513,6 +5679,11 @@
      {
       "value": "4",
       "label": "Shah Faisal Colony # 01_Sabzi Market Landhi Babar Market Banaras Aligarh Market Orangi",
+      "city": "1"
+     },
+     {
+      "value": "777",
+      "label": "Other",
       "city": "1"
      },
      {
@@ -5708,7 +5879,7 @@
     ]
    },
    "source_file": "turmeric_sampling_survey.xlsx",
-   "source_sha256": "95b35fc12773d257a04292dd54c8713f8fc4dcac6b3d954e6b353ab7f03ff6bd"
+   "source_sha256": "2ee36b88e8804ff3b5997ef22e740035a49ff29e57eb6818bc7397fb8fbb7808"
   }
  }
 }
