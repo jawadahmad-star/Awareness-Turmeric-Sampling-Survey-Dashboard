@@ -40,6 +40,27 @@ python scripts/daily_update.py --dry-run   # build only, change nothing
 python scripts/daily_update.py --no-push   # build and commit, push later
 ```
 
+### What the daily run checks before it publishes
+
+Two things go wrong quietly on a static host, and both have shipped a live
+dashboard that showed its shell and no data. The runner now stops on either:
+
+- **index.html and assets/ out of step.** If `assets/app.js` reads an element
+  id that `index.html` no longer defines, `boot()` throws and every chart is
+  lost. The build fails and names the line rather than committing.
+- **A stale asset in the viewer's cache.** Every local `.js` and `.css` in
+  `index.html` is stamped with a hash of its own contents, so a file that
+  changed is always re-fetched and one that did not is still served from
+  cache. GitHub Pages caches `index.html` itself for ten minutes, so a
+  returning viewer can be up to ten minutes behind a push — after that it
+  corrects itself, or immediately on a hard refresh (Ctrl+F5).
+
+It also commits every tracked file that changed, not a fixed list — publishing
+a new `index.html` against last week's `app.js` is exactly how the two get out
+of step. `.gitignore` is what keeps the raw exports out, and the runner
+double-checks the staged list and refuses to commit if anything
+respondent-level appears in it.
+
 ### If the instrument changes
 
 Put the new XLSForm in `instruments/` under the same filename. The next run
