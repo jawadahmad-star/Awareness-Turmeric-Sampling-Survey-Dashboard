@@ -15,6 +15,34 @@
 const PBKDF2_ITERATIONS = 250000;
 const SESSION_KEY = 'tq_payload';
 
+/* The decrypted payload is kept for the life of the tab so nobody retypes the
+   password on every reload. A daily rebuild lands while such tabs are still
+   open, though, and a cache keyed on nothing goes on serving yesterday's
+   figures underneath today's freshness stamp — the header would read the new
+   build date while every chart showed the old one. Keying on the build makes
+   a stale entry impossible to mistake for a current one. */
+function buildId() {
+  const p = window.DASHBOARD_PUBLIC || {};
+  return [p.generated_at, p.data_through, p.n_interviews, p.n_samples].join('|');
+}
+function cachePayload(payload) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ build: buildId(), payload }));
+  } catch (e) {}
+}
+function cachedPayload() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const box = JSON.parse(raw);
+    if (box && box.build === buildId() && box.payload) return box.payload;
+    sessionStorage.removeItem(SESSION_KEY);
+  } catch (e) {
+    try { sessionStorage.removeItem(SESSION_KEY); } catch (e2) {}
+  }
+  return null;
+}
+
 const b64bytes = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 
 async function decryptPayload(password, blob) {
@@ -56,7 +84,7 @@ async function checkAuth() {
   btn.disabled = true;
   try {
     const payload = await decryptPayload(pw, window.DASHBOARD_ENC);
-    try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(payload)); } catch (e) {}
+    cachePayload(payload);
     err.textContent = '';
     input.classList.remove('error');
     unlock(payload);
@@ -76,10 +104,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const err = document.getElementById('auth-error');
     if (err) err.textContent = 'This page must be served over HTTPS (or localhost) to decrypt.';
   }
-  try {
-    const cached = sessionStorage.getItem(SESSION_KEY);
-    if (cached) unlock(JSON.parse(cached));
-  } catch (e) {}
+  const cached = cachedPayload();
+  if (cached) unlock(cached);
 });
 
 /* ============================== THEME =============================== */
@@ -712,6 +738,10 @@ function cumulativeChart(id, arr, target, name, color) {
 function progressDonut(id, done, target, unit) {
   const el = document.getElementById(id);
   if (!el) return;
+  // Filtering to a city the survey does not run in leaves no target to
+  // measure against — a donut reading 0/0 would look like a failure rather
+  // than a city that was never in this survey's scope.
+  if (!target) return noData(id, 'No target — the selected cities are not in this survey’s scope.');
   clearEmpty(id);
   const rem = Math.max(target - done, 0);
   mk(id, {
@@ -1113,16 +1143,19 @@ function drawOverview() {
   progressDonut('ovProgTs', ts.length, tsTarget, 'vendor visits');
   // Naming the cities the target covers is what stops a filtered donut from
   // looking like the programme is behind when it is only showing one city.
-  const scopeText = (ds, whole) => {
-    const cs = targetCities(ds);
-    return F.city.size
-      ? (cs.length ? cs.join(', ') : 'no city in scope')
-      : `all ${cs.length} ${whole}`;
+  // Unfiltered, the description explains how the target was arrived at.
+  // Filtered, that arithmetic is about the whole programme and would only
+  // confuse, so it names the cities the figure now covers instead.
+  const desc = (ds, lead, basis, whole) => {
+    const cs = targetCities(ds), t = targetFor(ds);
+    if (!F.city.size) return `${lead} against a target of ${fmt(t)} — ${basis}, across all ${cs.length} ${whole}.`;
+    if (!cs.length) return `${lead}. The selected cities are not in this survey’s scope, so there is no target to measure against.`;
+    return `${lead} against a target of ${fmt(t)} for ${cs.join(', ')}.`;
   };
   setTxt('ov-prog-aw-desc',
-    `Consented interviews against a target of ${fmt(awTarget)} — ${AW_PER_CITY_TXT()} per city, ${scopeText('aw', 'study cities')}.`);
+    desc('aw', 'Consented interviews', `${AW_PER_CITY_TXT()} per city`, 'study cities'));
   setTxt('ov-prog-ts-desc',
-    `Vendor visits against a target of ${fmt(tsTarget)} — ${TS_BASIS_TXT()}, ${scopeText('ts', 'sampling cities')}.`);
+    desc('ts', 'Vendor visits', TS_BASIS_TXT(), 'sampling cities'));
   donutChart('ovMix', [
     { label: 'Retailer', value: rsRetail },
     { label: 'Wholesaler', value: rsWholesale },
@@ -1961,7 +1994,9 @@ function boot(payload) {
   buildFilterUI();
 
   const m = D.meta;
-  setTxt('meta-scope', `${m.aw.n_cities} awareness · ${m.ts.n_cities} sampling cities`);
+  // Programme scope, not the cities reached so far — the header reads as
+  // "how big is this study", and the tracker below answers "how far in".
+  setTxt('meta-scope', `${m.aw.scope_cities} awareness · ${m.ts.scope_cities} sampling cities`);
   setTxt('meta-line', `Data through ${m.data_through || '—'}`);
   setTxt('meta-pill', `Updated ${m.generated_at}`);
   setTxt('foot-build', `Build ${m.generated_at} · data through ${m.data_through || '—'} · ${fmt(m.aw.n_submissions)} awareness submissions · ${fmt(m.ts.n_samples)} samples`);

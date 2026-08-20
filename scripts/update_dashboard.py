@@ -166,18 +166,73 @@ def to_int(v):
 
 
 DATE_FORMATS = [
-    "%b %d, %Y %I:%M:%S %p", "%b %d, %Y %H:%M:%S", "%B %d, %Y %I:%M:%S %p",
-    "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d",
-    "%d/%m/%Y %H:%M:%S", "%d/%m/%Y", "%m/%d/%Y %H:%M:%S", "%m/%d/%Y",
-    "%d-%b-%Y", "%d-%m-%Y",
+    "%b %d, %Y %I:%M:%S %p", "%b %d, %Y %I:%M %p", "%b %d, %Y %H:%M:%S",
+    "%B %d, %Y %I:%M:%S %p", "%B %d, %Y %I:%M %p",
+    "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d",
+    "%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M", "%d/%m/%Y",
+    "%m/%d/%Y %H:%M:%S", "%m/%d/%Y %H:%M", "%m/%d/%Y",
+    "%d-%b-%Y", "%d-%m-%Y %H:%M", "%d-%m-%Y",
 ]
 
+SLASH_DATE = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})")
+TIME_FORMATS = ("%H:%M:%S", "%H:%M", "%I:%M:%S %p", "%I:%M %p")
 
-def parse_dt(v):
+
+def detect_month_first(values):
+    """
+    Decide whether a slash-dated column is d/m/Y or m/d/Y.
+
+    A single value settles it: a first component above twelve cannot be a
+    month, a second above twelve cannot be a day. Deciding once for the whole
+    column rather than per value is the point -- guessing value by value is
+    how 8/5 and 5/8 from one export end up in different months.
+
+    Returns True for month-first, False for day-first, None if the column
+    carries no value that distinguishes them.
+    """
+    first_big = second_big = False
+    for v in values:
+        m = SLASH_DATE.match(norm(v))
+        if not m:
+            continue
+        first_big = first_big or int(m.group(1)) > 12
+        second_big = second_big or int(m.group(2)) > 12
+    if second_big and not first_big:
+        return True
+    if first_big and not second_big:
+        return False
+    return None
+
+
+def parse_dt(v, month_first=None):
     if is_missing(v):
         return None
     s = norm(v).replace("Z", "")
     s = re.sub(r"([+-]\d{2}:?\d{2})$", "", s).strip()
+
+    # Honour the column-wide verdict before falling back to the format list,
+    # whose d/m entries would otherwise claim an ambiguous m/d value first.
+    m = SLASH_DATE.match(s)
+    if m and month_first is not None:
+        a, b, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        mo, day = (a, b) if month_first else (b, a)
+        rest = s[m.end():].strip()
+        hh = mi = ss = 0
+        ok = not rest
+        for tf in TIME_FORMATS:
+            if ok:
+                break
+            try:
+                t = datetime.strptime(rest, tf)
+            except ValueError:
+                continue
+            hh, mi, ss, ok = t.hour, t.minute, t.second, True
+        if ok:
+            try:
+                return datetime(year, mo, day, hh, mi, ss)
+            except ValueError:
+                pass
+
     for f in DATE_FORMATS:
         try:
             return datetime.strptime(s, f)
@@ -192,9 +247,16 @@ def parse_dt(v):
     return None
 
 
-def day_of(v):
-    d = parse_dt(v)
+def day_of(v, month_first=None):
+    d = parse_dt(v, month_first)
     return d.strftime("%Y-%m-%d") if d else None
+
+
+DATE_COLUMNS = ("SubmissionDate", "date", "starttime", "endtime")
+
+
+def date_order_of(rows):
+    return detect_month_first(r.get(c) for r in rows for c in DATE_COLUMNS)
 
 
 def read_csvs(folder, pattern="*.csv"):
@@ -424,13 +486,14 @@ def build_awareness(book, tables):
     # returns (None, None, None) when the column is absent, same as it does
     # for a skipped fix, so this stays harmless until real coordinates land.
     fields = ["key", "date", "dur", "lat", "lon", "acc"] + AW_META + AW_RS + AW_CS
+    order = date_order_of(rows_in)
     out = []
     for r in rows_in:
         rec = []
-        d = day_of(r.get("SubmissionDate") or r.get("endtime") or r.get("starttime") or r.get("date"))
+        d = day_of(r.get("SubmissionDate") or r.get("endtime") or r.get("starttime") or r.get("date"), order)
         dur = to_int(r.get("duration"))
         if dur is None:
-            st, en = parse_dt(r.get("starttime")), parse_dt(r.get("endtime"))
+            st, en = parse_dt(r.get("starttime"), order), parse_dt(r.get("endtime"), order)
             dur = int((en - st).total_seconds()) if st and en else None
         lat, lon, acc = read_geo(r, field="geo_2")
         rec.append(norm(r.get("KEY") or r.get("instanceID") or ""))
@@ -479,13 +542,14 @@ def build_turmeric(book, tables):
 
     # ---- vendor level ----
     v_fields = ["key", "date", "dur", "lat", "lon", "acc", "n_types", "n_samples"] + TS_MAIN_FIELDS
+    order = date_order_of(main_rows)
     vendors, by_key = [], {}
     for r in main_rows:
         key = norm(r.get("KEY") or r.get("instanceID") or r.get("vendor_id") or "")
         lat, lon, acc = read_geo(r)
         rec = {
             "key": key,
-            "date": day_of(r.get("date") or r.get("SubmissionDate") or r.get("starttime")),
+            "date": day_of(r.get("date") or r.get("SubmissionDate") or r.get("starttime"), order),
             "dur": to_int(r.get("duration")),
             "lat": lat, "lon": lon, "acc": acc,
             "n_types": 0, "n_samples": 0,
@@ -651,6 +715,16 @@ def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows):
             flags.append({"sev": "warn", "area": "Awareness",
                           "msg": f"{short} interviews ran unusually short (below {max(300, int(p10*0.6))}s)",
                           "n": short})
+
+    for area, rows, idx in (("Awareness", aw_rows, fi.get("date")),
+                            ("Sampling", ts_v_rows, vi.get("date"))):
+        if idx is None or not rows:
+            continue
+        undated = sum(1 for r in rows if not r[idx])
+        if undated:
+            flags.append({"sev": "warn", "area": area,
+                          "msg": f"{undated} of {len(rows)} records carry no readable date — "
+                                 f"check the export's date format", "n": undated})
 
     aw_no_gps = sum(1 for r in aw_rows if r[fi["lat"]] is None)
     if aw_no_gps:

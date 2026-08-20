@@ -40,6 +40,37 @@ python scripts/daily_update.py --dry-run   # build only, change nothing
 python scripts/daily_update.py --no-push   # build and commit, push later
 ```
 
+### Fieldwork targets
+
+Both targets are read off the instruments at build time, not typed into the
+code, so adding a market to an XLSForm moves the target with it.
+
+| | Target | How it is arrived at |
+|---|---|---|
+| Awareness Follow-up | **600** interviews | 150 consented interviews in each of the 4 study cities (Karachi, Hyderabad, Peshawar, Mardan) |
+| Market Sampling | **405** vendor visits | 25 vendors in each of the 13 wholesale markets + 2 in each of the 40 retail localities, across 10 cities |
+
+Because the market lists cascade by city, the sampling target differs per city:
+Karachi lists two wholesale markets and Quetta three, the rest one each, and
+every city lists four retail localities.
+
+```
+per city = 25 x (wholesale markets) + 2 x (retail localities)
+
+Karachi   25 x 2 + 2 x 4 = 58
+Quetta    25 x 3 + 2 x 4 = 83
+all other 25 x 1 + 2 x 4 = 33      ->  58 + 83 + (33 x 8) = 405
+```
+
+The dashboard measures against the cities on screen: filter to Karachi and the
+progress ring compares against 58, not 405. A city outside a survey's scope —
+Quetta has no awareness target, Mardan no sampling target — shows no ring
+rather than a misleading zero.
+
+To change the per-vendor or per-city assumptions, edit `AW_PER_CITY`,
+`SHOPS_PER_WHOLESALE` and `SHOPS_PER_RETAIL` at the top of
+`scripts/update_dashboard.py`.
+
 ### What the daily run checks before it publishes
 
 Two things go wrong quietly on a static host, and both have shipped a live
