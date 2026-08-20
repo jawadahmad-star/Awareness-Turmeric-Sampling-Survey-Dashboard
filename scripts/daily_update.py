@@ -168,8 +168,6 @@ def main():
     ap.add_argument("--no-push", action="store_true", help="commit but do not push")
     ap.add_argument("--dry-run", action="store_true", help="rebuild only; no commit, no push")
     ap.add_argument("--password", default=None, help="override the dashboard access password")
-    ap.add_argument("--aw-target", type=int, default=1000)
-    ap.add_argument("--ts-target", type=int, default=500)
     a = ap.parse_args()
 
     started = datetime.now()
@@ -199,8 +197,7 @@ def main():
     else:
         say("      codebook is current")
 
-    cmd = [sys.executable, str(SCRIPTS / "update_dashboard.py"),
-           "--aw-target", str(a.aw_target), "--ts-target", str(a.ts_target)]
+    cmd = [sys.executable, str(SCRIPTS / "update_dashboard.py")]
     if a.password:
         cmd += ["--password", a.password]
     run(cmd)

@@ -212,6 +212,21 @@ const F = { city: new Set(), enum: new Set(), resp: new Set(), mktType: new Set(
 
 const setOk = (set, v) => set.size === 0 || (v !== null && set.has(v));
 
+/* Targets are set per city, so a filtered view has to be measured against the
+   target for the cities actually on screen. Comparing four Karachi interviews
+   with the whole 600-interview programme reads as 1% and tells the reader
+   nothing about whether Karachi is on track. */
+function targetCities(ds) {
+  const per = ((D.meta || {})[ds] || {}).target_per_city || {};
+  const names = Object.keys(per);
+  return F.city.size ? names.filter(c => F.city.has(c)) : names;
+}
+function targetFor(ds) {
+  const per = ((D.meta || {})[ds] || {}).target_per_city;
+  if (!per) return (D.meta[ds] || {}).target || 0;
+  return targetCities(ds).reduce((t, c) => t + (per[c] || 0), 0);
+}
+
 /* Awareness Survey respondents are filtered on their real-world type, not
    the raw instrument code: the Retailer_survey instrument's type_of_vendor
    splits Retailer vs Wholesaler, and the Consumer_survey instrument's Q_1
@@ -1018,11 +1033,25 @@ function renderAll() {
   drawPanel(currentPanel);
 }
 
+/* The target arithmetic lives in the build; these just read it back so the
+   wording cannot drift from the number beside it. */
+function AW_PER_CITY_TXT() {
+  const per = (D.meta.aw || {}).target_per_city || {};
+  const vals = [...new Set(Object.values(per))];
+  return vals.length === 1 ? fmt(vals[0]) : 'a per-city quota';
+}
+function TS_BASIS_TXT() {
+  const b = (D.meta.ts || {}).target_basis;
+  if (!b) return 'a per-market quota';
+  const w = b.wholesale_market, r = b.locality_retail;
+  return `${w.vendors_each} vendors in each of ${w.markets} wholesale markets + ${r.vendors_each} in each of ${r.markets} retail localities`;
+}
+
 /* ---------- 01 OVERVIEW ---------- */
 function drawOverview() {
   const m = D.meta;
   const con = Q.con, ts = Q.ts, sp = Q.sp;
-  const awTarget = m.aw.target, tsTarget = m.ts.target;
+  const awTarget = targetFor('aw'), tsTarget = targetFor('ts');
   const dailyAw = byDay(con, AW.f.date), dailyTs = byDay(ts, TS.f.date);
   const days = new Set([...dailyAw.map(x => x.date), ...dailyTs.map(x => x.date)]).size;
   const grams = nums(sp, SP.f.qty).reduce((a, b) => a + b, 0);
@@ -1082,6 +1111,18 @@ function drawOverview() {
   dualLine('ovDaily', dailyAw, dailyTs, 'Awareness Survey', 'Sampling Survey');
   progressDonut('ovProgAw', con.length, awTarget, 'interviews');
   progressDonut('ovProgTs', ts.length, tsTarget, 'vendor visits');
+  // Naming the cities the target covers is what stops a filtered donut from
+  // looking like the programme is behind when it is only showing one city.
+  const scopeText = (ds, whole) => {
+    const cs = targetCities(ds);
+    return F.city.size
+      ? (cs.length ? cs.join(', ') : 'no city in scope')
+      : `all ${cs.length} ${whole}`;
+  };
+  setTxt('ov-prog-aw-desc',
+    `Consented interviews against a target of ${fmt(awTarget)} — ${AW_PER_CITY_TXT()} per city, ${scopeText('aw', 'study cities')}.`);
+  setTxt('ov-prog-ts-desc',
+    `Vendor visits against a target of ${fmt(tsTarget)} — ${TS_BASIS_TXT()}, ${scopeText('ts', 'sampling cities')}.`);
   donutChart('ovMix', [
     { label: 'Retailer', value: rsRetail },
     { label: 'Wholesaler', value: rsWholesale },
@@ -1093,7 +1134,9 @@ function drawOverview() {
   cumulativeChart('ovCumAw', dailyAw, null, 'Cumulative interviews', S(6));
   cumulativeChart('ovCumTs', byDay(sp, SP.f.date), null, 'Cumulative samples', S(4));
 
-  setTxt('ov-foot', `Awareness Survey target ${fmt(awTarget)} consented interviews across ${m.aw.n_cities} cities; Sampling Survey target ${fmt(tsTarget)} vendor visits across ${m.ts.n_cities} cities. Data through ${m.data_through || '—'}. Live fieldwork data. Dashboard by Research Solutions (M&A Research Solutions LLC) | www.rs.org.pk`);
+  // The footer states the programme as designed, so it stays on the full
+  // targets even when the filter bar has narrowed what the charts above show.
+  setTxt('ov-foot', `Awareness Survey target ${fmt(m.aw.target)} consented interviews — ${m.aw.target_note}. Sampling Survey target ${fmt(m.ts.target)} vendor visits — ${m.ts.target_note}. Data through ${m.data_through || '—'}. Live fieldwork data. Dashboard by Research Solutions (M&A Research Solutions LLC) | www.rs.org.pk`);
 }
 
 /* Awareness Survey respondents come in three types: the Retailer_survey
@@ -1745,7 +1788,13 @@ function drawLead() {
 let covRows = [], covSort = { key: 'samples', dir: -1 };
 function drawCoverage() {
   const con = Q.con, ts = Q.ts, sp = Q.sp;
+  // A coverage tracker that only lists cities with data hides the ones that
+  // matter most — the ones still on zero. Start from the programme scope (the
+  // cities the instruments define targets for), then add anything the data
+  // turned up that the scope did not anticipate.
+  const awPer = D.meta.aw.target_per_city || {}, tsPer = D.meta.ts.target_per_city || {};
   const cities = new Set([
+    ...targetCities('aw'), ...targetCities('ts'),
     ...con.map(r => cityOf('aw', r[AW.f.city])),
     ...ts.map(r => cityOf('ts', r[TS.f.sample_city])),
   ].filter(Boolean));
@@ -1763,15 +1812,23 @@ function drawCoverage() {
       vendors: v.length, samples: s.length,
       types: types.size, typePct: Math.round(100 * types.size / 4),
       price: ppk.length ? Math.round(median(ppk)) : null,
-      scope: a.length && v.length ? 'both' : (v.length ? 'ts' : 'aw'),
+      // Scope is which surveys the programme sends to this city, which is a
+      // fact about the instruments — not about whether anyone has been yet.
+      awTarget: awPer[c] || 0, tsTarget: tsPer[c] || 0,
+      awPct: awPer[c] ? Math.round(100 * a.length / awPer[c]) : null,
+      tsPct: tsPer[c] ? Math.round(100 * v.length / tsPer[c]) : null,
+      scope: (awPer[c] && tsPer[c]) ? 'both' : (tsPer[c] ? 'ts' : 'aw'),
     };
   });
 
+  const awT = targetFor('aw'), tsT = targetFor('ts');
+  const started = covRows.filter(r => r.aw || r.vendors).length;
   setHTML('cv-stats', [
-    statBox(fmt(cities.size), 'Cities in scope', 'Either survey', 'var(--rs-red)'),
-    statBox(fmt(covRows.filter(r => r.scope === 'both').length), 'Covered by both', 'Awareness + sampling', 'var(--series-6)'),
-    statBox(fmt(con.length), 'Awareness interviews', 'Consented', 'var(--series-3)'),
-    statBox(fmt(ts.length), 'Vendors visited', 'Sampling survey', 'var(--turmeric)'),
+    statBox(fmt(cities.size), 'Cities in scope',
+      `${fmt(targetCities('aw').length)} awareness · ${fmt(targetCities('ts').length)} sampling`, 'var(--rs-red)'),
+    statBox(fmt(started), 'Cities started', `of ${fmt(cities.size)} with fieldwork recorded`, 'var(--series-6)'),
+    statBox(fmt(con.length), 'Awareness interviews', `of ${fmt(awT)} target · ${pctOf(con.length, awT)}%`, 'var(--series-3)'),
+    statBox(fmt(ts.length), 'Vendors visited', `of ${fmt(tsT)} target · ${pctOf(ts.length, tsT)}%`, 'var(--turmeric)'),
     statBox(fmt(sp.length), 'Samples banked', 'Awaiting laboratory', 'var(--series-5)'),
     statBox(fmt(covRows.filter(r => r.types === 4).length), 'Cities with all 4 types', 'Full product coverage', 'var(--series-1)'),
   ].join(''));
@@ -1804,7 +1861,7 @@ function drawCoverage() {
   locRows.noExpand = true;
   barChart('cvTsLoc', locRows, S(8), true, '', true);
 
-  setTxt('cv-foot', `Type coverage is the share of the four turmeric product types in the sampling protocol that have been collected at least once in that city — a city at 50% has half the product range still to sample. Median price is across all sampled types in that city and is not adjusted for product mix, so cities skewed towards branded packs will read high.`);
+  setTxt('cv-foot', `Every city the two instruments define a target for is listed, including those still on zero. Awareness targets ${AW_PER_CITY_TXT()} interviews per city; sampling targets ${TS_BASIS_TXT()}, which is why Karachi and Quetta carry more than the rest. Type coverage is the share of the four turmeric product types in the sampling protocol that have been collected at least once in that city — a city at 50% has half the product range still to sample. Median price is across all sampled types in that city and is not adjusted for product mix, so cities skewed towards branded packs will read high.`);
 }
 
 function renderCovTable() {
@@ -1818,8 +1875,8 @@ function renderCovTable() {
   });
 
   const cols = [
-    ['city', 'City', false], ['aw', 'Interviews', true], ['rs', 'Retailer', true], ['cs', 'Consumer', true],
-    ['vendors', 'Vendors', true], ['samples', 'Samples', true], ['typePct', 'Type coverage', true],
+    ['city', 'City', false], ['awPct', 'Interviews / target', true], ['rs', 'Retailer', true], ['cs', 'Consumer', true],
+    ['tsPct', 'Vendors / target', true], ['samples', 'Samples', true], ['typePct', 'Type coverage', true],
     ['price', 'Median Rs/kg', true], ['scope', 'Scope', true],
   ];
   document.getElementById('cov-head').innerHTML = '<tr>' + cols.map(([k2, l, num]) =>
@@ -1830,12 +1887,17 @@ function renderCovTable() {
       : '<span class="badge badge-teal">Awareness</span>';
   const barColor = p => p >= 100 ? S(6) : p >= 50 ? S(4) : p > 0 ? S(2) : MUTED();
 
+  // "4 / 150" beside a bar reads as progress; a bare "4" does not.
+  const vsTarget = (done, target, pct) => target
+    ? `<td class="num"><span class="bar-mini"><span style="width:${Math.min(pct, 100)}%;background:${barColor(pct)}"></span></span><span class="pct-num">${fmt(done)} / ${fmt(target)}</span></td>`
+    : `<td class="num">${fmt(done)}<span class="pct-num" style="opacity:.5"> / —</span></td>`;
+
   document.getElementById('cov-body').innerHTML = rows.length ? rows.map(r => `<tr>
     <td class="strong">${esc(r.city)}</td>
-    <td class="num">${fmt(r.aw)}</td>
+    ${vsTarget(r.aw, r.awTarget, r.awPct)}
     <td class="num">${fmt(r.rs)}</td>
     <td class="num">${fmt(r.cs)}</td>
-    <td class="num">${fmt(r.vendors)}</td>
+    ${vsTarget(r.vendors, r.tsTarget, r.tsPct)}
     <td class="num strong">${fmt(r.samples)}</td>
     <td class="num"><span class="bar-mini"><span style="width:${r.typePct}%;background:${barColor(r.typePct)}"></span></span><span class="pct-num">${r.typePct}%</span></td>
     <td class="num">${r.price ? 'Rs ' + fmt(r.price) : '—'}</td>
@@ -1867,9 +1929,13 @@ function download(name, text) {
 function exportTable() {
   const stamp = (D.meta.data_through || 'export').replace(/-/g, '');
   const rows = window.__covVisible || [];
-  const head = ['City', 'Interviews', 'Retailer', 'Consumer', 'Vendors', 'Samples', 'Types sampled', 'Type coverage %', 'Median Rs per kg', 'Scope'];
+  const head = ['City', 'Interviews', 'Interview target', 'Interviews % of target',
+    'Retailer', 'Consumer', 'Vendors', 'Vendor target', 'Vendors % of target',
+    'Samples', 'Types sampled', 'Type coverage %', 'Median Rs per kg', 'Scope'];
   download(`turmeric_coverage_${stamp}.csv`,
-    [head.join(','), ...rows.map(r => [r.city, r.aw, r.rs, r.cs, r.vendors, r.samples, r.types, r.typePct, r.price, r.scope].map(csvCell).join(','))].join('\n'));
+    [head.join(','), ...rows.map(r => [r.city, r.aw, r.awTarget || '', r.awPct, r.rs, r.cs,
+      r.vendors, r.tsTarget || '', r.tsPct, r.samples, r.types, r.typePct, r.price, r.scope]
+      .map(csvCell).join(','))].join('\\n'));
 }
 
 /* The header is sticky and its height changes with viewport width (the meta

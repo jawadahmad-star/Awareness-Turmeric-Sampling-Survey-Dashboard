@@ -67,6 +67,18 @@ DEFAULT_PASSWORD = "TS2026_RS"
 # SurveyCTO writes these for don't-know / refused; they must never be counted
 # as substantive answers but should still be visible in distributions.
 SPECIAL = {"-999": "Don't know", "-888": "Refused", "999": "Don't know", "888": "Refused"}
+# "Other (specify)" in every cascading market list. It is an escape hatch for
+# the enumerator, not a market the programme planned to visit, so it never
+# counts towards a target.
+OTHER_CODE = "777"
+
+# ---- fieldwork targets ----------------------------------------------------
+# Read off the instruments rather than typed in here, so that adding a market
+# to an XLSForm moves the target with it instead of leaving the dashboard
+# measuring progress against a number nobody remembers setting.
+AW_PER_CITY = 150          # consented awareness interviews per study city
+SHOPS_PER_WHOLESALE = 25   # vendors sampled in each wholesale market
+SHOPS_PER_RETAIL = 2       # vendors sampled in each retail locality
 
 
 # ----------------------------------------------------------------------
@@ -542,6 +554,42 @@ def build_turmeric(book, tables):
     return (v_fields, v_rows), (s_fields, samples)
 
 
+def awareness_targets(book):
+    """150 consented interviews in each city the awareness instrument lists."""
+    per = {label: AW_PER_CITY for label in book.choice_map("city").values()}
+    return per, sum(per.values())
+
+
+def sampling_targets(book):
+    """
+    Vendor visits per city: 25 in each of its wholesale markets, plus 2 in
+    each of its retail localities.
+
+    The cascading market lists carry the city they belong to, which is what
+    makes this countable: Karachi lists two wholesale markets and Quetta
+    three, the other eight cities one each -- thirteen in all -- and every
+    city lists four retail localities. So Karachi targets 25*2 + 2*4 = 58,
+    Quetta 25*3 + 2*4 = 83, and a single-market city 25 + 8 = 33.
+    """
+    cities = book.choice_map("sample_city")
+    per = {}
+    basis = {}
+    for field, shops in (("wholesale_market", SHOPS_PER_WHOLESALE),
+                         ("locality_retail", SHOPS_PER_RETAIL)):
+        ln = book.list_of(field)
+        n_markets = 0
+        for ch in book.c.get(ln, []):
+            if ch["value"] == OTHER_CODE:
+                continue
+            city = cities.get(ch.get("city"))
+            if not city:
+                continue
+            per[city] = per.get(city, 0) + shops
+            n_markets += 1
+        basis[field] = {"markets": n_markets, "vendors_each": shops}
+    return per, sum(per.values()), basis
+
+
 # ----------------------------------------------------------------------
 #  label packs shipped to the browser
 # ----------------------------------------------------------------------
@@ -677,8 +725,6 @@ def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="validate only, write nothing")
-    ap.add_argument("--aw-target", type=int, default=1000)
-    ap.add_argument("--ts-target", type=int, default=500)
     ap.add_argument("--password", default=None,
                     help="access password used to encrypt the payload "
                          "(default: $TQ_DASHBOARD_PASSWORD, else the built-in)")
@@ -733,6 +779,9 @@ def main():
     def median(xs):
         return xs[len(xs) // 2] if xs else None
 
+    aw_per_city, aw_target = awareness_targets(aw_book)
+    ts_per_city, ts_target, ts_basis = sampling_targets(ts_book)
+
     grams = sum(s[9] for s in s_rows if s[9]) or 0
     ppks = sorted(s[10] for s in s_rows if s[10])
 
@@ -753,7 +802,11 @@ def main():
             "n_enums": len({r[fi["Data_Collector"]] for r in aw_rows if r[fi["Data_Collector"]]}),
             "n_cities": len({r[fi["city"]] for r in aw_rows if r[fi["city"]]}),
             "n_markets": len({r[fi["market_name"]] for r in aw_rows if r[fi["market_name"]]}),
-            "target": a.aw_target,
+            "target": aw_target,
+            "target_per_city": aw_per_city,
+            "target_note": f"{AW_PER_CITY} consented interviews in each of "
+                           f"{len(aw_per_city)} study cities",
+            "scope_cities": len(aw_per_city),
             "field_days": len(aw_days),
         },
         "ts": {
@@ -762,7 +815,15 @@ def main():
             "n_cities": len({r[vi["sample_city"]] for r in v_rows if r[vi["sample_city"]]}),
             "median_duration": round((median(ts_durs) or 0) / 60, 1),
             "n_enums": len({r[vi["enum_name"]] for r in v_rows if r[vi["enum_name"]]}),
-            "target": a.ts_target,
+            "target": ts_target,
+            "target_per_city": ts_per_city,
+            "target_basis": ts_basis,
+            "target_note": f"{SHOPS_PER_WHOLESALE} vendors in each of "
+                           f"{ts_basis['wholesale_market']['markets']} wholesale markets plus "
+                           f"{SHOPS_PER_RETAIL} in each of "
+                           f"{ts_basis['locality_retail']['markets']} retail localities, "
+                           f"across {len(ts_per_city)} cities",
+            "scope_cities": len(ts_per_city),
             "total_grams": int(grams),
             "median_price_per_kg": median(ppks),
             "field_days": len(ts_days),
@@ -787,6 +848,10 @@ def main():
           f" {meta['aw']['n_rs']} retailer / {meta['aw']['n_cs']} consumer)")
     print(f"  sampling  : {len(v_rows):5d} vendor visits, {len(s_rows)} physical samples")
     print(f"  field days: {len(all_days)}  ({meta['first_day']} -> {meta['data_through']})")
+    print(f"  targets   : awareness {aw_target} ({meta['aw']['target_note']})")
+    print(f"              sampling  {ts_target} ({meta['ts']['target_note']})")
+    for city, n in sorted(ts_per_city.items(), key=lambda kv: (-kv[1], kv[0])):
+        print(f"                {city:<14} {n}")
     for f in payload["quality"]:
         print(f"  [{f['sev']:4s}] {f['msg']}")
 
