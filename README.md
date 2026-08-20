@@ -18,11 +18,14 @@ Built by Research Solutions (M&A Research Solutions LLC) · www.rs.org.pk
 
    ```
    data_in/awareness/     awareness survey export
-   data_in/turmeric/      sampling export + the two repeat-group exports
+   data_in/turmeric/      sampling export — either the single wide CSV, or the
+                          long CSV plus its two repeat-group exports
                           (sample_type_details, samples_detail)
    ```
 
-   Replace whatever is already there — the build always reads the whole folder.
+   Replace whatever is already there — the build always reads the whole
+   folder. Only `.csv` is read; a `.dta` or `.xlsx` sitting alongside is
+   ignored (and, like the CSVs, never committed).
 
 3. Double-click **`UPDATE DASHBOARD.bat`**.
 
@@ -90,7 +93,6 @@ data_in/                      drop CSVs here (never committed)
 scripts/
   build_codebook.py           XLSForms  -> codebook.json
   update_dashboard.py         CSVs      -> encrypted payload
-  make_demo_data.py           generates demonstration CSVs
   daily_update.py             the daily runner
 UPDATE DASHBOARD.bat          double-click wrapper for the above
 CNAME                         custom domain for GitHub Pages
@@ -118,25 +120,6 @@ instantly without a server.
 
 ---
 
-## Demonstration data
-
-Until real exports arrive, the site runs on generated data so the client can
-see a complete dashboard. Every build made this way is labelled **DEMO DATA**
-on the login screen, in the header and in a banner across the top.
-
-To regenerate it:
-
-```bash
-python scripts/make_demo_data.py
-python scripts/daily_update.py --demo
-```
-
-**To switch to real data:** delete the CSVs in `data_in/`, drop the real
-exports in, and run `UPDATE DASHBOARD.bat` — without `--demo`. The demo
-labelling disappears on its own.
-
----
-
 ## Export shapes the build accepts
 
 SurveyCTO can export the same form several ways, so the build tolerates all of
@@ -147,6 +130,8 @@ these without configuration:
 | `select_multiple` | `"1 3 4"` in one column, **or** expanded `Q2_1`, `Q2_2` binary columns |
 | `geopoint` | `gps-Latitude` / `gps-Longitude` columns, **or** a single space-separated `gps` cell |
 | Repeat groups | separate long CSVs joined on `PARENT_KEY`, **or** flattened wide columns |
+| Nested repeats | `price_sample_1_2` (outer\_inner), **or** the fully qualified `sample_type_details_1_samples_detail_2_price_sample` |
+| "Other (specify)" | the free text is folded back into the coded field, so a market answered as *Other → "Raja Bazar"* charts and filters as **Raja Bazar** rather than piling up under *Other* |
 | Dates | ISO, `Aug 08, 2026 5:32:11 PM`, `dd/mm/yyyy` and several others |
 
 Unrecognised columns are ignored rather than fatal, so adding a question to the

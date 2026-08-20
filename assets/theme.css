@@ -90,8 +90,6 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
   border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:27px;
   margin:0 auto 18px; box-shadow:0 8px 20px rgba(232,25,44,.28); }
 .auth-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:#2D3450; margin-bottom:6px; line-height:1.3; }
-.auth-demo { display:inline-block; font-size:9.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
-  background:#FEF3C7; color:#78350f; padding:4px 10px; border-radius:5px; margin-bottom:14px; }
 .auth-subtitle { font-size:13px; color:#475569; margin-bottom:24px; line-height:1.6; }
 .auth-label { display:block; text-align:left; font-size:11.5px; font-weight:600; color:#6B7494;
   letter-spacing:.5px; text-transform:uppercase; margin-bottom:7px; }
@@ -119,8 +117,6 @@ body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var
 .header-study { text-align:center; flex:1; padding:0 16px; }
 .header-study-title { font-family:'Playfair Display',serif; font-size:21px; font-weight:700; color:#fff;
   letter-spacing:-.2px; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
-.demo-chip { font-family:'Inter',sans-serif; font-size:9.5px; font-weight:800; letter-spacing:1px;
-  text-transform:uppercase; background:var(--amber-500); color:#1E2438; padding:3px 9px; border-radius:5px; }
 .header-study-sub { font-size:10.5px; color:rgba(255,255,255,.55); letter-spacing:.6px;
   text-transform:uppercase; margin-top:4px; }
 .header-meta { text-align:right; font-size:11.5px; color:rgba(255,255,255,.55); line-height:1.65; white-space:nowrap; }

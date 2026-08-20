@@ -19,12 +19,12 @@ Usage:
     python scripts/daily_update.py                 # build, commit, push
     python scripts/daily_update.py --no-push       # build and commit only
     python scripts/daily_update.py --dry-run       # build only, touch nothing
-    python scripts/daily_update.py --demo          # tag payload as demo data
 """
 
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime
@@ -116,11 +116,57 @@ def codebook_is_stale():
     return False
 
 
+# Anything under these is respondent-level and must never reach a public repo,
+# whatever the staging logic does. .gitignore already blocks them; this is the
+# second lock on the same door.
+NEVER_COMMIT = re.compile(r"^(data_in/|media/|attachments/)|\.(csv|dta|sav)$|\.plain\.js$", re.I)
+
+
+def carries_microdata(path):
+    """
+    True for a path that holds respondent-level answers.
+
+    The XLSForms in instruments/ are spreadsheets too, but they are the
+    questionnaire definitions and the codebook is built from them, so they
+    belong in the repository -- an extension test alone would wrongly block
+    every instrument revision.
+    """
+    if NEVER_COMMIT.search(path):
+        return True
+    return path.lower().endswith((".xlsx", ".xls")) and not path.startswith("instruments/")
+
+# getElementById('x'). -- dereferenced straight away, with no null guard. The
+# optional-chaining form ")?." deliberately does not match.
+UNGUARDED_GET = re.compile(r"""getElementById\(\s*['"]([^'"]+)['"]\s*\)\s*\.""")
+
+
+def check_page_boots():
+    """
+    Fail the build if app.js dereferences an element id that index.html does
+    not define.
+
+    This is the failure that shipped an empty dashboard once already: the page
+    lost an element, the script that touched it was published one commit
+    later, and every getElementById on the missing id threw inside boot() --
+    so the shell rendered and not one chart did. It is cheap to check and the
+    symptom is invisible until someone opens the live site.
+    """
+    idx = (ROOT / "index.html").read_text(encoding="utf-8")
+    have = set(re.findall(r"""(?:^|\s)id=["']([^"']+)["']""", idx))
+    missing = []
+    for js in sorted((ROOT / "assets").glob("*.js")):
+        src = js.read_text(encoding="utf-8")
+        for m in UNGUARDED_GET.finditer(src):
+            if m.group(1) not in have:
+                line = src.count(chr(10), 0, m.start()) + 1
+                missing.append(f"{js.name}:{line}  getElementById('{m.group(1)}') has no matching id in index.html")
+    return missing
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-push", action="store_true", help="commit but do not push")
     ap.add_argument("--dry-run", action="store_true", help="rebuild only; no commit, no push")
-    ap.add_argument("--demo", action="store_true", help="tag the payload as demonstration data")
     ap.add_argument("--password", default=None, help="override the dashboard access password")
     ap.add_argument("--aw-target", type=int, default=1000)
     ap.add_argument("--ts-target", type=int, default=500)
@@ -134,7 +180,7 @@ def main():
     say()
 
     aw_csv, ts_csv = count_inputs()
-    say("[1/4] Checking inputs")
+    say("[1/5] Checking inputs")
     say(f"      awareness CSVs : {len(aw_csv)}")
     say(f"      sampling CSVs  : {len(ts_csv)}")
     if not aw_csv and not ts_csv:
@@ -146,7 +192,7 @@ def main():
         return 1
 
     say()
-    say("[2/4] Rebuilding data")
+    say("[2/5] Rebuilding data")
     if codebook_is_stale():
         say("      instrument changed — rebuilding codebook")
         run([sys.executable, str(SCRIPTS / "build_codebook.py")])
@@ -155,8 +201,6 @@ def main():
 
     cmd = [sys.executable, str(SCRIPTS / "update_dashboard.py"),
            "--aw-target", str(a.aw_target), "--ts-target", str(a.ts_target)]
-    if a.demo:
-        cmd.append("--demo")
     if a.password:
         cmd += ["--password", a.password]
     run(cmd)
@@ -173,22 +217,52 @@ def main():
         return 0
 
     say()
-    say("[3/4] Committing")
+    say("[3/5] Checking the page will boot")
+    problems = check_page_boots()
+    if problems:
+        say("  [FAIL] index.html and assets/ are out of step — this would deploy")
+        say("         a dashboard that renders its shell and no charts:")
+        for pr in problems:
+            say(f"      {pr}")
+        say("      Nothing was committed.")
+        write_log(started)
+        return 1
+    say("      index.html and assets/ agree on every element id")
+
+    say()
+    say("[4/5] Committing")
     if not have_git_repo():
         say("      not a git repository — skipping commit and push")
         say(f"      payload is ready at {PAYLOAD.relative_to(ROOT)}")
         write_log(started)
         return 0
 
-    # index.html carries the cache-busting stamp for the payload, so it has to
-    # travel with it or returning viewers keep loading the previous build.
-    git("add", "--", str(PAYLOAD.relative_to(ROOT)).replace("\\", "/"),
-        "index.html", "codebook/codebook.json", check=False)
-    code, _ = git("diff", "--cached", "--quiet", check=False)
+    # Stage everything tracked that changed, not a hand-picked list. An
+    # earlier version added only the payload, index.html and the codebook,
+    # which published a cache-stamped index.html against a stale assets/app.js
+    # and left the live dashboard as an empty shell. .gitignore is what keeps
+    # the raw exports out; the staging list is not the place to enforce that.
+    git("add", "-A", "--", ".", check=False)
+
+    _, staged = git("diff", "--cached", "--name-only", check=False)
+    staged_files = [f.strip() for f in staged.splitlines() if f.strip()]
+    leaked = [f for f in staged_files if carries_microdata(f)]
+    if leaked:
+        git("reset", check=False)
+        say("  [FAIL] Refusing to commit — these carry respondent-level data:")
+        for f in leaked:
+            say(f"      {f}")
+        say("      Check .gitignore before running again. Nothing was committed.")
+        write_log(started)
+        return 1
+    for f in staged_files:
+        say(f"      + {f}")
+
+    code = 1 if staged_files else 0
     if code == 0:
         say("      no change in the rebuilt payload — nothing to commit")
         say()
-        say("[4/4] Push")
+        say("[5/5] Push")
         say("      skipped (nothing new)")
         write_log(started)
         return 0
@@ -203,7 +277,7 @@ def main():
     say(f"      committed: {msg}")
 
     say()
-    say("[4/4] Pushing to GitHub")
+    say("[5/5] Pushing to GitHub")
     if a.no_push:
         say("      --no-push set; run 'git push' when ready")
         write_log(started)

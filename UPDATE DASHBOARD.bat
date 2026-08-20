@@ -4,7 +4,8 @@ REM  TURMERIC QUALITY DASHBOARD - daily update
 REM
 REM  1. Put the new SurveyCTO exports here:
 REM       data_in\awareness\   (awareness survey CSV)
-REM       data_in\turmeric\    (sampling CSV + the two repeat-group CSVs)
+REM       data_in\turmeric\    (sampling CSV - wide, or long + its two
+REM                             repeat-group CSVs)
 REM  2. Double-click this file.
 REM
 REM  It rebuilds the encrypted dashboard payload, commits it, and pushes

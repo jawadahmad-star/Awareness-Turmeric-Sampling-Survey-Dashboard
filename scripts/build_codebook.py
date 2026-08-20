@@ -4,9 +4,9 @@ build_codebook.py
 Parses the two XLSForm instruments into a single codebook.json.
 
 The codebook is the one place that knows what a question is called, what it
-says in English, and what its coded answers mean. Both the demo-data
-generator and the daily ETL read it, so re-running this after an instrument
-revision is all that is needed to keep them in step.
+says in English, and what its coded answers mean. The daily ETL reads it, so
+re-running this after an instrument revision is all that is needed to keep the
+dashboard in step.
 
 Usage:
     python scripts/build_codebook.py
@@ -120,7 +120,14 @@ def build_form(path):
         for extra in ("city", "filter"):
             if d.get(extra) is not None:
                 entry[extra] = str(d[extra]).strip()
-        choices.setdefault(ln, []).append(entry)
+        # Cascading lists repeat the shared options (777 "Other", mostly) once
+        # per parent city, so the same value can appear a dozen times in one
+        # list. Keep the first and drop the rest -- otherwise every chart built
+        # off the list order shows "Other" a dozen times.
+        bucket = choices.setdefault(ln, [])
+        if any(c["value"] == val for c in bucket):
+            continue
+        bucket.append(entry)
 
     # ---- questions ----------------------------------------------------
     questions = {}

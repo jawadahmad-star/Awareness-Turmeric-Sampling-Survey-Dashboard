@@ -72,11 +72,6 @@ async function checkAuth() {
 /* Re-open without re-typing within the same tab. The decrypted payload lives
    in sessionStorage, which dies with the tab; the password is never kept. */
 window.addEventListener('DOMContentLoaded', () => {
-  const pub = window.DASHBOARD_PUBLIC || {};
-  const demo = !!pub.is_demo;
-  const chip = document.getElementById('auth-demo-chip');
-  if (chip) chip.style.display = demo ? '' : 'none';
-
   if (!window.isSecureContext && window.DASHBOARD_ENC) {
     const err = document.getElementById('auth-error');
     if (err) err.textContent = 'This page must be served over HTTPS (or localhost) to decrypt.';
@@ -331,22 +326,28 @@ function multiOf(rows, ds, tbl, field, opt) {
 }
 
 /* Share of rows whose coded answer falls in `codes`, over rows that were asked. */
+/* select_multiple answers arrive as an array of codes, select_one as a bare
+   string, and the same question can be either depending on the instrument
+   revision — so both helpers read "is any of these codes selected". */
+function hasCode(v, codes) {
+  return Array.isArray(v) ? v.some(c => codes.includes(c)) : codes.includes(v);
+}
 function shareIn(rows, tbl, field, codes) {
   const i = tbl.f[field];
   if (i === undefined) return { pct: 0, n: 0, base: 0 };
   let base = 0, n = 0;
   rows.forEach(r => {
     const v = r[i];
-    if (v === null || v === undefined || v === '') return;
+    if (v === null || v === undefined || v === '' || (Array.isArray(v) && !v.length)) return;
     base++;
-    if (codes.includes(v)) n++;
+    if (hasCode(v, codes)) n++;
   });
   return { pct: base ? Math.round(1000 * n / base) / 10 : 0, n, base };
 }
 function countWhere(rows, tbl, field, codes) {
   const i = tbl.f[field];
   if (i === undefined) return 0;
-  return rows.filter(r => codes.includes(r[i])).length;
+  return rows.filter(r => hasCode(r[i], codes)).length;
 }
 function nonNull(rows, tbl, field) {
   const i = tbl.f[field];
@@ -814,8 +815,13 @@ function animateKpis(scope) {
     const target = parseFloat(m[1].replace(/,/g, '')), rest = m[2];
     if (isNaN(target) || target === 0) return;
     const dec = (m[1].split('.')[1] || '').length;
-    const t0 = performance.now(), dur = 800;
     el.dataset.done = '1';
+    // requestAnimationFrame is paused in a background tab, so a count-up
+    // started there would freeze on its first frame — which is zero. Anyone
+    // opening the dashboard in a background tab would come back to a wall of
+    // zeroes, so skip straight to the real figure when the page is hidden.
+    if (document.hidden) return;
+    const t0 = performance.now(), dur = 800;
     (function tick(t) {
       const k = Math.min(((t || performance.now()) - t0) / dur, 1), eased = 1 - Math.pow(1 - k, 3);
       const v = target * eased;
@@ -1087,7 +1093,7 @@ function drawOverview() {
   cumulativeChart('ovCumAw', dailyAw, null, 'Cumulative interviews', S(6));
   cumulativeChart('ovCumTs', byDay(sp, SP.f.date), null, 'Cumulative samples', S(4));
 
-  setTxt('ov-foot', `Awareness Survey target ${fmt(awTarget)} consented interviews across ${m.aw.n_cities} cities; Sampling Survey target ${fmt(tsTarget)} vendor visits across ${m.ts.n_cities} cities. Data through ${m.data_through || '—'}. ${m.is_demo ? 'DEMONSTRATION DATA — figures are synthetic and generated from the instrument structure, not from fieldwork.' : 'Live fieldwork data.'} Dashboard by Research Solutions (M&A Research Solutions LLC) | www.rs.org.pk`);
+  setTxt('ov-foot', `Awareness Survey target ${fmt(awTarget)} consented interviews across ${m.aw.n_cities} cities; Sampling Survey target ${fmt(tsTarget)} vendor visits across ${m.ts.n_cities} cities. Data through ${m.data_through || '—'}. Live fieldwork data. Dashboard by Research Solutions (M&A Research Solutions LLC) | www.rs.org.pk`);
 }
 
 /* Awareness Survey respondents come in three types: the Retailer_survey
@@ -1894,13 +1900,9 @@ function boot(payload) {
   setTxt('meta-pill', `Updated ${m.generated_at}`);
   setTxt('foot-build', `Build ${m.generated_at} · data through ${m.data_through || '—'} · ${fmt(m.aw.n_submissions)} awareness submissions · ${fmt(m.ts.n_samples)} samples`);
 
-  const demo = !!m.is_demo;
-  document.getElementById('hdr-demo-chip').style.display = demo ? '' : 'none';
-  document.getElementById('auth-demo-chip').style.display = demo ? '' : 'none';
-  setTxt('banner-tag', demo ? 'Demo Data' : 'Live');
-  document.getElementById('banner-text').innerHTML = demo
-    ? `This build runs on <strong style="color:#fff">demonstration data</strong> generated from the survey instruments — structure is real, figures are not. Live figures appear as soon as fieldwork exports are loaded.`
-    : `Live fieldwork data, rebuilt daily. Snapshot dated <strong style="color:#fff">${esc(m.data_through || '—')}</strong>.`;
+  setTxt('banner-tag', 'Live');
+  document.getElementById('banner-text').innerHTML =
+    `Live fieldwork data, rebuilt daily. Snapshot dated <strong style="color:#fff">${esc(m.data_through || '—')}</strong>.`;
   setTxt('banner-pill', `${fmt(m.aw.n_submissions)} interviews · ${fmt(m.ts.n_samples)} samples`);
 
   document.querySelectorAll('.nav-tab').forEach(b => {

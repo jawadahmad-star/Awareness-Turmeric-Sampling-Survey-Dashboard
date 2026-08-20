@@ -22,13 +22,13 @@ question to the instrument never breaks the build.
 
 Usage:
     python scripts/update_dashboard.py
-    python scripts/update_dashboard.py --demo        # mark payload as demo
     python scripts/update_dashboard.py --check       # validate, write nothing
 """
 
 import argparse
 import base64
 import csv
+import difflib
 import json
 import math
 import os
@@ -255,6 +255,72 @@ def wide_repeats(row, repeat_name, inner_fields):
     return out
 
 
+def wide_inner_repeats(row, outer, inner_fields, outer_name="sample_type_details",
+                       inner_name="samples_detail"):
+    """
+    Pull the *inner* repeat of a nested repeat group out of a wide export.
+
+    SurveyCTO flattens a nested repeat by suffixing both indices onto the bare
+    field name -- price_sample_1_2 is the second sample of the first sample
+    type -- rather than by qualifying it with the group names. Older exports do
+    write the fully qualified form, so both are tried.
+    """
+    out, j = [], 1
+    while True:
+        got, found = {}, False
+        for f in inner_fields:
+            for pat in (f"{f}_{outer}_{j}",
+                        f"{outer_name}_{outer}_{inner_name}_{j}_{f}",
+                        f"{outer_name}-{outer}-{inner_name}-{j}-{f}"):
+                if pat in row and not is_missing(row[pat]):
+                    got[f] = row[pat]
+                    found = True
+                    break
+        if not found:
+            break
+        out.append(got)
+        j += 1
+        if j > 40:
+            break
+    return out
+
+
+def fold_other_specify(fields, rows, code_field, other_field, other_codes=("777", "99", "996", "9999")):
+    """
+    Fold an "Other (specify)" free-text answer back into the coded field.
+
+    Most real market and locality answers come in as Other + free text, so
+    left alone every one of them collapses into a single "Other" bar and the
+    market filter stops being able to tell two cities apart. The text becomes
+    a synthetic code ("777|raja bazar") whose label is the text itself, so the
+    filter bar, the coverage table and every chart keep working unchanged.
+
+    Returns (labels, order) to be merged into the choice map shipped to the
+    browser.
+    """
+    if code_field not in fields or other_field not in fields:
+        return {}, []
+    ci, oi = fields.index(code_field), fields.index(other_field)
+    labels, order = {}, []
+    for r in rows:
+        code = r[ci]
+        if code is None or str(code) not in other_codes:
+            continue
+        txt = norm(r[oi] or "")
+        if not txt:
+            continue
+        # Spelling and capitalisation of the same place drift between
+        # enumerators; matching on a squashed key merges "Raja Bazar" with
+        # "raja  bazar" without pretending to fix genuine typos.
+        key = re.sub(r"[^a-z0-9]+", " ", txt.lower()).strip()
+        syn = f"{code}|{key}"
+        if syn not in labels:
+            labels[syn] = txt[0].upper() + txt[1:]
+            order.append(syn)
+        r[ci] = syn
+    return labels, order
+
+
 # ----------------------------------------------------------------------
 #  codebook access
 # ----------------------------------------------------------------------
@@ -291,8 +357,11 @@ class Book:
 # ----------------------------------------------------------------------
 #  AWARENESS
 # ----------------------------------------------------------------------
-AW_META = ["From_ID", "Consent", "Data_Collector", "city", "market_name",
-           "Q1", "Type_of_survey", "survey_status"]
+# resp_id replaced From_ID in the Jul-2026 instrument revision; market_name_other
+# arrived with it, and carries the real market name whenever the enumerator
+# picked "Other" -- which in this fieldwork is most of the time.
+AW_META = ["resp_id", "Consent", "Data_Collector", "city", "market_name",
+           "market_name_other", "Q1", "Type_of_survey", "survey_status"]
 
 AW_RS = ["type_of_vendor", "Q2", "Q3", "Q3_b",
          "Fresh_Turmeric_Roots", "Dried_Turmeric_Roots", "Loose_Turmeric_Powder",
@@ -361,7 +430,8 @@ def build_awareness(book, tables):
 #  TURMERIC SAMPLING
 # ----------------------------------------------------------------------
 TS_MAIN_FIELDS = ["enum_name", "vendor_id", "sample_city", "market_name",
-                  "locality_retail", "wholesale_market", "vendor_name",
+                  "locality_retail", "locality_retail_other",
+                  "wholesale_market", "wholesale_market_other", "vendor_name",
                   "shop_sample_type", "collected_sample_type", "size_of_shop",
                   "whole_root_display", "survey_status"]
 
@@ -438,8 +508,8 @@ def build_turmeric(book, tables):
             for i, blk in enumerate(wide_repeats(r, "sample_type_details",
                                                  ["current_sample_type", "total_samples_collect"]), 1):
                 ttype = norm(blk.get("current_sample_type")) or None
-                inner = wide_repeats(r, f"sample_type_details_{i}_samples_detail",
-                                     ["sample_type_2", "price_sample", "quantity_smaple"])
+                inner = wide_inner_repeats(r, i,
+                                           ["sample_type_2", "price_sample", "quantity_smaple"])
                 for s in inner:
                     emit(vrec, ttype, norm(s.get("sample_type_2")) or None,
                          to_int(s.get("price_sample")), to_int(s.get("quantity_smaple")))
@@ -459,7 +529,7 @@ def build_turmeric(book, tables):
 # ----------------------------------------------------------------------
 #  label packs shipped to the browser
 # ----------------------------------------------------------------------
-def label_pack(book, names):
+def label_pack(book, names, extra=None):
     pack = {}
     for n in names:
         q = book.q.get(n)
@@ -471,12 +541,38 @@ def label_pack(book, names):
             entry["c"] = cm
             entry["o"] = book.choice_order(n)
         pack[n] = entry
+    # synthetic "Other" codes minted by fold_other_specify, so the browser can
+    # label them like any other choice
+    for n, (labels, order) in (extra or {}).items():
+        if not labels or n not in pack:
+            continue
+        pack[n].setdefault("c", {}).update(labels)
+        pack[n]["o"] = [v for v in pack[n].get("o", []) if v not in labels] + order
     return pack
 
 
 # ----------------------------------------------------------------------
 #  quality flags
 # ----------------------------------------------------------------------
+def near_duplicate_names(rows, idx):
+    """
+    Free-text place names that differ only by spelling.
+
+    Market and locality names typed by hand drift between enumerators --
+    "Bakhsho pul" and "Bakhsho pull" are one market, and counted apart they
+    quietly inflate the market count and split every market-level chart. This
+    only reports them; merging is a field-team decision, not the ETL's.
+    """
+    names = sorted({str(r[idx]).split("|", 1)[1] for r in rows
+                    if r[idx] and "|" in str(r[idx])})
+    pairs = []
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            if difflib.SequenceMatcher(None, a, b).ratio() >= 0.82:
+                pairs.append((a, b))
+    return pairs
+
+
 def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows):
     fi = {f: i for i, f in enumerate(aw_fields)}
     vi = {f: i for i, f in enumerate(ts_v_fields)}
@@ -491,6 +587,24 @@ def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows):
             flags.append({"sev": "warn", "area": "Awareness",
                           "msg": f"{short} interviews ran unusually short (below {max(300, int(p10*0.6))}s)",
                           "n": short})
+
+    aw_no_gps = sum(1 for r in aw_rows if r[fi["lat"]] is None)
+    if aw_no_gps:
+        flags.append({"sev": "warn", "area": "Awareness",
+                      "msg": f"{aw_no_gps} awareness interviews recorded without a GPS fix",
+                      "n": aw_no_gps})
+
+    for area, rows, idx in (("Awareness", aw_rows, fi.get("market_name")),
+                            ("Sampling", ts_v_rows, vi.get("locality_retail"))):
+        if idx is None:
+            continue
+        pairs = near_duplicate_names(rows, idx)
+        if pairs:
+            eg = " / ".join(pairs[0])
+            flags.append({"sev": "info", "area": area,
+                          "msg": f"{len(pairs)} market names differ only by spelling "
+                                 f"and are counted separately (e.g. {eg})",
+                          "n": len(pairs)})
 
     no_gps = sum(1 for r in ts_v_rows if r[vi["lat"]] is None)
     if no_gps:
@@ -546,7 +660,6 @@ def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows):
 # ----------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--demo", action="store_true", help="tag the payload as demonstration data")
     ap.add_argument("--check", action="store_true", help="validate only, write nothing")
     ap.add_argument("--aw-target", type=int, default=1000)
     ap.add_argument("--ts-target", type=int, default=500)
@@ -577,6 +690,18 @@ def main():
         build_turmeric(ts_book, ts_tables) if ts_tables else (([], []), ([], []))
     )
 
+    aw_extra = {"market_name": fold_other_specify(aw_fields, aw_rows,
+                                                  "market_name", "market_name_other")}
+    ts_extra = {
+        "locality_retail": fold_other_specify(v_fields, v_rows,
+                                              "locality_retail", "locality_retail_other"),
+        "wholesale_market": fold_other_specify(v_fields, v_rows,
+                                               "wholesale_market", "wholesale_market_other"),
+    }
+    n_folded = sum(len(lbls) for lbls, _ in list(aw_extra.values()) + list(ts_extra.values()))
+    if n_folded:
+        print(f"    resolved {n_folded} 'Other' market/locality names from the specify fields")
+
     # ---- meta -------------------------------------------------------
     fi = {f: i for i, f in enumerate(aw_fields)}
     vi = {f: i for i, f in enumerate(v_fields)}
@@ -601,7 +726,6 @@ def main():
         "data_through": all_days[-1] if all_days else None,
         "first_day": all_days[0] if all_days else None,
         "field_days": len(all_days),
-        "is_demo": bool(a.demo),
         "aw": {
             "n_submissions": len(aw_rows),
             "n_consented": len(consented),
@@ -633,8 +757,8 @@ def main():
     payload = {
         "meta": meta,
         "labels": {
-            "aw": label_pack(aw_book, aw_fields[6:]),
-            "ts": label_pack(ts_book, TS_MAIN_FIELDS + ["sample_type_2"]),
+            "aw": label_pack(aw_book, aw_fields[6:], aw_extra),
+            "ts": label_pack(ts_book, TS_MAIN_FIELDS + ["sample_type_2"], ts_extra),
         },
         "aw": {"fields": aw_fields, "rows": aw_rows},
         "ts": {"fields": v_fields, "rows": v_rows},
@@ -657,13 +781,12 @@ def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     password = a.password or os.environ.get("TQ_DASHBOARD_PASSWORD") or DEFAULT_PASSWORD
 
-    # A small unencrypted header lets the page show freshness and the demo
-    # badge on the login screen, before anyone has authenticated. It carries
-    # counts and dates only — no respondent or vendor data.
+    # A small unencrypted header lets the login screen show how fresh the
+    # build is before anyone has authenticated. It carries counts and dates
+    # only — no respondent or vendor data.
     public = {
         "generated_at": meta["generated_at"],
         "data_through": meta["data_through"],
-        "is_demo": meta["is_demo"],
         "n_interviews": meta["aw"]["n_submissions"],
         "n_samples": meta["ts"]["n_samples"],
     }
