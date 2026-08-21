@@ -782,8 +782,10 @@ def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows):
         flags.append({"sev": "warn", "area": "Sampling",
                       "msg": f"{ndup} vendor IDs appear on more than one visit", "n": ndup})
 
-    consent_i = fi["Consent"]
-    refused = sum(1 for r in aw_rows if r[consent_i] == "0")
+    # On a day when only one survey has exported, the other arrives with no
+    # fields at all -- so read the index rather than assuming the column.
+    consent_i = fi.get("Consent")
+    refused = sum(1 for r in aw_rows if r[consent_i] == "0") if consent_i is not None else 0
     if refused:
         flags.append({"sev": "info", "area": "Awareness",
                       "msg": f"{refused} approaches ended at the consent stage", "n": refused})
