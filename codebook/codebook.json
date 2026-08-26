@@ -5220,7 +5220,7 @@
      "group": [
       "sample_type_details"
      ],
-     "relevance": "${current_sample_type} = '1'"
+     "relevance": "${current_sample_type} = 1"
     },
     "total_samples_collect": {
      "name": "total_samples_collect",
@@ -5253,7 +5253,19 @@
       "samples_detail"
      ],
      "list_name": "sample_type_2",
-     "relevance": "${current_sample_type} != '1'",
+     "relevance": "${current_sample_type} != 1",
+     "required": true
+    },
+    "sample_type_2_specify": {
+     "name": "sample_type_2_specify",
+     "type": "text",
+     "label": "Please specify other basis of selection",
+     "raw_label": "Please specify other basis of selection",
+     "group": [
+      "sample_type_details",
+      "samples_detail"
+     ],
+     "relevance": "${sample_type_2} = 4",
      "required": true
     },
     "price_sample": {
@@ -5358,6 +5370,7 @@
     "total_samples_collect",
     "sample_no",
     "sample_type_2",
+    "sample_type_2_specify",
     "price_sample",
     "quantity_smaple",
     "label_sample",
@@ -5434,6 +5447,10 @@
      {
       "value": "136",
       "label": "M. Shehzad"
+     },
+     {
+      "value": "137",
+      "label": "Shamas Iqbal"
      },
      {
       "value": "777",
@@ -5879,7 +5896,7 @@
     ]
    },
    "source_file": "turmeric_sampling_survey.xlsx",
-   "source_sha256": "2ee36b88e8804ff3b5997ef22e740035a49ff29e57eb6818bc7397fb8fbb7808"
+   "source_sha256": "dd423735936274baf2ca15835b0fed44761280a5b0605f609e57f6a1b5d7cd82"
   }
  }
 }
