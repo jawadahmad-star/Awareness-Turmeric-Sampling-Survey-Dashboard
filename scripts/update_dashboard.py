@@ -790,6 +790,23 @@ def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows):
         flags.append({"sev": "info", "area": "Awareness",
                       "msg": f"{refused} approaches ended at the consent stage", "n": refused})
 
+    # The lead block is gated on one question per instrument (Q33 for retailers,
+    # Q57a for consumers). If nobody answers "yes", every downstream question is
+    # skipped and the whole Lead tab reads as empty -- so flag the gate itself,
+    # not the twelve blank questions behind it.
+    type_i, q33_i, q57a_i = fi.get("Type_of_survey"), fi.get("Q33"), fi.get("Q_57a")
+    consent_ok = [r for r in aw_rows if consent_i is None or r[consent_i] == "1"]
+    if None not in (type_i, q33_i, q57a_i) and consent_ok:
+        gate = [(r[q33_i] if r[type_i] == "RS" else r[q57a_i]) for r in consent_ok]
+        asked = [g for g in gate if g not in (None, "")]
+        yes = sum(1 for g in asked if g == "1")
+        if asked and not yes:
+            flags.append({"sev": "warn", "area": "Awareness",
+                          "msg": f"all {len(asked)} respondents answered 'no' to the lead gate "
+                                 f"question (Q33/Q57a), so the entire lead section was skipped "
+                                 f"— verify the question is being administered",
+                          "n": len(asked)})
+
     if not flags:
         flags.append({"sev": "ok", "area": "All", "msg": "No data-quality exceptions detected", "n": 0})
     return flags

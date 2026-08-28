@@ -576,8 +576,8 @@ const has = arr => arr && arr.length && SUM(arr) > 0;
 /* `showPct` puts the share of the chart total next to the count — "161 (33%)".
    Only meaningful when the bars partition one base, so it stays off for price
    and quantity charts, where a share of the total is nonsense. */
-function barChart(id, arr, color, horizontal, suffix, showPct) {
-  if (!has(arr)) return noData(id);
+function barChart(id, arr, color, horizontal, suffix, showPct, emptyMsg) {
+  if (!has(arr)) return noData(id, emptyMsg);
   clearEmpty(id);
   const sfx = suffix || '';
   const total = SUM(arr);
@@ -645,8 +645,8 @@ function barChart(id, arr, color, horizontal, suffix, showPct) {
   });
 }
 
-function donutChart(id, arr, colors) {
-  if (!has(arr)) return noData(id);
+function donutChart(id, arr, colors, emptyMsg) {
+  if (!has(arr)) return noData(id, emptyMsg);
   clearEmpty(id);
   mk(id, {
     type: 'doughnut',
@@ -771,8 +771,11 @@ function progressDonut(id, done, target, unit) {
   });
 }
 
-function groupedBar(id, labels, series, suffix, maxY) {
-  if (!labels.length) return noData(id);
+function groupedBar(id, labels, series, suffix, maxY, emptyMsg) {
+  // `emptyMsg` also stands in for "the axes exist but every bar is zero", which
+  // draws an empty grid and tells the reader nothing about why.
+  const allZero = series.every(sr => sr.data.every(v => !v));
+  if (!labels.length || (allZero && emptyMsg)) return noData(id, emptyMsg);
   clearEmpty(id);
   const sfx = suffix === undefined ? '%' : suffix;
   mk(id, {
@@ -1104,12 +1107,14 @@ function drawOverview() {
   const rsWholesale = Q.rs.filter(r => vendorTypeOf(r) === 'wholesaler').length;
   const tsWholesale = ts.filter(r => r[TS.f.market_name] === '1').length;
   const tsRetail = ts.length - tsWholesale;
-  const leadKnow = leadCascade(con);
+  const leadKnow = leadCascade(con), leadG = leadGate(con);
   setHTML('ov-callouts', [
     callout('teal', '🗣️', 'Awareness Survey', `${fmt(rsRetail)} retailer, ${fmt(rsWholesale)} wholesaler and ${fmt(Q.cs.length)} consumer interviews completed against a ${fmt(awTarget)} target.`),
     callout('turmeric', '🧪', 'Sampling Survey', `${fmt(tsRetail)} retail-market and ${fmt(tsWholesale)} wholesale-market vendor visits — ${fmt(sp.length)} samples banked, ${(sp.length / Math.max(1, ts.length)).toFixed(1)} per visit.`),
     callout('purple', '📍', 'Heaviest sampling city', `${topCity} samples collected — the largest single-city contribution to the laboratory batch.`),
-    callout('amber', '🧠', 'Lead awareness', `${leadKnow.steps[1].pct}% of respondents know what lead is; ${leadKnow.steps[2].pct}% have heard it reaches turmeric.`),
+    callout('amber', '🧠', 'Lead awareness', leadG.asked && !leadG.yes
+      ? `Nil so far — not one of the ${fmt(leadG.asked)} respondents asked says they know what lead (sisa) is, so the whole cascade sits at zero. See the Lead tab.`
+      : `${leadKnow.steps[1].pct}% of respondents know what lead is; ${leadKnow.steps[2].pct}% have heard it reaches turmeric.`),
   ].join(''));
 
   // Field-operations headlines. The Field Ops section was retired; these are
@@ -1762,10 +1767,46 @@ function leadCascade(con) {
   };
 }
 
+/* The whole section hangs off one gate question -- Q33 for retailers, Q57a for
+   consumers. Anyone who answers "no" is routed past every question below it, so
+   when nobody has answered "yes" the panel is not broken, it is reporting a real
+   (and rather stark) finding. Say so, or the zeros read as a data pipeline
+   failure to anyone opening the tab. */
+function leadGate(con) {
+  const gateOf = r => r[AW.f.Type_of_survey] === 'RS' ? r[AW.f.Q33] : r[AW.f.Q_57a];
+  const answered = con.filter(r => { const v = gateOf(r); return v !== null && v !== undefined && v !== ''; });
+  return {
+    asked: answered.length,
+    yes: answered.filter(r => gateOf(r) === '1').length,
+    no: answered.filter(r => gateOf(r) === '0').length,
+    rsNo: answered.filter(r => r[AW.f.Type_of_survey] === 'RS' && gateOf(r) === '0').length,
+    csNo: answered.filter(r => r[AW.f.Type_of_survey] === 'CS' && gateOf(r) === '0').length,
+  };
+}
+
+/* Q33_ii / Q35_i / Q35_iii sit behind a different gate again -- they are only
+   put to a retailer who named lead or lead chromate in Q26/Q29 -- so they need
+   their own wording rather than the generic filter message. */
+function namedLeadCount(rows) {
+  return rows.filter(r => (r[AW.f.Q26] || []).includes('2') || (r[AW.f.Q29] || []).includes('2')).length;
+}
+
 function drawLead() {
   const con = Q.con, rs = Q.rs, cs = Q.cs;
   const c = leadCascade(con);
   const st = c.steps;
+  const g = leadGate(con);
+  const namedRs = namedLeadCount(rs);
+  const SKIP_GATE = 'Not asked yet — the instrument only puts this question to a respondent who says they know what lead is, and none has so far.';
+  const SKIP_NAMED = 'Not asked yet — this question is only put to a retailer who named lead or lead chromate as an adulterant, and none has so far.';
+
+  if (g.asked && !g.yes) {
+    setHTML('ld-gate', callout('amber', '⚠️',
+      'Every respondent so far has answered “no” to the gate question',
+      `All ${fmt(g.no)} respondents who reached it — ${fmt(g.rsNo)} retailers (Q33) and ${fmt(g.csNo)} consumers (Q57a) — said they do not know what lead (sisa) is. The questionnaire routes anyone answering “no” past the rest of this section, so every question below was skipped by design and is blank for that reason, not because the data failed to load. The zeros are the finding: baseline lead awareness in the sample is nil. Worth a spot-check with the field team that the question is being read out as written, because zero variance across ${fmt(g.asked)} interviews is unusual even in a low-awareness population.`));
+  } else {
+    setHTML('ld-gate', '');
+  }
 
   setHTML('ld-kpis', [
     kpi('🧠', st[1].pct + '%', 'Know what lead is', `${fmt(st[1].n)} of ${fmt(c.base)}`, 'navy', 'teal'),
@@ -1794,27 +1835,32 @@ function drawLead() {
   const concernCs = distOf(cs, 'aw', AW, 'Q_57b', { maxLabel: 26 });
   const merged = new Map();
   [...concernRs, ...concernCs].forEach(x => merged.set(x.label, (merged.get(x.label) || 0) + x.value));
-  barChart('ldConcern', [...merged.entries()].map(([label, value]) => ({ label, value })), S(4), true, '', true);
+  barChart('ldConcern', [...merged.entries()].map(([label, value]) => ({ label, value })), S(4), true, '', true, SKIP_GATE);
 
+  // An all-zero grouped bar is a chart of nothing with axes drawn around it.
+  // Fall through to the placeholder so the reason for the blank is on screen.
   const cities = [...new Set(con.map(r => cityOf('aw', r[AW.f.city])).filter(Boolean))].sort();
   groupedBar('ldCity', cities, [
     { name: 'Know what lead is', color: S(1), data: cities.map(ct => leadCascade(con.filter(r => cityOf('aw', r[AW.f.city]) === ct)).steps[1].pct) },
     { name: 'Know it reaches turmeric', color: S(8), data: cities.map(ct => leadCascade(con.filter(r => cityOf('aw', r[AW.f.city]) === ct)).steps[2].pct) },
-  ]);
+  ], undefined, undefined, g.asked && !g.yes ? SKIP_GATE : undefined);
 
   const cr = leadCascade(rs), cc = leadCascade(cs);
   groupedBar('ldSplit', ['Know lead', 'In turmeric', 'Concerned', 'Know how', 'Acted'], [
     { name: 'Retailers', color: S(1), data: [1, 2, 3, 4, 5].map(i => cr.steps[i].pct) },
     { name: 'Consumers', color: S(8), data: [1, 2, 3, 4, 5].map(i => cc.steps[i].pct) },
-  ]);
+  ], undefined, undefined, g.asked && !g.yes ? SKIP_GATE : undefined);
 
-  barChart('ldAvoid', mergeMulti([[rs, 'Q35'], [cs, 'Q_57c_i']], 46), S(6), true, '', true);
-  barChart('ldRisk', distOf(cs, 'aw', AW, 'Q_57_iii', { sort: true, maxLabel: 30 }), S(2), true, '', true);
-  donutChart('ldAction', distOf(rs, 'aw', AW, 'Q35_i'), [S(6), S(2)]);
+  barChart('ldAvoid', mergeMulti([[rs, 'Q35'], [cs, 'Q_57c_i']], 46), S(6), true, '', true, SKIP_GATE);
+  barChart('ldRisk', distOf(cs, 'aw', AW, 'Q_57_iii', { sort: true, maxLabel: 30 }), S(2), true, '', true, SKIP_GATE);
+  donutChart('ldAction', distOf(rs, 'aw', AW, 'Q35_i'), [S(6), S(2)], SKIP_NAMED);
   const sfa = distOf(rs, 'aw', AW, 'Q35_iii');
-  donutChart('ldSfa', sfa, [S(6), S(2)]);
+  donutChart('ldSfa', sfa, [S(6), S(2)], SKIP_NAMED);
 
-  setTxt('ld-foot', `The cascade combines both instruments: retailers answer Q33/Q34/Q35 and consumers answer Q57a/Q57b/Q57c, which are the same constructs worded for each audience. Every step is a percentage of all ${fmt(c.base)} consented respondents, so the drops are additive and comparable. The step that matters commercially is the gap between knowing a protective action and taking one — ${(st[4].pct - st[5].pct).toFixed(1)} percentage points here.`);
+  const foot = `The cascade combines both instruments: retailers answer Q33/Q34/Q35 and consumers answer Q57a/Q57b/Q57c, which are the same constructs worded for each audience. Every step is a percentage of all ${fmt(c.base)} consented respondents, so the drops are additive and comparable.`;
+  setTxt('ld-foot', g.asked && !g.yes
+    ? `${foot} Every step below the first is at zero because no respondent has yet answered “yes” to the gate question, so the questionnaire skipped the rest of the section for all ${fmt(g.asked)} of them. The last two charts sit behind a separate gate — only a retailer who names lead or lead chromate in Q26/Q29 is asked them, and ${namedRs ? `only ${fmt(namedRs)} of ${fmt(rs.length)}` : `none of the ${fmt(rs.length)}`} has. Nothing on this page is missing data.`
+    : `${foot} The step that matters commercially is the gap between knowing a protective action and taking one — ${(st[4].pct - st[5].pct).toFixed(1)} percentage points here.`);
 }
 
 /* ---------- 08 COVERAGE ---------- */
