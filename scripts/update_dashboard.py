@@ -280,6 +280,65 @@ def read_csvs(folder, pattern="*.csv"):
     return out
 
 
+def read_awareness_survey_type(folder):
+    """
+    Pull the analyst's hand-coded `survey_type` classification out of the Stata
+    export.
+
+    The SurveyCTO CSV does not carry it, and it cannot be rebuilt from any one
+    questionnaire field: it splits consumers into household vs business, and
+    household-consumer interviews further into retail-market vs wholesale-market
+    intercepts — a distinction the analyst applies in Stata, not one the
+    instrument records. The .dta sits next to the CSV in data_in/awareness/ and,
+    like the CSV, is never committed.
+
+    Returns (by_key, labels, status):
+      by_key  {interview KEY -> code as str}
+      labels  {code as str -> label}       (the value labels on survey_type)
+      status  None on success, else a short reason string for the caller to log
+    """
+    dtas = [p for p in folder.glob("*.dta") if not p.name.startswith("~$")]
+    if not dtas:
+        return {}, {}, "no .dta in data_in/awareness/"
+    path = max(dtas, key=lambda p: p.stat().st_mtime)
+    try:
+        import pandas as pd
+    except ImportError:
+        return {}, {}, "pandas not installed (pip install -r scripts/requirements.txt)"
+    try:
+        raw = pd.read_stata(path, convert_categoricals=False)
+        lab = pd.read_stata(path, convert_categoricals=True)
+    except Exception as e:                       # noqa: BLE001 — logged, not raised
+        return {}, {}, f"could not read {path.name}: {e}"
+
+    cols = {c.lower(): c for c in raw.columns}
+    kc, sc = cols.get("key"), cols.get("survey_type")
+    if not kc or not sc:
+        return {}, {}, f"{path.name} has no 'survey_type' column"
+
+    by_key, seen = {}, {}
+    for k, code, text in zip(raw[kc], raw[sc], lab[sc]):
+        key = norm(k)
+        if not key or code is None:
+            continue
+        try:
+            if pd.isna(code):
+                continue
+            c = str(int(round(float(code))))
+        except (TypeError, ValueError):
+            continue
+        by_key[key] = c
+        t = norm(text)
+        if t and t.lower() != "nan" and c not in seen:
+            seen[c] = t
+    if not by_key:
+        return {}, {}, f"{path.name} carried no usable survey_type values"
+    labels = {c: seen[c] for c in sorted(seen, key=lambda x: (len(x), x))}
+    print(f"    read {path.name}: survey_type for {len(by_key)} interviews "
+          f"({len(labels)} categories)")
+    return by_key, labels, None
+
+
 # ----------------------------------------------------------------------
 #  export-shape normalisation
 # ----------------------------------------------------------------------
@@ -470,7 +529,7 @@ AW_CS = ["Q_1", "Q_2", "Q_3", "Q_4", "Q_5", "Q_6", "Q_7", "Q_8", "Q_9", "Q_10",
          "Q_57d", "Q_57e", "Q_57f", "Q_57g", "Q_57h"]
 
 
-def build_awareness(book, tables):
+def build_awareness(book, tables, st_map=None):
     rows_in = []
     for name, rows in tables.items():
         # the main awareness table is the one carrying Consent / Type_of_survey
@@ -485,7 +544,10 @@ def build_awareness(book, tables):
     # "gps" vendor-visit field). Not every export carries it yet -- read_geo
     # returns (None, None, None) when the column is absent, same as it does
     # for a skipped fix, so this stays harmless until real coordinates land.
-    fields = ["key", "date", "dur", "lat", "lon", "acc"] + AW_META + AW_RS + AW_CS
+    # "survey_type" is appended last: it is not a questionnaire field, so it is
+    # filled from the .dta join below rather than read off the CSV row.
+    base_fields = ["key", "date", "dur", "lat", "lon", "acc"] + AW_META + AW_RS + AW_CS
+    fields = base_fields + ["survey_type"]
     order = date_order_of(rows_in)
     out = []
     for r in rows_in:
@@ -502,7 +564,7 @@ def build_awareness(book, tables):
         rec.append(lat)
         rec.append(lon)
         rec.append(acc)
-        for f in fields[6:]:
+        for f in base_fields[6:]:
             k = book.kind(f)
             if k == "select_multiple":
                 rec.append(collect_multi(r, f, book.values(f)) or None)
@@ -511,6 +573,9 @@ def build_awareness(book, tables):
             else:
                 v = r.get(f)
                 rec.append(None if is_missing(v) else norm(v))
+        # analyst's hand-coded respondent classification, joined on the KEY;
+        # None for any interview the .dta has not (yet) classified
+        rec.append((st_map or {}).get(rec[0]))
         out.append(rec)
 
     out.sort(key=lambda x: (x[1] or "9999", x[0]))
@@ -701,10 +766,28 @@ def near_duplicate_names(rows, idx):
     return pairs
 
 
-def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows):
+def quality_flags(aw_fields, aw_rows, ts_v_fields, ts_v_rows, ts_s_rows, aw_st_labels=None):
     fi = {f: i for i, f in enumerate(aw_fields)}
     vi = {f: i for i, f in enumerate(ts_v_fields)}
     flags = []
+
+    # The respondent tags come from the analyst's .dta; if it is behind the CSV
+    # export, the newest interviews arrive untagged and drop out of any
+    # tag-filtered view. Flag the gap rather than let it pass silently.
+    st_i = fi.get("survey_type")
+    consented_aw = [r for r in aw_rows if fi.get("Consent") is None or r[fi["Consent"]] == "1"]
+    if aw_st_labels and st_i is not None:
+        untagged = sum(1 for r in consented_aw if not r[st_i])
+        if untagged:
+            flags.append({"sev": "warn", "area": "Awareness",
+                          "msg": f"{untagged} consented interviews have no survey_type tag — "
+                                 f"the .dta in data_in/awareness/ is behind the CSV export",
+                          "n": untagged})
+    elif consented_aw:
+        flags.append({"sev": "info", "area": "Awareness",
+                      "msg": "no survey_type classification loaded — respondent tags are "
+                             "derived from the questionnaire; drop the coded .dta into "
+                             "data_in/awareness/ to use the analyst's tags", "n": 0})
 
     durs = [r[fi["dur"]] for r in aw_rows if r[fi["dur"]]]
     durs.sort()
@@ -840,7 +923,14 @@ def main():
     aw_book = Book(cb, "awareness")
     ts_book = Book(cb, "turmeric")
 
-    aw_fields, aw_rows = build_awareness(aw_book, aw_tables) if aw_tables else ([], [])
+    aw_st_map, aw_st_labels, aw_st_status = ({}, {}, None)
+    if aw_tables:
+        aw_st_map, aw_st_labels, aw_st_status = read_awareness_survey_type(IN_AW)
+        if aw_st_status:
+            print(f"    [warn] respondent tags: {aw_st_status}")
+            print("           dashboard falls back to deriving them from the questionnaire")
+
+    aw_fields, aw_rows = build_awareness(aw_book, aw_tables, aw_st_map) if aw_tables else ([], [])
     (v_fields, v_rows), (s_fields, s_rows) = (
         build_turmeric(ts_book, ts_tables) if ts_tables else (([], []), ([], []))
     )
@@ -891,6 +981,12 @@ def main():
             "consent_rate": round(100 * len(consented) / len(aw_rows), 1) if aw_rows else 0,
             "n_rs": sum(1 for r in consented if r[fi["Type_of_survey"]] == "RS"),
             "n_cs": sum(1 for r in consented if r[fi["Type_of_survey"]] == "CS"),
+            "survey_type_labels": aw_st_labels,
+            "by_survey_type": {
+                code: sum(1 for r in consented if r[fi["survey_type"]] == code)
+                for code in aw_st_labels
+            },
+            "n_untagged": sum(1 for r in consented if not r[fi["survey_type"]]) if aw_st_labels else 0,
             "median_duration": round((median(aw_durs) or 0) / 60, 1),
             "n_enums": len({r[fi["Data_Collector"]] for r in aw_rows if r[fi["Data_Collector"]]}),
             "n_cities": len({r[fi["city"]] for r in aw_rows if r[fi["city"]]}),
@@ -924,21 +1020,41 @@ def main():
         },
     }
 
+    aw_labels = label_pack(aw_book, aw_fields[6:], aw_extra)
+    # survey_type is not in the codebook — it is the analyst's classification
+    # from the .dta. Ship its labels so the browser can name the tags. Absent
+    # this entry, app.js falls back to deriving respondent tags itself.
+    if aw_st_labels:
+        known = ("1", "2", "3", "4", "5")
+        aw_labels["survey_type"] = {
+            "t": "Respondent type",
+            "k": "select_one",
+            "c": dict(aw_st_labels),
+            "o": [c for c in known if c in aw_st_labels]
+                 + [c for c in aw_st_labels if c not in known],
+        }
+
     payload = {
         "meta": meta,
         "labels": {
-            "aw": label_pack(aw_book, aw_fields[6:], aw_extra),
+            "aw": aw_labels,
             "ts": label_pack(ts_book, TS_MAIN_FIELDS + ["sample_type_2"], ts_extra),
         },
         "aw": {"fields": aw_fields, "rows": aw_rows},
         "ts": {"fields": v_fields, "rows": v_rows},
         "samples": {"fields": s_fields, "rows": s_rows},
-        "quality": quality_flags(aw_fields, aw_rows, v_fields, v_rows, s_rows),
+        "quality": quality_flags(aw_fields, aw_rows, v_fields, v_rows, s_rows, aw_st_labels),
     }
 
     print()
     print(f"  awareness : {len(aw_rows):5d} submissions  ({len(consented)} consented,"
           f" {meta['aw']['n_rs']} retailer / {meta['aw']['n_cs']} consumer)")
+    if aw_st_labels:
+        for code in meta["aw"]["by_survey_type"]:
+            print(f"                tag {code}  {aw_st_labels[code]:<28} "
+                  f"{meta['aw']['by_survey_type'][code]}")
+        if meta["aw"]["n_untagged"]:
+            print(f"                     {meta['aw']['n_untagged']} interviews untagged")
     print(f"  sampling  : {len(v_rows):5d} vendor visits, {len(s_rows)} physical samples")
     print(f"  field days: {len(all_days)}  ({meta['first_day']} -> {meta['data_through']})")
     print(f"  targets   : awareness {aw_target} ({meta['aw']['target_note']})")

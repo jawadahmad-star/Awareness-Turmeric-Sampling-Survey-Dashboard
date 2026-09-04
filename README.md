@@ -17,15 +17,23 @@ Built by Research Solutions (M&A Research Solutions LLC) · www.rs.org.pk
 2. Drop the files here:
 
    ```
-   data_in/awareness/     awareness survey export
+   data_in/awareness/     awareness survey export — the wide CSV, plus the
+                          coded Stata .dta (see below)
    data_in/turmeric/      sampling export — either the single wide CSV, or the
                           long CSV plus its two repeat-group exports
                           (sample_type_details, samples_detail)
    ```
 
    Replace whatever is already there — the build always reads the whole
-   folder. Only `.csv` is read; a `.dta` or `.xlsx` sitting alongside is
-   ignored (and, like the CSVs, never committed).
+   folder. Charts and filters are built from the `.csv`; the awareness `.dta`
+   is read only for its hand-coded `survey_type` column (the five respondent
+   tags: household / business consumer × retail / wholesale, plus the two
+   vendor types). Both are gitignored and never committed.
+
+   Drop the newest `.dta` in each day alongside the CSV. If it is missing or
+   behind the CSV, the build still runs — it warns, and the Respondent filter
+   falls back to four tags derived from the questionnaire instead of the
+   analyst's five.
 
 3. Double-click **`UPDATE DASHBOARD.bat`**.
 
@@ -141,7 +149,7 @@ assets/app.js                 decryption, filters, aggregation, all charts
 data/dashboard_data.js        encrypted payload  ← the only file that changes daily
 codebook/codebook.json        questions, labels and choice lists from the XLSForms
 instruments/                  the two XLSForm files, as the source of truth
-data_in/                      drop CSVs here (never committed)
+data_in/                      drop CSVs (+ the awareness .dta) here (never committed)
 scripts/
   build_codebook.py           XLSForms  -> codebook.json
   update_dashboard.py         CSVs      -> encrypted payload

@@ -182,7 +182,24 @@ const NONSUBSTANTIVE = /^(don't know|refused|none|n\/a|not recorded|no response)
 /* The two instruments use different city and enumerator code frames but
    overlapping real-world names, so every filter works on the name. */
 let CITY_LIST = [], ENUM_LIST = [], MKT_TYPE_LIST = [], MKT_NAME_LIST = [], MKT_LOC_LIST = [];
+let RESP_LIST = [];
 let TS_BY_KEY = new Map();
+
+/* Respondent tags come from the analyst's hand-coded survey_type in the .dta
+   (shipped as an aw label pack). When it is present RESP_LIST drives both the
+   filter menu and the mix donut; when it is absent every respondent-tag path
+   falls back to deriving the four questionnaire-based categories. */
+const RESP_TAGGED = () => !!meta('aw', 'survey_type');
+function buildRespList() {
+  const m = meta('aw', 'survey_type');
+  if (!m || !m.c) { RESP_LIST = []; return; }
+  const order = (m.o && m.o.length) ? m.o : Object.keys(m.c);
+  RESP_LIST = order.filter(v => m.c[v] !== undefined).map(v => ({ v: String(v), l: m.c[v] }));
+}
+function respCount(rows, code) {
+  const i = AW.f.survey_type;
+  return i === undefined ? 0 : rows.filter(r => String(r[i]) === code).length;
+}
 
 function cityOf(ds, code) { return ds === 'aw' ? lab('aw', 'city', code) : lab('ts', 'sample_city', code); }
 function enumOf(ds, code) { return ds === 'aw' ? lab('aw', 'Data_Collector', code) : lab('ts', 'enum_name', code); }
@@ -231,6 +248,8 @@ function buildDimensions() {
     MKT_LOC_LIST.push({ v: k, l: pretty(lab('ts', isW ? 'wholesale_market' : 'locality_retail', r[TS.f[isW ? 'wholesale_market' : 'locality_retail']])), isW });
   });
   MKT_LOC_LIST.sort((a, b) => (a.isW === b.isW) ? a.l.localeCompare(b.l) : (a.isW ? -1 : 1));
+
+  buildRespList();
 }
 
 /* --- filter state --------------------------------------------------- */
@@ -253,12 +272,22 @@ function targetFor(ds) {
   return targetCities(ds).reduce((t, c) => t + (per[c] || 0), 0);
 }
 
-/* Awareness Survey respondents are filtered on their real-world type, not
-   the raw instrument code: the Retailer_survey instrument's type_of_vendor
-   splits Retailer vs Wholesaler, and the Consumer_survey instrument's Q_1
-   (bought for HH or business use) splits Household vs Business — a "both"
-   answer belongs to both consumer categories at once. */
+/* The respondent tag a row belongs to, for the Respondent filter.
+
+   Preferred source is the analyst's survey_type from the .dta (five mutually
+   exclusive tags: household/business consumer × retail/wholesale, plus the two
+   vendor types). A row the .dta has not classified returns no tag and drops
+   out of any tag-filtered view.
+
+   Fallback, when no survey_type is shipped at all: derive four categories from
+   the questionnaire — type_of_vendor splits Retailer vs Wholesaler, and Q_1
+   splits Household vs Business, with a "both" answer in both consumer tags. */
 function respCategoriesOf(awRow) {
+  if (RESP_TAGGED()) {
+    const i = AW.f.survey_type;
+    const v = i === undefined ? null : awRow[i];
+    return (v === null || v === undefined || v === '') ? [] : [String(v)];
+  }
   const t = awRow[AW.f.Type_of_survey];
   if (t === 'RS') return [vendorTypeOf(awRow)];
   if (t === 'CS') {
@@ -923,10 +952,13 @@ function buildFilterUI() {
   const respOpt = (v, l) => `<label class="fb-opt"><input type="checkbox" value="${esc(v)}" ${F.resp.has(v) ? 'checked' : ''}><span>${esc(l)}</span></label>`;
   const respMenu = document.getElementById('fb-resp-menu');
   respMenu.innerHTML =
-    grpHead('Awareness · Retailer survey', true) +
-    respOpt('retailer', 'Retailer') + respOpt('wholesaler', 'Wholesaler') +
-    grpHead('Awareness · Consumer survey', false) +
-    respOpt('hh', 'Household consumer') + respOpt('biz', 'Business consumer') +
+    (RESP_LIST.length
+      ? grpHead('Awareness · respondent type', true) +
+        RESP_LIST.map(it => respOpt(it.v, it.l)).join('')
+      : grpHead('Awareness · Retailer survey', true) +
+        respOpt('retailer', 'Retailer') + respOpt('wholesaler', 'Wholesaler') +
+        grpHead('Awareness · Consumer survey', false) +
+        respOpt('hh', 'Household consumer') + respOpt('biz', 'Business consumer')) +
     `<div class="fb-menu-foot"><button class="fb-mini" data-act="none">Clear</button></div>`;
   respMenu.querySelectorAll('input').forEach(cb => {
     cb.onchange = () => { cb.checked ? F.resp.add(cb.value) : F.resp.delete(cb.value); renderAll(); };
@@ -1108,8 +1140,13 @@ function drawOverview() {
   const tsWholesale = ts.filter(r => r[TS.f.market_name] === '1').length;
   const tsRetail = ts.length - tsWholesale;
   const leadKnow = leadCascade(con), leadG = leadGate(con);
+  const awMixBlurb = RESP_TAGGED()
+    ? `${fmt(con.length)} interviews against a ${fmt(awTarget)} target — `
+      + RESP_LIST.map(it => `${fmt(respCount(Q.con, it.v))} ${it.l}`).join(', ')
+      + (m.aw.n_untagged ? `, ${fmt(Q.con.filter(r => !r[AW.f.survey_type]).length)} untagged` : '') + '.'
+    : `${fmt(rsRetail)} retailer, ${fmt(rsWholesale)} wholesaler and ${fmt(Q.cs.length)} consumer interviews completed against a ${fmt(awTarget)} target.`;
   setHTML('ov-callouts', [
-    callout('teal', '🗣️', 'Awareness Survey', `${fmt(rsRetail)} retailer, ${fmt(rsWholesale)} wholesaler and ${fmt(Q.cs.length)} consumer interviews completed against a ${fmt(awTarget)} target.`),
+    callout('teal', '🗣️', 'Awareness Survey', awMixBlurb),
     callout('turmeric', '🧪', 'Sampling Survey', `${fmt(tsRetail)} retail-market and ${fmt(tsWholesale)} wholesale-market vendor visits — ${fmt(sp.length)} samples banked, ${(sp.length / Math.max(1, ts.length)).toFixed(1)} per visit.`),
     callout('purple', '📍', 'Heaviest sampling city', `${topCity} samples collected — the largest single-city contribution to the laboratory batch.`),
     callout('amber', '🧠', 'Lead awareness', leadG.asked && !leadG.yes
@@ -1161,11 +1198,21 @@ function drawOverview() {
     desc('aw', 'Consented interviews', `${AW_PER_CITY_TXT()} per city`, 'study cities'));
   setTxt('ov-prog-ts-desc',
     desc('ts', 'Vendor visits', TS_BASIS_TXT(), 'sampling cities'));
-  donutChart('ovMix', [
-    { label: 'Retailer', value: rsRetail },
-    { label: 'Wholesaler', value: rsWholesale },
-    { label: 'Consumer', value: Q.cs.length },
-  ], [S(1), S(5), S(8)]);
+  setTxt('ov-mix-desc', RESP_TAGGED()
+    ? 'Split of consented awareness interviews across the analyst’s survey_type tags'
+    : 'Split of consented awareness interviews by respondent type — Retailer, Wholesaler and Consumer');
+  if (RESP_TAGGED()) {
+    const mix = RESP_LIST.map(it => ({ label: it.l, value: respCount(Q.con, it.v) }));
+    const untagged = Q.con.filter(r => !r[AW.f.survey_type]).length;
+    if (untagged) mix.push({ label: 'Untagged', value: untagged });
+    donutChart('ovMix', mix.filter(d => d.value), [S(8), S(6), S(4), S(2), S(1), S(3)]);
+  } else {
+    donutChart('ovMix', [
+      { label: 'Retailer', value: rsRetail },
+      { label: 'Wholesaler', value: rsWholesale },
+      { label: 'Consumer', value: Q.cs.length },
+    ], [S(1), S(5), S(8)]);
+  }
 
   barChart('ovAwCity', cityDist(con, 'aw', AW, AW.f.city), S(3), true, '', true);
   barChart('ovTsCity', cityDist(sp, 'ts', SP, SP.f.city), S(8), true, '', true);
